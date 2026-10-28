@@ -30,7 +30,7 @@
   /* ---------- Données ---------- */
   let D = { config: {}, petales: [], defis: [], rdv: [] };
   async function chargerDonnees() {
-    const lire = async f => { const r = await fetch(`data/${f}.json`, { cache: 'no-cache' }); if (!r.ok) throw new Error(f); return r.json(); };
+    const lire = async f => { const r = await fetch(`${f}.json`, { cache: 'no-cache' }); if (!r.ok) throw new Error(f); return r.json(); };
     const [config, petales, defis, rdv] = await Promise.all([lire('config'), lire('petales'), lire('defis'), lire('rendezvous')]);
     D = { config, petales, defis, rdv };
   }

@@ -1,14 +1,14 @@
 // Service worker : permet d'ouvrir l'application même sans réseau.
 // Quand vous modifiez des fichiers, changez simplement le numéro de VERSION ci-dessous.
-const VERSION = 'main-tendue-v1';
+const VERSION = 'main-tendue-v2';
 const FICHIERS = [
   './', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
-  'data/config.json', 'data/petales.json', 'data/defis.json', 'data/rendezvous.json',
-  'assets/logo-brille.png', 'assets/icon-192.png', 'assets/icon-512.png', 'assets/favicon.png', 'assets/apple-touch-icon.png',
-  'fonts/gruppo-latin-400-normal.woff2',
-  'fonts/quicksand-latin-300-normal.woff2', 'fonts/quicksand-latin-400-normal.woff2',
-  'fonts/quicksand-latin-500-normal.woff2', 'fonts/quicksand-latin-600-normal.woff2',
-  'fonts/quicksand-latin-700-normal.woff2'
+  'config.json', 'petales.json', 'defis.json', 'rendezvous.json',
+  'logo-brille.png', 'icon-192.png', 'icon-512.png', 'favicon.png', 'apple-touch-icon.png',
+  'gruppo-latin-400-normal.woff2',
+  'quicksand-latin-300-normal.woff2', 'quicksand-latin-400-normal.woff2',
+  'quicksand-latin-500-normal.woff2', 'quicksand-latin-600-normal.woff2',
+  'quicksand-latin-700-normal.woff2'
 ];
 
 self.addEventListener('install', e => {
@@ -28,7 +28,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
-  const estDonnee = req.url.includes('/data/');
+  const estDonnee = /\/(config|petales|defis|rendezvous)\.json/.test(req.url);
   if (estDonnee) {
     e.respondWith(
       fetch(req).then(r => { const copie = r.clone(); caches.open(VERSION).then(c => c.put(req, copie)); return r; })

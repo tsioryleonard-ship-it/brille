@@ -1,10 +1,10 @@
 /* ====== Polices (hébergées ici, aucun appel à un service externe) ====== */
-@font-face { font-family: 'Gruppo'; src: url('fonts/gruppo-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
-@font-face { font-family: 'Quicksand'; src: url('fonts/quicksand-latin-300-normal.woff2') format('woff2'); font-weight: 300; font-display: swap; }
-@font-face { font-family: 'Quicksand'; src: url('fonts/quicksand-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
-@font-face { font-family: 'Quicksand'; src: url('fonts/quicksand-latin-500-normal.woff2') format('woff2'); font-weight: 500; font-display: swap; }
-@font-face { font-family: 'Quicksand'; src: url('fonts/quicksand-latin-600-normal.woff2') format('woff2'); font-weight: 600; font-display: swap; }
-@font-face { font-family: 'Quicksand'; src: url('fonts/quicksand-latin-700-normal.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Gruppo'; src: url('gruppo-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Quicksand'; src: url('quicksand-latin-300-normal.woff2') format('woff2'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Quicksand'; src: url('quicksand-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Quicksand'; src: url('quicksand-latin-500-normal.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Quicksand'; src: url('quicksand-latin-600-normal.woff2') format('woff2'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Quicksand'; src: url('quicksand-latin-700-normal.woff2') format('woff2'); font-weight: 700; font-display: swap; }
 
 /* ====== Palette de la charte BRILLE ====== */
 :root {
