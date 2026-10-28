@@ -1,0 +1,108 @@
+[
+  {
+    "id": "emotions",
+    "couleur": "#f5abaf",
+    "titre": "Mes émotions de parent",
+    "sousTitre": "Accueillir, comprendre, apaiser",
+    "miroir": "Mes émotions apprivoisées",
+    "intro": "Les parents aussi ressentent de la fatigue, de l'agacement, de la culpabilité, de la joie. Les reconnaître sans se juger est la première façon d'aider son enfant à apprivoiser les siennes : il apprend en nous regardant faire.",
+    "question": "Cette semaine, j'ai réussi à accueillir mes émotions de parent…",
+    "pratiques": [
+      "Nommer ce que je ressens à voix haute, simplement : « Là, je suis agacé·e, j'ai besoin de souffler une minute. »",
+      "Faire 3 grandes respirations avant de répondre quand la tension monte.",
+      "En fin de journée, raconter une émotion vécue dans la journée, et inviter mon enfant à en raconter une aussi."
+    ],
+    "phrase": "« Ce que tu ressens est important, et ce que je ressens aussi. On va trouver comment s'en occuper ensemble. »"
+  },
+  {
+    "id": "apprentissages",
+    "couleur": "#b8aed7",
+    "titre": "Mon regard sur ses apprentissages",
+    "sousTitre": "Encourager, soutenir, relativiser",
+    "miroir": "Le sens de mes apprentissages",
+    "intro": "Notre regard sur l'école et sur les devoirs influence la confiance de l'enfant. Valoriser l'effort, la curiosité et les progrès, plutôt que seulement les notes, nourrit l'envie d'apprendre.",
+    "question": "Cette semaine, j'ai pu soutenir la curiosité de mon enfant sans mettre la pression…",
+    "pratiques": [
+      "Remplacer « Qu'as-tu eu comme note ? » par « Qu'as-tu appris d'intéressant aujourd'hui ? ».",
+      "Féliciter un effort précis : « J'ai vu que tu as recommencé trois fois, tu n'as pas lâché. »",
+      "Demander à mon enfant de m'expliquer quelque chose qu'il a appris, comme si j'étais l'élève."
+    ],
+    "phrase": "« Tu n'as pas besoin d'être parfait·e pour apprendre. Ce qui compte, c'est que tu essaies. »"
+  },
+  {
+    "id": "liens",
+    "couleur": "#f8f4b8",
+    "titre": "Mes liens et ma parole",
+    "sousTitre": "Écouter, parler, se relier",
+    "miroir": "Mes liens et ma parole",
+    "intro": "La qualité de la relation passe par des petits moments d'attention et par des mots qui relient plutôt que des mots qui blessent. Écouter vraiment, c'est déjà dire à l'enfant qu'il compte.",
+    "question": "Cette semaine, j'ai pris le temps d'écouter et de parler avec mon enfant…",
+    "pratiques": [
+      "Offrir 10 minutes d'attention complète, sans écran, sur ce que mon enfant a envie de faire.",
+      "Reformuler avant de répondre : « Si je comprends bien, tu es déçu·e parce que… »",
+      "Dire « je » plutôt que « tu » : « Je suis inquiet·ète » plutôt que « Tu n'écoutes jamais ». "
+    ],
+    "phrase": "« Raconte-moi. Je t'écoute, et je ne vais pas te couper la parole. »"
+  },
+  {
+    "id": "droits",
+    "couleur": "#a4c2e7",
+    "titre": "Mon cadre et ses droits",
+    "sousTitre": "Un cadre clair, des limites bienveillantes",
+    "miroir": "Ma place et mes droits",
+    "intro": "Un cadre rassure l'enfant : des règles claires, expliquées, tenues avec calme. Et l'enfant a aussi des droits, par exemple celui d'être écouté sur ce qui le concerne (Convention internationale des droits de l'enfant, article 12). Cadre et écoute vont ensemble.",
+    "question": "Cette semaine, j'ai tenu un cadre clair tout en écoutant mon enfant…",
+    "pratiques": [
+      "Choisir deux ou trois règles essentielles pour la maison, et les expliquer avec des mots simples.",
+      "Inviter mon enfant à donner son avis sur une règle ou une organisation familiale.",
+      "Quand une règle n'est pas respectée, proposer une conséquence logique, dite calmement, plutôt qu'une punition sous l'émotion."
+    ],
+    "phrase": "« La règle, c'est celle-ci, et voilà pourquoi. Et toi, qu'en penses-tu ? »"
+  },
+  {
+    "id": "equilibre",
+    "couleur": "#ebc6e0",
+    "titre": "Mon équilibre et mon énergie",
+    "sousTitre": "Me ressourcer, alléger ma charge",
+    "miroir": "Mon équilibre et mon énergie",
+    "intro": "Un parent fatigué n'est pas un mauvais parent. Prendre soin de son énergie, de son sommeil et de ses appuis, c'est aussi prendre soin de son enfant : il ressent notre état général.",
+    "question": "Cette semaine, j'ai pris soin de mon énergie…",
+    "pratiques": [
+      "Me réserver 15 minutes rien que pour moi, sans culpabilité.",
+      "Demander ou déléguer une tâche à un proche, ou à mon enfant si elle est adaptée à son âge.",
+      "Garder des heures de coucher régulières pour toute la famille."
+    ],
+    "phrase": "« J'ai besoin de me reposer un moment pour être disponible ensuite. »",
+    "note": "Si la fatigue ou le poids du quotidien durent, en parler à un professionnel (médecin traitant, PMI, référent famille du centre social) est un vrai soutien."
+  },
+  {
+    "id": "briller",
+    "couleur": "#f49f4c",
+    "titre": "Ce qui me fait briller",
+    "sousTitre": "Mes forces de parent, mes victoires",
+    "miroir": "Ce qui me fait briller",
+    "intro": "On repère souvent ce qui ne va pas. Pourtant chaque parent a des forces et des réussites, même petites. Les reconnaître donne de la confiance, et cette confiance se transmet à l'enfant.",
+    "question": "Cette semaine, j'ai reconnu mes forces et mes réussites de parent…",
+    "pratiques": [
+      "Chaque soir, noter une chose qui s'est bien passée, même toute petite.",
+      "Demander à mon enfant : « Qu'est-ce qu'on fait de bien ensemble ? ».",
+      "Partager une fierté avec un proche ou avec le groupe de parents."
+    ],
+    "phrase": "« Aujourd'hui, je suis fier·ère de la façon dont j'ai géré… »"
+  },
+  {
+    "id": "organisation",
+    "couleur": "#cbe1b6",
+    "titre": "Mon organisation et ma posture",
+    "sousTitre": "Routines, temps, responsabilités partagées",
+    "miroir": "Mon organisation et mon autonomie",
+    "intro": "Des repères simples (routines, espace, rôles de chacun) allègent le quotidien et aident l'enfant à gagner en autonomie. Le parent donne l'exemple et la direction, sans tout porter seul.",
+    "question": "Cette semaine, notre organisation familiale nous a facilité la vie…",
+    "pratiques": [
+      "Installer un petit rituel fixe : le matin ou le soir, toujours dans le même ordre.",
+      "Confier à mon enfant une responsabilité adaptée à son âge, et le féliciter quand il l'assume.",
+      "Préparer la veille ce qui peut l'être (sac, vêtements, repas) pour désamorcer les matins tendus."
+    ],
+    "phrase": "« Chacun a un rôle dans la famille. Voilà le tien, et je suis là si tu as besoin d'aide. »"
+  }
+]
