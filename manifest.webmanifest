@@ -1,0 +1,16 @@
+{
+  "name": "Main tendue · BRILLE",
+  "short_name": "Main tendue",
+  "description": "La suite des ateliers Main tendue : prolonger chez soi la qualité de vie de l'enfant.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
