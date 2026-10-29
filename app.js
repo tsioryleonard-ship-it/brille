@@ -38,44 +38,62 @@
     ACCES = { acces, contenuEnc };
   }
   const codeMemorise = () => { try { return localStorage.getItem(CLE_CODE) || ''; } catch { return ''; } };
-  async function deverrouiller(code) {                 // renvoie true si le code ouvre le contenu
-    const details = await Acces.ouvrir(code, ACCES.acces, ACCES.contenuEnc);
-    D.petales = D.vitrine.map(v => Object.assign({}, v, details[v.id] || {}, { ouvert: !!details[v.id] }));
+  function composer(ouverts) {                        // ouverts : liste d'identifiants de pétales ouverts
+    D.petales = D.vitrine.map(v => Object.assign({}, v, D.details[v.id] || {}, { ouvert: ouverts.includes(v.id) && !!D.details[v.id] }));
     D.defis = D.petales.filter(p => p.ouvert).flatMap(p => p.defis || []).sort((a, b) => a.id.localeCompare(b.id));
+  }
+  async function deverrouiller(code, exigerAdmin) {    // ouvre le contenu autorisé par ce code
+    const r = await Acces.ouvrir(code, ACCES.acces, ACCES.contenuEnc);
+    if (exigerAdmin && !r.admin) throw new Error('admin');
+    D.details = r.details; D.admin = r.admin; D.apercu = null;
+    composer(Object.keys(r.details));
     try { localStorage.setItem(CLE_CODE, code); } catch { }
     return true;
   }
   function verrouiller() {
     try { localStorage.removeItem(CLE_CODE); } catch { }
-    D.petales = []; D.defis = [];
+    D.petales = []; D.defis = []; D.details = {}; D.admin = false; D.apercu = null;
     ecranCode();
   }
-  function ecranCode(message) {
+  function ecranCode(message, onglet) {
     document.body.classList.add('verrouille');
     const c = D.config.contact || {};
+    const ing = onglet === 'ing';
     $app.innerHTML = `<section class="vue acces">
-      <div class="carte">
-        <span class="etiquette">Accès famille</span>
-        <h1>Bienvenue dans Étincelle</h1>
-        <p>Cette application prolonge les ateliers BRILLE. Elle est réservée aux familles accompagnées : entrez le code personnel qui vous a été remis à l'atelier.</p>
+      ${motIngenieure()}
+      <div class="onglets-acces" role="tablist" aria-label="Type d'accès">
+        <button type="button" role="tab" id="t-fam" aria-selected="${!ing}">Accès famille</button>
+        <button type="button" role="tab" id="t-ing" aria-selected="${ing}">Accès ingénieure</button>
+      </div>
+      <div class="carte" role="tabpanel">
+        <span class="etiquette">${ing ? 'Espace conceptrice' : 'Accès famille'}</span>
+        <h1>${ing ? 'Espace ingénieure' : 'Bienvenue dans Étincelle'}</h1>
+        <p>${ing ? 'Réservé à la conceptrice d\'Étincelle : aperçu complet de tous les pétales et vue « comme une famille ». Entrez votre code personnel.' : 'Cette application prolonge les ateliers BRILLE. Elle est réservée aux familles accompagnées : entrez le code personnel qui vous a été remis à l\'atelier.'}</p>
         <form id="form-code" autocomplete="off">
-          <label for="champ-code">Votre code famille</label>
-          <input id="champ-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="XXXX-XXXX" maxlength="12">
+          <label for="champ-code">${ing ? 'Votre code ingénieure' : 'Votre code famille'}</label>
+          <input id="champ-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="${ing ? 'XXXX-XXXX-XXXX' : 'XXXX-XXXX'}" maxlength="16">
           <p class="erreur" id="erreur-code" role="alert">${esc(message || '')}</p>
           <button class="btn plein" type="submit" id="valider-code">Entrer</button>
         </form>
-        <p class="petit">Vous n'avez pas encore de code ? Écrivez à <a href="mailto:${esc(c.email || '')}">${esc(c.email || '')}</a>.</p>
+        ${ing ? '' : `<p class="petit">Vous n'avez pas encore de code ? Écrivez à <a href="mailto:${esc(c.email || '')}">${esc(c.email || '')}</a>.</p>`}
       </div></section>`;
+    $app.querySelector('#t-fam').addEventListener('click', () => ecranCode('', 'fam'));
+    $app.querySelector('#t-ing').addEventListener('click', () => ecranCode('', 'ing'));
     const f = $app.querySelector('#form-code'), champ = $app.querySelector('#champ-code'), err = $app.querySelector('#erreur-code'), bt = $app.querySelector('#valider-code');
     f.addEventListener('submit', async e => {
       e.preventDefault();
       const code = champ.value.trim(); if (!code) { err.textContent = 'Saisissez votre code.'; return; }
       bt.disabled = true; bt.textContent = 'Vérification…'; err.textContent = '';
-      try { await deverrouiller(code); document.body.classList.remove('verrouille'); premiere = true; rendre(); }
-      catch { err.textContent = 'Ce code n\'est pas reconnu. Vérifiez-le, ou contactez BRILLE.'; bt.disabled = false; bt.textContent = 'Entrer'; }
+      try { await deverrouiller(code, ing); document.body.classList.remove('verrouille'); premiere = true; rendre(); }
+      catch (x) { if (x.message !== 'admin' && x.message !== 'code') console.error(x); err.textContent = x.message === 'admin' ? 'Ce code n\'ouvre pas l\'espace ingénieure.' : 'Ce code n\'est pas reconnu. Vérifiez-le, ou contactez BRILLE.'; bt.disabled = false; bt.textContent = 'Entrer'; }
+    });
+    champ.addEventListener('input', () => {
+      const net = champ.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, ing ? 12 : 8);
+      champ.value = net.replace(/(.{4})(?=.)/g, '$1-');
     });
     champ.focus({ preventScroll: true });
   }
+
   const petale = id => D.petales.find(p => p.id === id);
 
   /* ---------- Visages de l'échelle ---------- */
@@ -115,6 +133,12 @@
 
   const etincelleDeco = '<svg class="etincelle-deco" viewBox="0 0 80 80" aria-hidden="true"><path d="M40 4l7 24 24 7-24 7-7 24-7-24-24-7 24-7z" fill="#fff" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/><path d="M64 50l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#cbe1b6" stroke="#000" stroke-width="2" stroke-linejoin="round"/></svg>';
 
+  const motIngenieure = () => `<figure class="mot">
+      <figcaption>Le mot de l'ingénieure QVE</figcaption>
+      <blockquote>Défendre l'épanouissement et l'harmonie familiale : redonner sa place au lien, à l'écoute et au bien-être de l'enfant, pour mieux vivre le quotidien.</blockquote>
+      <p class="signature">Tsiory · BRILLE</p>
+    </figure>`;
+
   /* ---------- Vues ---------- */
   function vueAccueil() {
     const S = charger(), mode = S.mode === 'enfant' ? 'enfant' : 'parent';
@@ -136,6 +160,7 @@
         <h1>Étincelle</h1>
         <p>${esc(D.config.messageAccueil)}</p>
       </div>
+      ${motIngenieure()}
 
       <div class="grille">
       <div class="fleur-carte">
@@ -338,10 +363,12 @@
     return `<section class="vue">
       <h1><span class="surligne" style="--hl:var(--vert)">Plus</span></h1>
       <div class="grille-cartes">
+      ${D.admin ? vueIngenieure() : ''}
       <details class="carte" open><summary>Installer Étincelle sur mon téléphone</summary>
         <p>Pour la retrouver comme une application, sans passer par un magasin d'applications :</p>
         <button class="btn plein" id="btn-install" type="button" hidden>Installer Étincelle</button>
         <p class="petit"><b>iPhone</b> (Safari) : touchez le bouton Partager, puis « Sur l'écran d'accueil ».<br><b>Android</b> (Chrome) : touchez le menu ⋮, puis « Installer l'application » ou « Ajouter à l'écran d'accueil ».</p>
+        <p class="petit">Si l'application vous redemande votre code après l'installation, saisissez-le simplement une fois de plus.</p>
       </details>
 
       <details class="carte"><summary>Besoin d'un soutien ?</summary>
@@ -379,7 +406,22 @@
       <p class="pied">Conçue et développée par ${esc(c.nom || 'BRILLE')}<br>© BRILLE · Étincelle</p>
     </section>`;
   }
+  function vueIngenieure() {
+    const sel = D.apercu || D.vitrine.map(v => v.id);
+    return `<div class="carte teinte" style="background:var(--vert)" id="carte-ing">
+      <span class="etiquette">Espace ingénieure</span>
+      <h2>Aperçu « comme une famille »</h2>
+      <p>Vous voyez tous les pétales. Cochez ceux qu'une famille a vécus en atelier pour voir exactement son application :</p>
+      <div class="apercu">${D.vitrine.map(v => `<label class="coche"><input type="checkbox" data-id="${v.id}" ${sel.includes(v.id) ? 'checked' : ''}> ${esc(v.titre)}</label>`).join('')}</div>
+      <p class="petit">Les familles et leurs codes se gèrent dans votre fichier privé « gestion-des-acces.html », sur votre ordinateur.</p>
+    </div>`;
+  }
   function lierPlus() {
+    const ci = $app.querySelector('#carte-ing');
+    if (ci) ci.addEventListener('change', () => {
+      const ids = [...ci.querySelectorAll('input:checked')].map(x => x.dataset.id);
+      D.apercu = ids.length === D.vitrine.length ? null : ids; composer(ids.length ? ids : D.vitrine.map(v => v.id));
+    });
     const bi = $app.querySelector('#btn-install');
     if (bi && invitationInstall) { bi.hidden = false; bi.addEventListener('click', async () => { invitationInstall.prompt(); await invitationInstall.userChoice; invitationInstall = null; bi.hidden = true; }); }
     const msg = t => { $app.querySelector('#retour-donnees').textContent = t; };
@@ -431,6 +473,14 @@
 
   /* ---------- Démarrage ---------- */
   chargerDonnees().then(async () => {
+    // Lien personnel : .../#/c/CODE ouvre l'application sans rien saisir (le code est ensuite retiré de l'adresse)
+    const m = location.hash.match(/^#\/c\/([^/?]+)/i);
+    if (m) {
+      const lien = decodeURIComponent(m[1]);
+      history.replaceState(null, '', location.pathname + location.search + '#/');
+      try { await deverrouiller(lien); document.body.classList.remove('verrouille'); premiere = true; rendre(); return; }
+      catch { ecranCode('Ce lien n\'est plus valide. Entrez votre code ou contactez BRILLE.'); return; }
+    }
     const code = codeMemorise();
     if (code) { try { await deverrouiller(code); document.body.classList.remove('verrouille'); rendre(); return; } catch { /* code retiré ou changé */ } }
     ecranCode(code ? 'Votre accès n\'est plus valide. Entrez un nouveau code ou contactez BRILLE.' : '');

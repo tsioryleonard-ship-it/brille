@@ -245,3 +245,21 @@ body.verrouille .tabbar { display: none; }
 .petale.ferme .forme path, .petale.ferme .forme image { opacity: .38; }
 .ligne-petale.ferme { opacity: .6; }
 .ligne-petale.ferme small { font-weight: 500; }
+
+.onglets-acces { display: flex; gap: 6px; padding: 5px; margin: 0 0 12px; background: #f1f5ec; border-radius: 999px; }
+.onglets-acces button { flex: 1; min-height: 46px; border: 0; border-radius: 999px; background: transparent; font: inherit; font-weight: 600; color: var(--doux); cursor: pointer; }
+.onglets-acces button[aria-selected="true"] { background: var(--vert); color: #000; }
+.apercu { display: grid; gap: 4px; margin: 8px 0 12px; }
+.apercu .coche { padding: 4px 0; }
+
+/* En-tête : logo seul, centré */
+.topbar { justify-content: center; }
+.slogan { display: none; }
+
+/* Le mot de l'ingénieure QVE */
+.mot { margin: 0 0 18px; padding: 22px 24px 18px; text-align: center; border-radius: var(--rayon); background: #fff; box-shadow: var(--ombre); position: relative; }
+.mot figcaption { font-family: 'Quicksand', sans-serif; font-weight: 600; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: #6f9a4e; margin-bottom: 10px; }
+.mot blockquote { margin: 0 auto; max-width: 640px; font-family: 'Quicksand', sans-serif; font-weight: 500; font-size: 1.22rem; line-height: 1.55; color: var(--texte); text-align: center; hyphens: none; }
+.mot blockquote::before { content: '“'; display: block; font-family: 'Gruppo', serif; font-size: 3rem; line-height: .6; color: var(--vert); margin-bottom: 6px; }
+.mot .signature { margin: 12px 0 0; font-family: 'Quicksand', sans-serif; font-weight: 600; font-size: .9rem; color: var(--doux); text-align: center; }
+@media (min-width: 900px) { .mot blockquote { font-size: 1.5rem; } .mot { padding: 28px 40px 22px; } }
