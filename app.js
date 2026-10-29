@@ -29,10 +29,52 @@
 
   /* ---------- Données ---------- */
   let D = { config: {}, petales: [], defis: [], formes: {} };
+  const CLE_CODE = 'brille-etincelle-code';
+  let ACCES = null;
   async function chargerDonnees() {
     const lire = async f => { const r = await fetch(`${f}.json`, { cache: 'no-cache' }); if (!r.ok) throw new Error(f); return r.json(); };
-    const [config, petales, defis, formes] = await Promise.all([lire('config'), lire('petales'), lire('defis'), lire('formes')]);
-    D = { config, petales, defis, formes };
+    const [config, formes, vitrine, acces, contenuEnc] = await Promise.all([lire('config'), lire('formes'), lire('vitrine'), lire('acces'), lire('contenu.enc')]);
+    D = { config, petales: [], defis: [], formes, vitrine };
+    ACCES = { acces, contenuEnc };
+  }
+  const codeMemorise = () => { try { return localStorage.getItem(CLE_CODE) || ''; } catch { return ''; } };
+  async function deverrouiller(code) {                 // renvoie true si le code ouvre le contenu
+    const details = await Acces.ouvrir(code, ACCES.acces, ACCES.contenuEnc);
+    D.petales = D.vitrine.map(v => Object.assign({}, v, details[v.id] || {}, { ouvert: !!details[v.id] }));
+    D.defis = D.petales.filter(p => p.ouvert).flatMap(p => p.defis || []).sort((a, b) => a.id.localeCompare(b.id));
+    try { localStorage.setItem(CLE_CODE, code); } catch { }
+    return true;
+  }
+  function verrouiller() {
+    try { localStorage.removeItem(CLE_CODE); } catch { }
+    D.petales = []; D.defis = [];
+    ecranCode();
+  }
+  function ecranCode(message) {
+    document.body.classList.add('verrouille');
+    const c = D.config.contact || {};
+    $app.innerHTML = `<section class="vue acces">
+      <div class="carte">
+        <span class="etiquette">Accès famille</span>
+        <h1>Bienvenue dans Étincelle</h1>
+        <p>Cette application prolonge les ateliers BRILLE. Elle est réservée aux familles accompagnées : entrez le code personnel qui vous a été remis à l'atelier.</p>
+        <form id="form-code" autocomplete="off">
+          <label for="champ-code">Votre code famille</label>
+          <input id="champ-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="XXXX-XXXX" maxlength="12">
+          <p class="erreur" id="erreur-code" role="alert">${esc(message || '')}</p>
+          <button class="btn plein" type="submit" id="valider-code">Entrer</button>
+        </form>
+        <p class="petit">Vous n'avez pas encore de code ? Écrivez à <a href="mailto:${esc(c.email || '')}">${esc(c.email || '')}</a>.</p>
+      </div></section>`;
+    const f = $app.querySelector('#form-code'), champ = $app.querySelector('#champ-code'), err = $app.querySelector('#erreur-code'), bt = $app.querySelector('#valider-code');
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+      const code = champ.value.trim(); if (!code) { err.textContent = 'Saisissez votre code.'; return; }
+      bt.disabled = true; bt.textContent = 'Vérification…'; err.textContent = '';
+      try { await deverrouiller(code); document.body.classList.remove('verrouille'); premiere = true; rendre(); }
+      catch { err.textContent = 'Ce code n\'est pas reconnu. Vérifiez-le, ou contactez BRILLE.'; bt.disabled = false; bt.textContent = 'Entrer'; }
+    });
+    champ.focus({ preventScroll: true });
   }
   const petale = id => D.petales.find(p => p.id === id);
 
@@ -51,17 +93,17 @@
     const qui = mode === 'enfant' ? 'enfant' : 'parent';
     const parts = D.petales.map(p => {
       const f = D.formes[p.id]; if (!f) return '';
-      const b = dernierBilan(p.id, qui);
+      const b = p.ouvert ? dernierBilan(p.id, qui) : null;
       const s = b ? 0.9 + 0.03 * b.s : 0.97;
       const titre = qui === 'enfant' ? p.miroir : p.titre;
-      const lab = `${titre}${b ? `, dernier bilan ${b.s} sur 5` : ', pas encore de bilan'}`;
+      const lab = p.ouvert ? `${titre}${b ? `, dernier bilan ${b.s} sur 5` : ', pas encore de bilan'}` : `${titre}, se découvre en atelier`;
       const t = f.trou, ic = f.icone;
-      return `<a href="#/petale/${p.id}" class="petale" aria-label="${esc(lab)}">
+      return `<a href="#/petale/${p.id}" class="petale${p.ouvert ? '' : ' ferme'}" aria-label="${esc(lab)}">
         <g class="forme" transform="translate(${f.cx} ${f.cy}) scale(${s}) translate(${-f.cx} ${-f.cy})">
           <path d="${f.d}" fill="${p.couleur}"/>
           <image href="p-${p.id}.png" x="${ic.x}" y="${ic.y}" width="${ic.w}" height="${ic.h}" style="pointer-events:none"/>
           <circle cx="${t.x}" cy="${t.y}" r="${t.r}" fill="#fff"/>
-          ${b ? `<text x="${t.x}" y="${t.y}" text-anchor="middle" dominant-baseline="central" font-family="Quicksand, sans-serif" font-weight="600" font-size="46" fill="#000" style="pointer-events:none">${b.s}</text>` : ''}
+          ${!p.ouvert ? `<g transform="translate(${t.x} ${t.y}) scale(1.15)" style="pointer-events:none"><rect x="-9" y="-3" width="18" height="14" rx="3.5" fill="#8d8795"/><path d="M-5.2 -3 v-4.2 a5.2 5.2 0 0 1 10.4 0 v4.2" fill="none" stroke="#8d8795" stroke-width="3" stroke-linecap="round"/></g>` : b ? `<text x="${t.x}" y="${t.y}" text-anchor="middle" dominant-baseline="central" font-family="Quicksand, sans-serif" font-weight="600" font-size="46" fill="#000" style="pointer-events:none">${b.s}</text>` : ''}
         </g>
       </a>`;
     }).join('');
@@ -78,9 +120,9 @@
     const S = charger(), mode = S.mode === 'enfant' ? 'enfant' : 'parent';
     const defi = defiCourant();
     const lignes = D.petales.map(p => {
-      const b = dernierBilan(p.id, mode);
-      const titre = mode === 'enfant' ? p.miroir : p.titre, ss = mode === 'enfant' ? p.miroirSous : p.sousTitre;
-      return `<li><a class="ligne-petale" href="#/petale/${p.id}" style="background:${p.couleur}">
+      const b = p.ouvert ? dernierBilan(p.id, mode) : null;
+      const titre = mode === 'enfant' ? p.miroir : p.titre, ss = p.ouvert ? (mode === 'enfant' ? p.miroirSous : p.sousTitre) : '🔒 Se découvre en atelier';
+      return `<li><a class="ligne-petale${p.ouvert ? '' : ' ferme'}" href="#/petale/${p.id}" style="background:${p.couleur}">
         <span class="pastille"><img src="p-${p.id}.png" alt="" width="42" height="42"></span>
         <span class="txt"><strong>${esc(titre)}</strong><small>${esc(ss)}</small></span>
         ${b ? `<span class="score" aria-label="Dernier bilan ${b.s} sur 5">${b.s}</span>` : ''}
@@ -113,6 +155,7 @@
 
       <h2 class="titre-section"><span class="surligne" style="--hl:var(--vert)">Les sept pétales</span></h2>
       <ul class="liste-petales">${lignes}</ul>
+      <p class="petit">Les pétales en couleur sont ceux que vous avez vécus en atelier. Les autres s'ouvrent au fil des ateliers : chez BRILLE, le lien se crée d'abord ensemble, avant de se prolonger à la maison.</p>
       </div>
       </div>
     </section>`;
@@ -139,10 +182,31 @@
     return `<h3 style="margin-top:6px">${titre}</h3><div class="histo-wrap"><div class="historique" aria-label="${titre}">${recents.map(b => `<div class="barre" style="height:${b.s * 17}px" title="${dateCourte(b.d)} : ${b.s}/5"><span>${dateCourte(b.d)}</span></div>`).join('')}</div></div>`;
   }
 
+  function vuePetaleFerme(p) {
+    const c = D.config.contact || {};
+    return `<section class="vue" style="--puce:${p.couleur}">
+      <a class="retour" href="#/">← La fleur</a>
+      <div class="hero-petale" style="background:${p.couleur}">
+        <div class="icone"><img src="p-${p.id}.png" alt=""></div>
+        <h1>${esc(p.titre)}</h1>
+        <p class="ss">${esc(p.sousTitre)}</p>
+      </div>
+      <div class="carte">
+        <span class="etiquette">🔒 À découvrir en atelier</span>
+        <h2>Ce pétale se vit d'abord ensemble</h2>
+        <p>Chez BRILLE, le lien passe avant tout. Ce pétale se découvre en atelier, avec d'autres parents et avec votre enfant : c'est là qu'il prend tout son sens. Étincelle vous aidera ensuite à le prolonger à la maison.</p>
+        <p>Vous l'avez déjà vécu en atelier et il n'est pas encore ouvert ? Écrivez-nous, nous l'ajouterons à votre accès.</p>
+        <a class="btn plein" href="mailto:${esc(c.email || '')}?subject=${encodeURIComponent('Étincelle : ouvrir un pétale')}">Écrire à BRILLE</a>
+      </div>
+    </section>`;
+  }
+
   function vuePetale(id) {
     const p = petale(id);
     if (!p) return vueIntrouvable();
-    const i = D.petales.indexOf(p), suivant = D.petales[(i + 1) % D.petales.length];
+    if (!p.ouvert) return vuePetaleFerme(p);
+    const ouverts = D.petales.filter(x => x.ouvert);
+    const i = ouverts.indexOf(p), suivant = ouverts[(i + 1) % ouverts.length];
     const sem = debutSemaine();
     const actP = bilansDe(id, 'parent').find(b => b.w === sem), actE = bilansDe(id, 'enfant').find(b => b.w === sem);
     const e = p.ensemble;
@@ -185,7 +249,7 @@
       <div class="carte"><h2>Petites pratiques à essayer</h2><ul class="pratiques">${p.pratiques.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
       <div class="carte"><h3>Une phrase à essayer</h3><p class="phrase">${esc(p.phrase)}</p>${p.note ? `<div class="note-soutien">${esc(p.note)}</div>` : ''}</div>
       </div></div>
-      <a class="btn discret plein" href="#/petale/${suivant.id}">Pétale suivant : ${esc(suivant.titre)} →</a>
+      ${suivant && suivant !== p ? `<a class="btn discret plein" href="#/petale/${suivant.id}">Pétale suivant : ${esc(suivant.titre)} →</a>` : ''}
     </section>`;
   }
 
@@ -295,6 +359,8 @@
         <button class="btn discret plein" id="exporter" type="button">Enregistrer une copie de mes données</button>
         <label class="btn discret plein" style="margin-top:12px">Récupérer une copie<input type="file" id="importer" accept="application/json,.json" hidden></label>
         <button class="btn alerte plein" id="effacer" type="button" style="margin-top:12px">Effacer toutes mes données</button>
+        <button class="btn plein" id="verrouiller" type="button" style="margin-top:12px">Verrouiller l'application</button>
+        <p class="petit">« Verrouiller » ne supprime pas vos bilans : il faudra simplement saisir de nouveau votre code famille.</p>
         <p class="ok" id="retour-donnees" role="status"></p>
       </details>
 
@@ -332,6 +398,7 @@
         msg('Vos données ont été récupérées.');
       } catch { msg('Ce fichier n\'est pas une copie valide d\'Étincelle.'); }
     });
+    $app.querySelector('#verrouiller').addEventListener('click', verrouiller);
     $app.querySelector('#effacer').addEventListener('click', () => {
       if (!confirm('Effacer tous vos bilans, notes et défis ? Cette action est définitive.')) return;
       memoire = vide(); sauver(); msg('Toutes vos données ont été effacées.');
@@ -345,6 +412,7 @@
   /* ---------- Routeur ---------- */
   let premiere = true;
   function rendre() {
+    if (!D.petales.length) { ecranCode(); return; }
     const [r, param] = location.hash.replace(/^#\/?/, '').split('/');
     let html, tab, titre = 'Étincelle · BRILLE', apres = () => { };
     if (!r) { html = vueAccueil(); tab = 'fleur'; apres = lierAccueil; }
@@ -362,7 +430,11 @@
   window.addEventListener('hashchange', rendre);
 
   /* ---------- Démarrage ---------- */
-  chargerDonnees().then(rendre).catch(() => {
+  chargerDonnees().then(async () => {
+    const code = codeMemorise();
+    if (code) { try { await deverrouiller(code); document.body.classList.remove('verrouille'); rendre(); return; } catch { /* code retiré ou changé */ } }
+    ecranCode(code ? 'Votre accès n\'est plus valide. Entrez un nouveau code ou contactez BRILLE.' : '');
+  }).catch(() => {
     $app.innerHTML = '<section class="vue"><h1>Oups</h1><p>Impossible de charger le contenu. Vérifiez votre connexion et rechargez la page.</p></section>';
   });
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {

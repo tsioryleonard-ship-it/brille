@@ -24,8 +24,13 @@ Les textes sont dans trois fichiers (le quatrième, `formes.json`, ne se modifie
 
 Attention aux virgules et aux guillemets : ne supprimez pas ceux qui entourent les textes.
 
-Si vous modifiez `index.html`, `app.js` ou `style.css`, changez aussi le numéro dans `sw.js` (`etincelle-v5` devient `etincelle-v6`) pour que les téléphones prennent la nouvelle version.
+Si vous modifiez `index.html`, `app.js` ou `style.css`, changez aussi le numéro dans `sw.js` (`etincelle-v7` devient `etincelle-v8`) pour que les téléphones prennent la nouvelle version.
 
 ## 3. Les images
 
 Les pictogrammes des pétales (`p-*.png`) sont extraits de votre fleur : vérifiez les droits d'usage de ces illustrations, notamment si elles viennent d'une banque d'images qui demande de citer l'auteur.
+
+
+## Accès par code famille
+- Chaque pétale est chiffré dans `contenu.enc.json` : une famille n'ouvre que les pétales vécus en atelier. Les codes sont gérés avec le fichier PRIVÉ `gestion-des-acces.html` (à garder sur votre ordinateur, jamais sur GitHub).
+- Ne publiez JAMAIS `petales.json`, `defis.json` ni le carnet des familles.
