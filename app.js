@@ -523,19 +523,21 @@
     const actives = carnet.familles.filter(f => f.actif);
     const stock = carnet.familles.filter(f => f.actif && f.vente && f.publie && !f.envoye).length;
     const aPublier = carnet.familles.filter(f => f.actif && f.vente && !f.publie).length;
-    const lignes = carnet.familles.map((f, i) => f.actif ? `<div class="carte fam" data-i="${i}">
-        <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe">
-        <p>Code : <code>${esc(f.code)}</code>${f.admin ? ' · accès ingénieure' : ''}</p>
+    const ligneFam = (f, i) => f.actif ? `<div class="carte fam${f.admin ? ' fam-admin' : ''}" data-i="${i}">
+        ${f.admin ? '<span class="badge-admin">Mon accès ingénieure · protégé</span>' : ''}
+        <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe"${f.admin ? ' disabled' : ''}>
+        <p>Code : <code>${esc(f.code)}</code></p>
         <p class="petit">Ajouté le ${esc(f.ajout || '')}${f.vente ? ' · ' + (f.envoye ? 'envoyé le ' + esc(f.envoye) + (f.acheteur ? ' à ' + esc(f.acheteur) : '') : (f.publie ? 'disponible pour la vente' : 'à publier')) : ''}</p>
-        <div class="chips">${cases('pf', f.petales)}</div>
+        <div class="chips">${f.admin ? cases('pf', f.petales).replace(/<input/g, '<input disabled') : cases('pf', f.petales)}</div>
         <div class="actions-fam">
           <button type="button" class="btn petit-btn" data-a="msg">Copier le message</button>
           <button type="button" class="btn petit-btn" data-a="msgachat">Message d'achat</button>
           ${f.vente ? `<button type="button" class="btn petit-btn gris" data-a="envoye">${f.envoye ? 'Remettre en stock' : 'Marquer comme envoyé'}</button>` : ''}
           <button type="button" class="btn petit-btn gris" data-a="lien">Copier le lien</button>
           <button type="button" class="btn petit-btn gris" data-a="qr">QR code</button>
-          <button type="button" class="btn petit-btn alerte" data-a="retirer">Retirer</button>
-        </div></div>` : '').join('');
+          ${f.admin ? '' : '<button type="button" class="btn petit-btn alerte" data-a="retirer">Retirer</button>'}
+        </div></div>` : '';
+    const lignes = carnet.familles.map((f, i) => f.admin ? ligneFam(f, i) : '').join('') + carnet.familles.map((f, i) => f.admin ? '' : ligneFam(f, i)).join('');
     return `<section class="vue"><a class="retour" href="#/plus">← Plus</a>
       <h1><span class="surligne" style="--hl:var(--vert)">Gérer les familles</span></h1>
       <div class="grille-cartes">
@@ -591,8 +593,9 @@
     });
     $app.querySelectorAll('.fam').forEach(bloc => {
       const f = carnet.familles[+bloc.dataset.i];
-      bloc.querySelector('.nomf').addEventListener('input', e => { f.nom = e.target.value; ecrireCarnet(carnet); });
+      bloc.querySelector('.nomf').addEventListener('input', e => { if (f.admin) return; f.nom = e.target.value; ecrireCarnet(carnet); });
       bloc.querySelectorAll('.pf').forEach(c => c.addEventListener('change', () => {
+        if (f.admin) { c.checked = true; return; }
         if (c.checked) { if (!f.petales.includes(c.dataset.id)) f.petales.push(c.dataset.id); }
         else { f.petales = f.petales.filter(x => x !== c.dataset.id); Acces.renouvelerCles(carnet, [c.dataset.id]); }
         ecrireCarnet(carnet); st('Modifié. Pensez à publier (bouton « Préparer les fichiers »).');
@@ -603,7 +606,7 @@
         if (a === 'msgachat') copier(msgAchat(f), 'Message d\'achat copié, prêt à coller dans un e-mail.');
         if (a === 'envoye') { if (f.envoye) { delete f.envoye; delete f.acheteur; } else f.envoye = iso(new Date()); ecrireCarnet(carnet); rendre(); }
         if (a === 'lien') copier(lienFamille(f), 'Lien copié.');
-        if (a === 'retirer') { if (!confirm(`Retirer l'accès de « ${f.nom} » ? Les clés seront renouvelées : publiez ensuite les fichiers.`)) return; f.actif = false; Acces.renouvelerCles(carnet); ecrireCarnet(carnet); rendre(); }
+        if (a === 'retirer') { if (f.admin) return; if (!confirm(`Retirer l'accès de « ${f.nom} » ? Les clés seront renouvelées : publiez ensuite les fichiers.`)) return; f.actif = false; Acces.renouvelerCles(carnet); ecrireCarnet(carnet); rendre(); }
         if (a === 'qr') {
           try { await chargerScript('qrcode.js'); } catch { st('Le QR code n\'a pas pu se charger (connexion ?).'); return; }
           const q = qrcode(0, 'M'); q.addData(lienFamille(f)); q.make();

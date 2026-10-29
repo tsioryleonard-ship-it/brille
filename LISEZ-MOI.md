@@ -42,7 +42,7 @@ La vente est **désactivée** tant que `config.json` contient `"actif": false` d
 **Mise en place (une seule fois)** : suivez le guide « Encaisser les accès Étincelle avec Stripe ».
 1. Complétez les passages surlignés en jaune de `legal.html` (SIRET, adresse, médiateur, dates).
 2. Dans `config.json`, collez le lien de paiement Stripe de chaque offre dans `"lien"`. Passez `"actif"` à `true`.
-3. Changez le numéro de version dans `sw.js` (`etincelle-v14` devient `etincelle-v15`, et ainsi de suite à chaque mise à jour), puis publiez tous les fichiers sur GitHub (y compris `merci.html` et `legal.html`).
+3. Changez le numéro de version dans `sw.js` (`etincelle-v15` devient `etincelle-v16`, et ainsi de suite à chaque mise à jour), puis publiez tous les fichiers sur GitHub (y compris `merci.html` et `legal.html`).
 
 **Créer un stock de codes** : espace ingénieure, « Gérer les familles », nom « Achat », nombre 20, tous les pétales cochés, case « pour la vente » cochée, « Créer le code ». Puis « Préparer les fichiers à publier » et déposez les deux fichiers sur GitHub. Faites aussi « Télécharger une copie de mon carnet » et gardez-la en lieu sûr.
 

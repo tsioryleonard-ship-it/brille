@@ -306,3 +306,8 @@ code { background: #f2f7ec; padding: 2px 8px; border-radius: 8px; letter-spacing
 .fleur-bloc svg { margin: 0 auto; }
 .fleur-carte { padding-bottom: 10px; }
 .col-gauche > .carte.teinte { margin-bottom: 18px; }
+
+/* Accès ingénieure : carte distincte et protégée */
+.fam.fam-admin { background: var(--violet); border: 3px solid var(--noir); }
+.fam.fam-admin .nomf { background: rgba(255,255,255,.7); border-color: transparent; }
+.badge-admin { display: inline-block; font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; background: var(--noir); color: #fff; margin-bottom: 10px; }
