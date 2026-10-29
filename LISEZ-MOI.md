@@ -34,3 +34,23 @@ Les pictogrammes des pétales (`p-*.png`) sont extraits de votre fleur : vérifi
 ## Accès par code famille
 - Chaque pétale est chiffré dans `contenu.enc.json` : une famille n'ouvre que les pétales vécus en atelier. Les codes sont gérés avec le fichier PRIVÉ `gestion-des-acces.html` (à garder sur votre ordinateur, jamais sur GitHub).
 - Ne publiez JAMAIS `petales.json`, `defis.json` ni le carnet des familles.
+
+
+## Accès payant (familles hors centre)
+La vente est **désactivée** tant que `config.json` contient `"actif": false` dans le bloc `achat`.
+
+**Mise en place (une seule fois)** : suivez le guide « Encaisser les accès Étincelle avec Stripe ».
+1. Complétez les passages surlignés en jaune de `legal.html` (SIRET, adresse, médiateur, dates).
+2. Dans `config.json`, collez le lien de paiement Stripe de chaque offre dans `"lien"`. Passez `"actif"` à `true`.
+3. Changez le numéro de version dans `sw.js` (`etincelle-v14` devient `etincelle-v15`, et ainsi de suite à chaque mise à jour), puis publiez tous les fichiers sur GitHub (y compris `merci.html` et `legal.html`).
+
+**Créer un stock de codes** : espace ingénieure, « Gérer les familles », nom « Achat », nombre 20, tous les pétales cochés, case « pour la vente » cochée, « Créer le code ». Puis « Préparer les fichiers à publier » et déposez les deux fichiers sur GitHub. Faites aussi « Télécharger une copie de mon carnet » et gardez-la en lieu sûr.
+
+**Après chaque paiement (2 minutes)** : vous recevez un e-mail de Stripe. Dans « Gérer les familles », saisissez le nom ou l'e-mail de l'acheteur, cliquez sur « Copier le message du prochain code », collez-le dans un e-mail à l'acheteur. Le code est marqué « envoyé » et le stock se met à jour.
+
+**À savoir**
+- Le tarif solidaire et la fleur complète ouvrent la même chose : ils piochent dans le même stock. Pour un accès à vie, écrivez « VIE » devant l'e-mail de l'acheteur, pour le retrouver plus tard.
+- Un pétale à l'unité demande un code créé à part (seul le pétale choisi est coché), à publier avant l'envoi.
+- Un an après l'ajout d'un code (la date est affichée), retirez-le si la famille ne renouvelle pas, puis republiez.
+- Un code peut être partagé : les conditions l'interdisent. En cas d'abus, retirez-le et republiez.
+- Remboursement : dans Stripe, puis « Retirer » le code dans « Gérer les familles » et republiez.
