@@ -413,7 +413,7 @@
       <h2>Aperçu « comme une famille »</h2>
       <p>Vous voyez tous les pétales. Cochez ceux qu'une famille a vécus en atelier pour voir exactement son application :</p>
       <div class="apercu">${D.vitrine.map(v => `<label class="coche"><input type="checkbox" data-id="${v.id}" ${sel.includes(v.id) ? 'checked' : ''}> ${esc(v.titre)}</label>`).join('')}</div>
-      <p class="petit">Les familles et leurs codes se gèrent dans votre fichier privé « gestion-des-acces.html », sur votre ordinateur.</p>
+      <a class="btn plein" href="#/gestion">Gérer les familles et les codes</a>
     </div>`;
   }
   function lierPlus() {
@@ -447,6 +447,101 @@
     });
   }
 
+
+  /* ----- Gestion des familles (espace ingénieure) ----- */
+  const CLE_CARNET = 'brille-carnet';
+  const lireCarnet = () => { try { return JSON.parse(localStorage.getItem(CLE_CARNET) || 'null'); } catch { return null; } };
+  const ecrireCarnet = c => { try { localStorage.setItem(CLE_CARNET, JSON.stringify(c)); } catch { } };
+  const baseLien = () => location.origin + location.pathname;
+  const lienFamille = f => `${baseLien()}#/c/${f.code}`;
+  const telecharger = (nom, obj) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' })); a.download = nom; a.click(); };
+  const chargerScript = src => new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
+
+  function vueGestion() {
+    if (!D.admin) return vueIntrouvable();
+    const carnet = lireCarnet();
+    const cases = (cls, sel, extra = '') => D.vitrine.map(v => `<label class="chip"><input type="checkbox" class="${cls}" ${extra} data-id="${v.id}" ${sel && sel.includes(v.id) ? 'checked' : ''}> ${esc(v.titre)}</label>`).join('');
+    if (!carnet) return `<section class="vue"><a class="retour" href="#/plus">← Plus</a>
+      <h1><span class="surligne" style="--hl:var(--vert)">Gérer les familles</span></h1>
+      <div class="carte"><h2>Importer mon carnet</h2>
+        <p>Le carnet est le fichier <b>carnet-familles.json</b> de votre dossier privé. Il contient les codes et les clés : il reste uniquement sur cet appareil, jamais en ligne.</p>
+        <input type="file" id="f-carnet" accept=".json"><p class="erreur" id="st" role="status"></p></div></section>`;
+    const actives = carnet.familles.filter(f => f.actif);
+    const lignes = carnet.familles.map((f, i) => f.actif ? `<div class="carte fam" data-i="${i}">
+        <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe">
+        <p>Code : <code>${esc(f.code)}</code>${f.admin ? ' · accès ingénieure' : ''}</p>
+        <div class="chips">${cases('pf', f.petales)}</div>
+        <div class="actions-fam">
+          <button type="button" class="btn petit-btn" data-a="msg">Copier le message</button>
+          <button type="button" class="btn petit-btn gris" data-a="lien">Copier le lien</button>
+          <button type="button" class="btn petit-btn gris" data-a="qr">QR code</button>
+          <button type="button" class="btn petit-btn alerte" data-a="retirer">Retirer</button>
+        </div></div>` : '').join('');
+    return `<section class="vue"><a class="retour" href="#/plus">← Plus</a>
+      <h1><span class="surligne" style="--hl:var(--vert)">Gérer les familles</span></h1>
+      <div class="grille-cartes">
+      <div class="carte"><h2>Ajouter une famille ou un groupe</h2>
+        <p class="petit">Un seul code pour tout un groupe d'atelier, c'est le plus simple. Cochez les pétales vécus en atelier.</p>
+        <input type="text" id="nouveau-nom" placeholder="Nom (ex. Atelier mars, famille Martin)">
+        <div class="chips">${cases('ajout', [])}</div>
+        <button type="button" class="btn plein" id="creer">Créer le code</button>
+        <p class="erreur" id="st" role="status"></p></div>
+      <div class="carte"><h2>Publier les changements</h2>
+        <p>Après chaque ajout ou retrait, téléchargez les deux fichiers, puis déposez-les sur GitHub (Add file → Upload files → Commit changes). Les familles les prennent en compte dans les minutes qui suivent.</p>
+        <button type="button" class="btn plein" id="fabriquer">Préparer les fichiers à publier</button>
+        <button type="button" class="btn plein gris" id="sauver-carnet" style="margin-top:10px">Télécharger une copie de mon carnet</button>
+        <p class="petit">${actives.length} accès actif(s). Gardez la copie du carnet en lieu sûr : sans elle, vous ne pouvez plus gérer les codes.</p></div>
+      </div>
+      <h2 class="titre-section">Mes familles et groupes</h2>
+      <div class="grille-cartes">${lignes || '<p>Aucune famille pour le moment.</p>'}</div>
+    </section>`;
+  }
+  function lierGestion() {
+    const st = m => { const e = $app.querySelector('#st'); if (e) { e.style.color = ''; e.textContent = m; } };
+    const imp = $app.querySelector('#f-carnet');
+    if (imp) { imp.addEventListener('change', () => { const r = new FileReader(); r.onload = () => { try { const c = JSON.parse(r.result); if (c.v !== 2 || !c.cles || !c.familles) throw 0; ecrireCarnet(c); rendre(); } catch { st('Ce fichier n\'est pas un carnet valide.'); } }; r.readAsText(imp.files[0]); }); return; }
+    const carnet = lireCarnet(); if (!carnet) return;
+    const msgFamille = f => `Bonjour, voici votre accès personnel pour prolonger à la maison ce que nous avons vécu à l'atelier. Touchez ce lien, l'application s'ouvre toute seule : ${lienFamille(f)}\n(Si on vous demande le code, saisissez-le : ${f.code}). À bientôt, Tsiory (BRILLE)`;
+    const copier = async (t, ok) => { try { await navigator.clipboard.writeText(t); st(ok); } catch { prompt('Copiez ce texte :', t); } };
+    $app.querySelector('#creer').addEventListener('click', () => {
+      const sel = [...$app.querySelectorAll('.ajout:checked')].map(x => x.dataset.id);
+      if (!sel.length) { st('Cochez au moins un pétale vécu en atelier.'); return; }
+      const f = Acces.ajouterFamille(carnet, $app.querySelector('#nouveau-nom').value.trim() || 'Famille', sel);
+      ecrireCarnet(carnet); rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Code créé : ' + f.code + '. Pensez à publier (bouton « Préparer les fichiers »).'; }
+    });
+    $app.querySelectorAll('.fam').forEach(bloc => {
+      const f = carnet.familles[+bloc.dataset.i];
+      bloc.querySelector('.nomf').addEventListener('input', e => { f.nom = e.target.value; ecrireCarnet(carnet); });
+      bloc.querySelectorAll('.pf').forEach(c => c.addEventListener('change', () => {
+        if (c.checked) { if (!f.petales.includes(c.dataset.id)) f.petales.push(c.dataset.id); }
+        else { f.petales = f.petales.filter(x => x !== c.dataset.id); Acces.renouvelerCles(carnet, [c.dataset.id]); }
+        ecrireCarnet(carnet); st('Modifié. Pensez à publier (bouton « Préparer les fichiers »).');
+      }));
+      bloc.addEventListener('click', async e => {
+        const a = e.target.dataset.a; if (!a) return;
+        if (a === 'msg') copier(msgFamille(f), 'Message copié, prêt à coller dans un SMS ou WhatsApp.');
+        if (a === 'lien') copier(lienFamille(f), 'Lien copié.');
+        if (a === 'retirer') { if (!confirm(`Retirer l'accès de « ${f.nom} » ? Les clés seront renouvelées : publiez ensuite les fichiers.`)) return; f.actif = false; Acces.renouvelerCles(carnet); ecrireCarnet(carnet); rendre(); }
+        if (a === 'qr') {
+          try { await chargerScript('qrcode.js'); } catch { st('Le QR code n\'a pas pu se charger (connexion ?).'); return; }
+          const q = qrcode(0, 'M'); q.addData(lienFamille(f)); q.make();
+          const fond = document.createElement('div'); fond.className = 'fenetre-qr';
+          fond.innerHTML = `<div class="c"><h3>${esc(f.nom)}</h3>${q.createSvgTag({ cellSize: 4, margin: 2, scalable: true })}<p>Scannez pour ouvrir Étincelle<br><code>${esc(f.code)}</code></p><button type="button" class="btn">Fermer</button></div>`;
+          fond.addEventListener('click', ev => { if (ev.target === fond || ev.target.tagName === 'BUTTON') fond.remove(); });
+          document.body.appendChild(fond);
+        }
+      });
+    });
+    $app.querySelector('#fabriquer').addEventListener('click', async () => {
+      if (!actives_ok(carnet)) { st('Ajoutez au moins une famille avec un pétale.'); return; }
+      const r = await Acces.fabriquer(carnet, { details: D.details });
+      telecharger('acces.json', r.acces); setTimeout(() => telecharger('contenu.enc.json', r.contenuEnc), 500);
+      st('Deux fichiers téléchargés : déposez acces.json et contenu.enc.json sur GitHub.');
+    });
+    $app.querySelector('#sauver-carnet').addEventListener('click', () => telecharger('carnet-familles.json', carnet));
+  }
+  const actives_ok = c => c.familles.some(f => f.actif && f.petales.length);
+
   function vueIntrouvable() {
     return '<section class="vue"><h1>Page introuvable</h1><p>Cette page n\'existe pas.</p><a class="btn" href="#/">Retour à la fleur</a></section>';
   }
@@ -460,6 +555,7 @@
     if (!r) { html = vueAccueil(); tab = 'fleur'; apres = lierAccueil; }
     else if (r === 'petale') { html = vuePetale(param); tab = 'fleur'; apres = () => lierPetale(param); titre = `${petale(param)?.titre || 'Pétale'} · Étincelle`; }
     else if (r === 'semaine' || r === 'defi') { html = vueSemaine(param); tab = 'semaine'; apres = () => lierSemaine(param); titre = 'Cette semaine · Étincelle'; }
+    else if (r === 'gestion') { html = vueGestion(); tab = 'plus'; apres = lierGestion; titre = 'Gérer les familles · Étincelle'; }
     else if (r === 'plus') { html = vuePlus(); tab = 'plus'; apres = lierPlus; titre = 'Plus · Étincelle'; }
     else { html = vueIntrouvable(); tab = ''; }
     $app.innerHTML = html;
