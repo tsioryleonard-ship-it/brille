@@ -5,14 +5,31 @@
     "titre": "Mes émotions de parent",
     "sousTitre": "Accueillir, comprendre, apaiser",
     "miroir": "Mes émotions apprivoisées",
+    "miroirSous": "Nommer, exprimer, réguler",
     "intro": "Les parents aussi ressentent de la fatigue, de l'agacement, de la culpabilité, de la joie. Les reconnaître sans se juger est la première façon d'aider son enfant à apprivoiser les siennes : il apprend en nous regardant faire.",
     "question": "Cette semaine, j'ai réussi à accueillir mes émotions de parent…",
+    "questionEnfant": "Cette semaine, j'ai réussi à dire ce que je ressentais…",
     "pratiques": [
       "Nommer ce que je ressens à voix haute, simplement : « Là, je suis agacé·e, j'ai besoin de souffler une minute. »",
       "Faire 3 grandes respirations avant de répondre quand la tension monte.",
       "En fin de journée, raconter une émotion vécue dans la journée, et inviter mon enfant à en raconter une aussi."
     ],
-    "phrase": "« Ce que tu ressens est important, et ce que je ressens aussi. On va trouver comment s'en occuper ensemble. »"
+    "phrase": "« Ce que tu ressens est important, et ce que je ressens aussi. On va trouver comment s'en occuper ensemble. »",
+    "ensemble": {
+      "titre": "Le thermomètre des émotions",
+      "duree": "15 min",
+      "materiel": "Une feuille, des crayons de couleur",
+      "etapes": [
+        "Dessinez ensemble un grand thermomètre : en bas « tout calme », en haut « très très fort ».",
+        "Chacun choisit une situation de la semaine qui lui a fait ressentir une émotion (colère, peur, joie…) et la place sur le thermomètre.",
+        "Parlez de ce que vous avez senti dans votre corps : ventre noué, chaleur, cœur qui bat vite…",
+        "Inventez ensemble un « outil pour redescendre » (respirer comme un ballon qui se dégonfle, serrer un coussin, boire de l'eau, aller dans un coin calme) et dessinez-le à côté."
+      ],
+      "enParler": [
+        "Quelle émotion est la plus difficile à vivre pour toi ?",
+        "Et moi, comment j'ai fait quand c'était trop fort ?"
+      ]
+    }
   },
   {
     "id": "apprentissages",
@@ -20,14 +37,31 @@
     "titre": "Mon regard sur ses apprentissages",
     "sousTitre": "Encourager, soutenir, relativiser",
     "miroir": "Le sens de mes apprentissages",
+    "miroirSous": "Curiosité, école, motivation",
     "intro": "Notre regard sur l'école et sur les devoirs influence la confiance de l'enfant. Valoriser l'effort, la curiosité et les progrès, plutôt que seulement les notes, nourrit l'envie d'apprendre.",
     "question": "Cette semaine, j'ai pu soutenir la curiosité de mon enfant sans mettre la pression…",
+    "questionEnfant": "Cette semaine, j'ai eu envie d'apprendre et de découvrir des choses…",
     "pratiques": [
       "Remplacer « Qu'as-tu eu comme note ? » par « Qu'as-tu appris d'intéressant aujourd'hui ? ».",
       "Féliciter un effort précis : « J'ai vu que tu as recommencé trois fois, tu n'as pas lâché. »",
       "Demander à mon enfant de m'expliquer quelque chose qu'il a appris, comme si j'étais l'élève."
     ],
-    "phrase": "« Tu n'as pas besoin d'être parfait·e pour apprendre. Ce qui compte, c'est que tu essaies. »"
+    "phrase": "« Tu n'as pas besoin d'être parfait·e pour apprendre. Ce qui compte, c'est que tu essaies. »",
+    "ensemble": {
+      "titre": "Le quiz du spécialiste",
+      "duree": "15 min",
+      "materiel": "Papier et crayon (facultatif)",
+      "etapes": [
+        "L'enfant choisit un sujet qu'il connaît bien et qui lui plaît : un animal, un jeu, un sport, une chanson.",
+        "Il prépare trois questions pour vous, comme un maître du jeu.",
+        "Vous répondez, et vous avez le droit de vous tromper !",
+        "À votre tour : posez une question dont vous ne connaissez pas la réponse et cherchez-la ensemble, dans un livre ou en faisant une recherche à deux."
+      ],
+      "enParler": [
+        "Qu'est-ce qui te donne envie d'apprendre ?",
+        "Qu'est-ce qu'on a découvert aujourd'hui tous les deux ?"
+      ]
+    }
   },
   {
     "id": "liens",
@@ -35,14 +69,31 @@
     "titre": "Mes liens et ma parole",
     "sousTitre": "Écouter, parler, se relier",
     "miroir": "Mes liens et ma parole",
+    "miroirSous": "Relations, communication",
     "intro": "La qualité de la relation passe par des petits moments d'attention et par des mots qui relient plutôt que des mots qui blessent. Écouter vraiment, c'est déjà dire à l'enfant qu'il compte.",
     "question": "Cette semaine, j'ai pris le temps d'écouter et de parler avec mon enfant…",
+    "questionEnfant": "Cette semaine, j'ai pu parler et être écouté·e par ma famille…",
     "pratiques": [
       "Offrir 10 minutes d'attention complète, sans écran, sur ce que mon enfant a envie de faire.",
       "Reformuler avant de répondre : « Si je comprends bien, tu es déçu·e parce que… »",
-      "Dire « je » plutôt que « tu » : « Je suis inquiet·ète » plutôt que « Tu n'écoutes jamais ». "
+      "Dire « je » plutôt que « tu » : « Je suis inquiet·ète » plutôt que « Tu n'écoutes jamais »."
     ],
-    "phrase": "« Raconte-moi. Je t'écoute, et je ne vais pas te couper la parole. »"
+    "phrase": "« Raconte-moi. Je t'écoute, et je ne vais pas te couper la parole. »",
+    "ensemble": {
+      "titre": "Le micro magique",
+      "duree": "10 min",
+      "materiel": "Un objet qui sert de micro (cuillère en bois, stylo…)",
+      "etapes": [
+        "Choisissez un sujet léger : la meilleure chose de la journée, un souvenir drôle, un rêve.",
+        "Celui qui tient le micro parle deux minutes. L'autre écoute sans couper et sans donner de conseil.",
+        "Celui qui écoute résume en une phrase : « Si j'ai bien compris… ».",
+        "Échangez le micro et recommencez."
+      ],
+      "enParler": [
+        "Qu'est-ce que ça fait d'être écouté sans être coupé ?",
+        "Quel moment de ta journée aimerais-tu me raconter plus souvent ?"
+      ]
+    }
   },
   {
     "id": "droits",
@@ -50,14 +101,31 @@
     "titre": "Mon cadre et ses droits",
     "sousTitre": "Un cadre clair, des limites bienveillantes",
     "miroir": "Ma place et mes droits",
+    "miroirSous": "Cadre familial, devoirs, CIDE",
     "intro": "Un cadre rassure l'enfant : des règles claires, expliquées, tenues avec calme. Et l'enfant a aussi des droits, par exemple celui d'être écouté sur ce qui le concerne (Convention internationale des droits de l'enfant, article 12). Cadre et écoute vont ensemble.",
     "question": "Cette semaine, j'ai tenu un cadre clair tout en écoutant mon enfant…",
+    "questionEnfant": "Cette semaine, je me suis senti·e écouté·e et j'ai compris les règles de la maison…",
     "pratiques": [
       "Choisir deux ou trois règles essentielles pour la maison, et les expliquer avec des mots simples.",
       "Inviter mon enfant à donner son avis sur une règle ou une organisation familiale.",
       "Quand une règle n'est pas respectée, proposer une conséquence logique, dite calmement, plutôt qu'une punition sous l'émotion."
     ],
-    "phrase": "« La règle, c'est celle-ci, et voilà pourquoi. Et toi, qu'en penses-tu ? »"
+    "phrase": "« La règle, c'est celle-ci, et voilà pourquoi. Et toi, qu'en penses-tu ? »",
+    "ensemble": {
+      "titre": "Notre charte de famille",
+      "duree": "20 min",
+      "materiel": "Une grande feuille, des feutres",
+      "etapes": [
+        "Chacun propose une règle qui aide la famille à bien vivre ensemble (par exemple : on frappe avant d'entrer).",
+        "Chacun dit aussi un droit qui compte pour lui : être écouté, avoir du temps pour jouer, pouvoir dire non à un câlin…",
+        "Choisissez ensemble trois règles et deux droits à garder, et écrivez-les.",
+        "Signez ou dessinez vos empreintes en bas, puis affichez la charte à un endroit visible."
+      ],
+      "enParler": [
+        "Y a-t-il une règle que tu trouves injuste ? Pourquoi ?",
+        "Qu'est-ce qui t'aiderait à la respecter ?"
+      ]
+    }
   },
   {
     "id": "equilibre",
@@ -65,15 +133,32 @@
     "titre": "Mon équilibre et mon énergie",
     "sousTitre": "Me ressourcer, alléger ma charge",
     "miroir": "Mon équilibre et mon énergie",
+    "miroirSous": "Bien-être global",
     "intro": "Un parent fatigué n'est pas un mauvais parent. Prendre soin de son énergie, de son sommeil et de ses appuis, c'est aussi prendre soin de son enfant : il ressent notre état général.",
     "question": "Cette semaine, j'ai pris soin de mon énergie…",
+    "questionEnfant": "Cette semaine, j'avais de l'énergie et je me sentais bien dans mon corps…",
     "pratiques": [
       "Me réserver 15 minutes rien que pour moi, sans culpabilité.",
       "Demander ou déléguer une tâche à un proche, ou à mon enfant si elle est adaptée à son âge.",
       "Garder des heures de coucher régulières pour toute la famille."
     ],
     "phrase": "« J'ai besoin de me reposer un moment pour être disponible ensuite. »",
-    "note": "Si la fatigue ou le poids du quotidien durent, en parler à un professionnel (médecin traitant, PMI, référent famille du centre social) est un vrai soutien."
+    "note": "Si la fatigue ou le poids du quotidien durent, en parler à un professionnel (médecin traitant, PMI, référent famille du centre social) est un vrai soutien.",
+    "ensemble": {
+      "titre": "Le plein d'énergie",
+      "duree": "15 min",
+      "materiel": "Une feuille, des crayons",
+      "etapes": [
+        "Dessinez chacun une batterie avec son niveau d'énergie de la semaine.",
+        "Listez ce qui vous recharge (dormir, jouer dehors, la musique, un câlin, cuisiner) et ce qui vous vide (le bruit, la pression, manquer de sommeil).",
+        "Choisissez une « recharge » à vivre ensemble cette semaine : une promenade, une soirée sans écran, une danse dans le salon.",
+        "Fixez le moment dans votre semaine pour qu'il ait vraiment lieu."
+      ],
+      "enParler": [
+        "Qu'est-ce qui te fait le plus de bien ?",
+        "À quel moment de la journée te sens-tu le plus fatigué·e ?"
+      ]
+    }
   },
   {
     "id": "briller",
@@ -81,14 +166,31 @@
     "titre": "Ce qui me fait briller",
     "sousTitre": "Mes forces de parent, mes victoires",
     "miroir": "Ce qui me fait briller",
+    "miroirSous": "Talents, forces, victoires",
     "intro": "On repère souvent ce qui ne va pas. Pourtant chaque parent a des forces et des réussites, même petites. Les reconnaître donne de la confiance, et cette confiance se transmet à l'enfant.",
     "question": "Cette semaine, j'ai reconnu mes forces et mes réussites de parent…",
+    "questionEnfant": "Cette semaine, j'ai été fier·ère de quelque chose que j'ai fait…",
     "pratiques": [
       "Chaque soir, noter une chose qui s'est bien passée, même toute petite.",
       "Demander à mon enfant : « Qu'est-ce qu'on fait de bien ensemble ? ».",
       "Partager une fierté avec un proche ou avec le groupe de parents."
     ],
-    "phrase": "« Aujourd'hui, je suis fier·ère de la façon dont j'ai géré… »"
+    "phrase": "« Aujourd'hui, je suis fier·ère de la façon dont j'ai géré… »",
+    "ensemble": {
+      "titre": "Le tableau des fiertés",
+      "duree": "10 min",
+      "materiel": "Une feuille, des feutres",
+      "etapes": [
+        "Chacun note ou dessine trois choses dont il est fier cette semaine, petites ou grandes.",
+        "Chacun écrit aussi une chose qu'il admire chez l'autre.",
+        "Lisez-les à voix haute, avec le sourire.",
+        "Affichez le tableau là où tout le monde le voit."
+      ],
+      "enParler": [
+        "Qu'est-ce que tu sais très bien faire ?",
+        "De quoi es-tu le plus fier·ère en ce moment ?"
+      ]
+    }
   },
   {
     "id": "organisation",
@@ -96,13 +198,30 @@
     "titre": "Mon organisation et ma posture",
     "sousTitre": "Routines, temps, responsabilités partagées",
     "miroir": "Mon organisation et mon autonomie",
+    "miroirSous": "Espace, temps, responsabilités",
     "intro": "Des repères simples (routines, espace, rôles de chacun) allègent le quotidien et aident l'enfant à gagner en autonomie. Le parent donne l'exemple et la direction, sans tout porter seul.",
     "question": "Cette semaine, notre organisation familiale nous a facilité la vie…",
+    "questionEnfant": "Cette semaine, j'ai réussi à m'organiser et à faire des choses tout·e seul·e…",
     "pratiques": [
       "Installer un petit rituel fixe : le matin ou le soir, toujours dans le même ordre.",
       "Confier à mon enfant une responsabilité adaptée à son âge, et le féliciter quand il l'assume.",
       "Préparer la veille ce qui peut l'être (sac, vêtements, repas) pour désamorcer les matins tendus."
     ],
-    "phrase": "« Chacun a un rôle dans la famille. Voilà le tien, et je suis là si tu as besoin d'aide. »"
+    "phrase": "« Chacun a un rôle dans la famille. Voilà le tien, et je suis là si tu as besoin d'aide. »",
+    "ensemble": {
+      "titre": "La routine en images",
+      "duree": "20 min",
+      "materiel": "Une feuille, des crayons",
+      "etapes": [
+        "Choisissez une routine qui coince : le matin, le retour de l'école ou le coucher.",
+        "Dessinez chaque étape en petit (se laver, s'habiller, déjeuner, préparer le sac…), dans l'ordre.",
+        "L'enfant choisit une étape dont il se charge tout seul.",
+        "Affichez la routine et essayez-la dès demain."
+      ],
+      "enParler": [
+        "Quelle étape est la plus difficile pour toi ?",
+        "Qu'est-ce que je peux faire pour t'aider sans le faire à ta place ?"
+      ]
+    }
   }
 ]

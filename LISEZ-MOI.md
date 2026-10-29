@@ -1,32 +1,31 @@
-# Main tendue : mode d'emploi
+# Étincelle : mode d'emploi
 
-Application web (installable sur téléphone) pour les parents du groupe Main tendue. Gratuite à héberger, sans serveur, sans compte : les bilans des familles restent dans leur téléphone.
+Étincelle est la suite à la maison des ateliers BRILLE (Main tendue pour les parents, Lueur pour les enfants). Application installable sur téléphone, sans serveur, sans compte : les bilans des familles restent dans leur téléphone.
 
-## 1. La mettre en ligne (gratuit, environ 10 minutes)
+## 1. Mettre à jour le site sur GitHub
 
-1. Créez un compte sur https://github.com (gratuit).
-2. Cliquez sur **New repository**. Nom : `main-tendue`. Laissez **Public**. Validez avec **Create repository**.
-3. Sur la page du dépôt, cliquez sur **uploading an existing file**.
-4. Dézippez ce dossier sur votre ordinateur, puis glissez-déposez **tout son contenu** (tous les fichiers, sans dossier : tout est au même niveau) dans la fenêtre GitHub. Attendez la fin du chargement, puis **Commit changes**.
-5. Allez dans **Settings**, puis **Pages**. Dans « Branch », choisissez `main` et `/ (root)`, puis **Save**.
-6. Après une à deux minutes, votre adresse apparaît : `https://VOTRE-PSEUDO.github.io/main-tendue/`
-7. Créez un QR code de cette adresse (par exemple avec un générateur de QR code gratuit) pour l'imprimer sur vos supports d'atelier.
+Tous les fichiers sont au même niveau (pas de dossier).
 
-Le site est public : c'est normal, il ne contient aucune donnée de famille.
+1. Dézippez `etincelle.zip`.
+2. Sur la page de votre dépôt GitHub, cliquez sur **Add file**, puis **Upload files**.
+3. Glissez **tous les fichiers** du dossier dézippé. GitHub remplace ceux qui portent déjà le même nom et ajoute les nouveaux.
+4. Cliquez sur **Commit changes**. Au bout d'une à deux minutes, l'adresse de votre site est mise à jour.
+
+Le fichier `rendezvous.json` n'est plus utilisé : vous pouvez le supprimer sur GitHub (ouvrez-le, puis le menu « ... » en haut à droite, puis **Delete file**), ou le laisser, il ne gêne pas.
 
 ## 2. Modifier les contenus (sans coder)
 
-Les textes sont dans quatre fichiers : `rendezvous.json`, `defis.json`, `petales.json` et `config.json`. Sur GitHub, ouvrez le fichier, cliquez sur le crayon, modifiez le texte entre guillemets, puis **Commit changes**. Les téléphones se mettent à jour à la prochaine ouverture avec du réseau.
+Les textes sont dans trois fichiers (le quatrième, `formes.json`, ne se modifie pas). Sur GitHub, ouvrez le fichier, cliquez sur le crayon, modifiez le texte entre guillemets, puis **Commit changes**.
 
-- `rendezvous.json` : vos dates d'ateliers. Copiez un bloc entre accolades pour en ajouter un. Supprimez la ligne `"exemple": true` pour une vraie date. Format de date : `2026-11-12`. Heure : `18h00 - 19h30`.
+- `petales.json` : les 7 pétales (titres parent et enfant, explications, pratiques, phrases) et l'activité « À faire ensemble » de chacun.
 - `defis.json` : les défis hebdomadaires (un par semaine, en boucle).
-- `petales.json` : les 7 pétales (titres, explications, pratiques, phrases). Attention aux virgules et aux guillemets : ne supprimez pas ceux qui entourent les textes.
-- `config.json` : message d'accueil, vos coordonnées, et `debutDefis` (la date du lundi où le premier défi commence).
+- `formes.json` : les contours des pétales, tracés depuis votre fleur. Ne le modifiez pas.
+- `config.json` : message d'accueil, coordonnées, et `debutDefis` (la date du lundi où le premier défi commence).
 
-Si vous modifiez `index.html`, `app.js` ou `style.css`, changez aussi le numéro dans `sw.js` (`main-tendue-v2` devient `main-tendue-v3`) pour que les téléphones prennent la nouvelle version.
+Attention aux virgules et aux guillemets : ne supprimez pas ceux qui entourent les textes.
 
-## 3. À vérifier avant de la diffuser
+Si vous modifiez `index.html`, `app.js` ou `style.css`, changez aussi le numéro dans `sw.js` (`etincelle-v5` devient `etincelle-v6`) pour que les téléphones prennent la nouvelle version.
 
-- Remplacer les rendez-vous d'exemple par vos vraies dates et le vrai lieu.
-- Relire les textes des 7 pétales : ils sont une proposition de miroir de la fleur enfant, à adapter à vos mots et à vos ateliers.
-- Vérifier les droits d'usage des illustrations de votre fleur si vous les ajoutez : l'application utilise ses propres pictogrammes simples.
+## 3. Les images
+
+Les pictogrammes des pétales (`p-*.png`) sont extraits de votre fleur : vérifiez les droits d'usage de ces illustrations, notamment si elles viennent d'une banque d'images qui demande de citer l'auteur.
