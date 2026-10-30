@@ -71,10 +71,7 @@ main { width: 100%; max-width: none; margin: 0; padding: 16px 14px 24px; outline
   background: #e6efd9; border: 0; }
 .hero-accueil h1 { font-size: 2.9rem; margin-bottom: .1em; }
 .hero-accueil p { margin: 0; font-weight: 500; max-width: 92%; }
-.logo-etincelle { position: absolute; right: 8px; bottom: 0; width: 128px; height: auto; pointer-events: none; }
-.hero-accueil { min-height: 170px; }
-.hero-accueil p { max-width: 60%; text-align: left; hyphens: none; -webkit-hyphens: none; }
-.hero-accueil { padding-bottom: 26px; }
+.etincelle-deco { position: absolute; right: 14px; top: 12px; width: 70px; height: 70px; opacity: .95; }
 .etiquette { display: inline-block; font-size: .78rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,.8); border: 0; margin-bottom: 10px; }
 
 .fleur-carte { background: #fff; border-radius: var(--rayon); box-shadow: var(--ombre); padding: 14px 10px 8px; margin-bottom: 18px; }
@@ -201,16 +198,14 @@ b, strong { font-weight: 600; }
   .topbar { margin-bottom: 0; }
   .brand img { height: 74px; }
   .grille { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 32px; align-items: start; }
-  .grille .fleur-carte { margin-bottom: 18px; padding: 18px 16px 12px; }
-  .col-gauche > :last-child { margin-bottom: 0; }
+  .grille .fleur-carte { position: sticky; top: 16px; margin-bottom: 0; padding: 18px 16px 12px; }
   .grille2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
   .grille-cartes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
   .grille-cartes > .carte { margin-bottom: 0; }
   .hero-accueil { padding: 32px 36px 30px; }
   .hero-accueil h1 { font-size: 3.4rem; }
-  .hero-accueil p { max-width: 62%; font-size: 1.1rem; }
-  .logo-etincelle { width: 210px; right: 30px; }
-  .hero-accueil { min-height: 230px; }
+  .hero-accueil p { max-width: 70%; font-size: 1.1rem; }
+  .etincelle-deco { width: 110px; height: 110px; right: 32px; top: 22px; }
   .tabbar { max-width: 680px; }
 }
 @media (min-width: 1300px) { body { font-size: 18.5px; } }
@@ -282,32 +277,9 @@ code { background: #f2f7ec; padding: 2px 8px; border-radius: 8px; letter-spacing
 .fenetre-qr svg { width: 260px; height: 260px; }
 .fenetre-qr p { text-align: center; }
 
-/* Accès payant */
-.lien { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
-.achat { max-width: 560px; margin: 8px auto 0; }
-.achat .retour { display: inline-block; margin-bottom: 12px; }
-.consent { margin: 14px 0 6px; }
-.offres { display: grid; gap: 14px; margin: 16px 0 8px; }
-.offre { border: 2px solid #e4dcec; border-radius: 20px; padding: 16px; text-align: left; }
-.offre h2 { margin: 0 0 2px; font-size: 1.1rem; }
-.offre-prix { font-size: 1.5rem; font-weight: 600; margin: 8px 0; }
-.offre .coche { margin: 8px 0 12px; font-size: .9rem; text-align: left; }
-.liens-legaux { text-align: center; margin-top: 14px; }
-#nb-codes { max-width: 6rem; }
-.legal { max-width: 720px; margin: 0 auto; padding: 20px 16px 60px; }
-.legal h1 { margin-bottom: .4em; }
-.legal h2 { margin-top: 1.6em; }
-.legal h3 { margin: 1.2em 0 .3em; font-size: 1rem; }
-.legal ul { padding-left: 1.2em; }
-.a-completer { background: #fff3a8; padding: 0 3px; border-radius: 3px; }
-
-/* Accueil : fleur bien centrée dans sa carte */
-.fleur-bloc { display: flex; justify-content: center; }
-.fleur-bloc svg { margin: 0 auto; }
-.fleur-carte { padding-bottom: 10px; }
-.col-gauche > .carte.teinte { margin-bottom: 18px; }
-
-/* Accès ingénieure : carte distincte et protégée */
-.fam.fam-admin { background: var(--violet); border: 3px solid var(--noir); }
-.fam.fam-admin .nomf { background: rgba(255,255,255,.7); border-color: transparent; }
-.badge-admin { display: inline-block; font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; background: var(--noir); color: #fff; margin-bottom: 10px; }
+/* Protection des contenus (dissuasion) */
+#filigrane { position: fixed; inset: 0; z-index: 40; pointer-events: none; background-repeat: repeat; }
+body.protege { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+body.protege input, body.protege textarea { -webkit-user-select: text; user-select: text; }
+body.protege img { -webkit-user-drag: none; pointer-events: auto; }
+@media print { body.protege > * { display: none !important; } body.protege::before { content: "Impression non autorisée : contenu protégé BRILLE."; display: block; padding: 24px; font-size: 18px; } }

@@ -42,10 +42,28 @@
     D.petales = D.vitrine.map(v => Object.assign({}, v, D.details[v.id] || {}, { ouvert: ouverts.includes(v.id) && !!D.details[v.id] }));
     D.defis = D.petales.filter(p => p.ouvert).flatMap(p => p.defis || []).sort((a, b) => a.id.localeCompare(b.id));
   }
+  /* Protection : filigrane au nom de la famille + freins au copier-coller / à l'impression (dissuasion : une capture d'écran reste possible) */
+  const xmlesc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]));
+  function appliquerProtection() {
+    const actif = !D.admin;
+    document.body.classList.toggle('protege', actif);
+    const ancien = document.getElementById('filigrane'); if (ancien) ancien.remove();
+    if (!actif) return;
+    const txt = `Accès : ${D.nom || 'famille accompagnée'} · BRILLE · usage personnel`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="240"><text x="30" y="130" transform="rotate(-24 210 120)" font-family="sans-serif" font-size="17" font-weight="600" fill="#000" fill-opacity="0.085">${xmlesc(txt)}</text></svg>`;
+    const f = document.createElement('div'); f.id = 'filigrane'; f.setAttribute('aria-hidden', 'true');
+    f.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+    document.body.appendChild(f);
+  }
+  const champSaisie = t => t && /^(INPUT|TEXTAREA)$/.test(t.tagName);
+  ['contextmenu', 'copy', 'cut', 'dragstart', 'selectstart'].forEach(ev => document.addEventListener(ev, e => {
+    if (document.body.classList.contains('protege') && !champSaisie(e.target)) e.preventDefault();
+  }));
   async function deverrouiller(code, exigerAdmin) {    // ouvre le contenu autorisé par ce code
     const r = await Acces.ouvrir(code, ACCES.acces, ACCES.contenuEnc);
     if (exigerAdmin && !r.admin) throw new Error('admin');
-    D.details = r.details; D.admin = r.admin; D.apercu = null;
+    D.details = r.details; D.admin = r.admin; D.nom = r.nom; D.apercu = null;
+    appliquerProtection();
     composer(Object.keys(r.details));
     try { localStorage.setItem(CLE_CODE, code); } catch { }
     return true;
@@ -53,6 +71,7 @@
   function verrouiller() {
     try { localStorage.removeItem(CLE_CODE); } catch { }
     D.petales = []; D.defis = []; D.details = {}; D.admin = false; D.apercu = null;
+    appliquerProtection();
     ecranCode();
   }
   function ecranCode(message, onglet) {
@@ -68,18 +87,18 @@
       <div class="carte" role="tabpanel">
         <span class="etiquette">${ing ? 'Espace conceptrice' : 'Accès famille'}</span>
         <h1>${ing ? 'Espace ingénieure' : 'Bienvenue dans Étincelle'}</h1>
-        <p>${ing ? 'Réservé à la conceptrice d\'Étincelle : aperçu complet de tous les pétales et vue « comme une famille ». Entrez votre code personnel.' : (achatActif() ? 'Cette application prolonge les ateliers BRILLE. Elle est gratuite pour les familles accompagnées par un centre partenaire : entrez le code personnel remis à l\'atelier, ou reçu après votre achat.' : 'Cette application prolonge les ateliers BRILLE. Elle est réservée aux familles accompagnées : entrez le code personnel qui vous a été remis à l\'atelier.')}</p>
+        <p>${ing ? 'Réservé à la conceptrice d\'Étincelle : aperçu complet de tous les pétales et vue « comme une famille ». Entrez votre code personnel.' : 'Cette application prolonge les ateliers BRILLE. Elle est réservée aux familles accompagnées : entrez le code personnel qui vous a été remis à l\'atelier.'}</p>
         <form id="form-code" autocomplete="off">
           <label for="champ-code">${ing ? 'Votre code ingénieure' : 'Votre code famille'}</label>
           <input id="champ-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="${ing ? 'XXXX-XXXX-XXXX' : 'XXXX-XXXX'}" maxlength="16">
           <p class="erreur" id="erreur-code" role="alert">${esc(message || '')}</p>
           <button class="btn plein" type="submit" id="valider-code">Entrer</button>
         </form>
-        ${ing ? '' : (achatActif() ? `<p class="petit">Vous ne passez pas par un centre social ? <button type="button" class="lien" id="voir-offres">Obtenir un accès</button></p>` : `<p class="petit">Vous n'avez pas encore de code ? Écrivez à <a href="mailto:${esc(c.email || '')}">${esc(c.email || '')}</a>.</p>`)}
+        ${!ing && D.config.codeDecouverte ? '<button type="button" class="btn plein gris" id="decouverte" style="margin-top:10px">Découvrir un extrait gratuit</button>' : ''}
+        ${ing ? '' : `<p class="petit">Vous n'avez pas encore de code ? Écrivez à <a href="mailto:${esc(c.email || '')}">${esc(c.email || '')}</a>.</p>`}
       </div></section>`;
     $app.querySelector('#t-fam').addEventListener('click', () => ecranCode('', 'fam'));
     $app.querySelector('#t-ing').addEventListener('click', () => ecranCode('', 'ing'));
-    const voir = $app.querySelector('#voir-offres'); if (voir) voir.addEventListener('click', () => ecranAchat());
     const f = $app.querySelector('#form-code'), champ = $app.querySelector('#champ-code'), err = $app.querySelector('#erreur-code'), bt = $app.querySelector('#valider-code');
     f.addEventListener('submit', async e => {
       e.preventDefault();
@@ -88,57 +107,14 @@
       try { await deverrouiller(code, ing); document.body.classList.remove('verrouille'); premiere = true; rendre(); }
       catch (x) { if (x.message !== 'admin' && x.message !== 'code') console.error(x); err.textContent = x.message === 'admin' ? 'Ce code n\'ouvre pas l\'espace ingénieure.' : 'Ce code n\'est pas reconnu. Vérifiez-le, ou contactez BRILLE.'; bt.disabled = false; bt.textContent = 'Entrer'; }
     });
+    const dec = $app.querySelector('#decouverte');
+    if (dec) dec.addEventListener('click', async () => { try { await deverrouiller(D.config.codeDecouverte); document.body.classList.remove('verrouille'); premiere = true; rendre(); } catch { err.textContent = 'L\'extrait gratuit n\'est pas disponible pour le moment.'; } });
     champ.addEventListener('input', () => {
       const net = champ.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, ing ? 12 : 8);
       champ.value = net.replace(/(.{4})(?=.)/g, '$1-');
     });
     champ.focus({ preventScroll: true });
   }
-
-  /* ---------- Accès payant ---------- */
-  const achatActif = () => !!(D.config.achat && D.config.achat.actif && (D.config.achat.offres || []).length);
-  const liensLegaux = () => `<a href="legal.html#cgv" target="_blank" rel="noopener">Conditions générales</a> · <a href="legal.html#confidentialite" target="_blank" rel="noopener">Confidentialité</a> · <a href="legal.html#mentions" target="_blank" rel="noopener">Mentions légales</a>`;
-  function htmlAchat(retour) {
-    const offres = D.config.achat.offres || [];
-    return `<section class="vue achat">
-      <button type="button" class="retour lien" id="achat-retour">← ${retour === 'code' ? 'Retour' : 'La fleur'}</button>
-      <div class="carte">
-        <span class="etiquette">Obtenir un accès</span>
-        <h1>Ouvrir Étincelle chez moi</h1>
-        <p>Étincelle est <b>gratuite pour les familles accompagnées par un centre social partenaire</b> : leur code est remis à l'atelier. Si vous ne passez pas par un centre, vous pouvez acheter un accès.</p>
-        <div class="consent">
-          <label class="coche"><input type="checkbox" id="ok-cgv"> J'ai lu et j'accepte les conditions générales et la politique de confidentialité.</label>
-          <label class="coche"><input type="checkbox" id="ok-retractation"> Je demande l'accès immédiat à Étincelle et je reconnais perdre mon droit de rétractation dès que mon code m'est fourni.</label>
-        </div>
-        <div class="offres">${offres.map(o => `<div class="offre">
-          <h2>${esc(o.nom)}</h2>
-          <p class="petit">${esc(o.detail || '')}</p>
-          <div class="offre-prix">${esc(o.prix || '')}</div>
-          ${o.id === 'solidaire' ? `<label class="coche"><input type="checkbox" class="decl-solidaire"> Je déclare sur l'honneur que le tarif standard représente une difficulté financière pour mon foyer.</label>` : ''}
-          <button type="button" class="btn plein payer" data-id="${esc(o.id)}" disabled>Choisir cet accès</button>
-        </div>`).join('')}</div>
-        <p class="ok" id="achat-info" role="status"></p>
-        <p class="petit">Votre code vous est envoyé par e-mail après le paiement. Un seul tarif solidaire par foyer.</p>
-        <p class="petit liens-legaux">${liensLegaux()}</p>
-      </div></section>`;
-  }
-  function lierAchat(retour) {
-    const cgv = $app.querySelector('#ok-cgv'), ret = $app.querySelector('#ok-retractation'), decl = $app.querySelector('.decl-solidaire'), info = $app.querySelector('#achat-info');
-    const maj = () => $app.querySelectorAll('.payer').forEach(b => { b.disabled = !(cgv.checked && ret.checked && (b.dataset.id !== 'solidaire' || (decl && decl.checked))); });
-    $app.querySelectorAll('.achat input[type=checkbox]').forEach(x => x.addEventListener('change', maj)); maj();
-    $app.querySelector('#achat-retour').addEventListener('click', () => { if (retour === 'code') ecranCode(); else location.hash = '#/'; });
-    $app.querySelectorAll('.payer').forEach(b => b.addEventListener('click', () => {
-      const o = (D.config.achat.offres || []).find(x => x.id === b.dataset.id); if (!o) return;
-      const c = D.config.contact || {};
-      if (o.lien) { window.open(o.lien, '_blank', 'noopener'); info.textContent = 'Le paiement s\'ouvre dans un nouvel onglet. Votre code vous sera envoyé par e-mail.'; }
-      else {
-        const corps = `Bonjour, je souhaite l'accès « ${o.nom} » (${o.prix}). J'ai lu les conditions générales et je reconnais perdre mon droit de rétractation dès que mon code m'est fourni.`;
-        location.href = `mailto:${c.email || ''}?subject=${encodeURIComponent('Étincelle : ' + o.nom)}&body=${encodeURIComponent(corps)}`;
-        info.textContent = 'Votre message est prêt : envoyez-le, nous vous répondons avec les moyens de paiement.';
-      }
-    }));
-  }
-  function ecranAchat() { document.body.classList.add('verrouille'); $app.innerHTML = htmlAchat('code'); lierAchat('code'); window.scrollTo(0, 0); }
 
   const petale = id => D.petales.find(p => p.id === id);
 
@@ -165,7 +141,7 @@
       return `<a href="#/petale/${p.id}" class="petale${p.ouvert ? '' : ' ferme'}" aria-label="${esc(lab)}">
         <g class="forme" transform="translate(${f.cx} ${f.cy}) scale(${s}) translate(${-f.cx} ${-f.cy})">
           <path d="${f.d}" fill="${p.couleur}"/>
-          <image href="p-${p.id}.png" x="${ic.x}" y="${ic.y}" width="${ic.w}" height="${ic.h}"${ic.rot ? ` transform="rotate(${ic.rot} ${ic.x + ic.w / 2} ${ic.y + ic.h / 2})"` : ''} style="pointer-events:none"/>
+          <image href="p-${p.id}.png" x="${ic.x}" y="${ic.y}" width="${ic.w}" height="${ic.h}" style="pointer-events:none"/>
           <circle cx="${t.x}" cy="${t.y}" r="${t.r}" fill="#fff"/>
           ${!p.ouvert ? `<g transform="translate(${t.x} ${t.y}) scale(1.15)" style="pointer-events:none"><rect x="-9" y="-3" width="18" height="14" rx="3.5" fill="#8d8795"/><path d="M-5.2 -3 v-4.2 a5.2 5.2 0 0 1 10.4 0 v4.2" fill="none" stroke="#8d8795" stroke-width="3" stroke-linecap="round"/></g>` : b ? `<text x="${t.x}" y="${t.y}" text-anchor="middle" dominant-baseline="central" font-family="Quicksand, sans-serif" font-weight="600" font-size="46" fill="#000" style="pointer-events:none">${b.s}</text>` : ''}
         </g>
@@ -200,16 +176,15 @@
     }).join('');
     const pDefi = defi ? petale(defi.petale) : null;
     return `<section class="vue">
-      ${motIngenieure()}
       <div class="hero-accueil">
-        <img class="logo-etincelle" src="logo-etincelle.png" alt="" width="320" height="320">
+        ${etincelleDeco}
         <span class="etiquette">La suite des ateliers</span>
         <h1>Étincelle</h1>
         <p>${esc(D.config.messageAccueil)}</p>
       </div>
+      ${motIngenieure()}
 
       <div class="grille">
-      <div class="col-gauche">
       <div class="fleur-carte">
         <div class="bascule" role="group" aria-label="Choisir la fleur">
           <button type="button" data-mode="parent" aria-pressed="${mode === 'parent'}">Ma fleur de parent</button>
@@ -218,13 +193,12 @@
         <div class="fleur-bloc">${fleurSVG(mode)}</div>
         <p class="legende">${mode === 'enfant' ? 'Voici la fleur de votre enfant. Touchez un pétale pour le vivre avec lui.' : 'Touchez un pétale pour l\'explorer. Plus il est grand, mieux vous vous y sentez.'}</p>
       </div>
+
+      <div class="col-droite">
       ${defi ? `<a class="carte teinte" href="#/semaine" style="display:block;text-decoration:none;background:${pDefi?.couleur || 'var(--jaune)'}">
         <span class="etiquette">Cette semaine</span>
         <h3 style="margin-bottom:.25em">${esc(defi.titre)}</h3>
         <p style="margin:0">${esc(defi.consigne.split('. ')[0])}.</p></a>` : ''}
-      </div>
-
-      <div class="col-droite">
 
       <h2 class="titre-section"><span class="surligne" style="--hl:var(--vert)">Les sept pétales</span></h2>
       <ul class="liste-petales">${lignes}</ul>
@@ -270,7 +244,6 @@
         <p>Chez BRILLE, le lien passe avant tout. Ce pétale se découvre en atelier, avec d'autres parents et avec votre enfant : c'est là qu'il prend tout son sens. Étincelle vous aidera ensuite à le prolonger à la maison.</p>
         <p>Vous l'avez déjà vécu en atelier et il n'est pas encore ouvert ? Écrivez-nous, nous l'ajouterons à votre accès.</p>
         <a class="btn plein" href="mailto:${esc(c.email || '')}?subject=${encodeURIComponent('Étincelle : ouvrir un pétale')}">Écrire à BRILLE</a>
-        ${achatActif() ? `<p style="margin-top:18px">Vous ne passez pas par un centre social ? Vous pouvez ouvrir ce pétale ou la fleur complète.</p><a class="btn discret plein" href="#/acces">Voir les accès</a>` : ''}
       </div>
     </section>`;
   }
@@ -339,7 +312,6 @@
     });
     const c = $app.querySelector('#fait');
     if (c) c.addEventListener('change', () => { const S = charger(); if (c.checked) S.ensembleFaits[id] = iso(new Date()); else delete S.ensembleFaits[id]; sauver(); });
-    if (!$app.querySelector('#enregistrer')) return;      // pétale fermé : rien à lier
     $app.querySelector('#enregistrer').addEventListener('click', () => {
       const ok = $app.querySelector('#retour-ok');
       if (!choix.parent && !choix.enfant) { ok.style.color = '#a33'; ok.textContent = 'Choisissez au moins un visage, pour vous ou pour votre enfant.'; return; }
@@ -414,10 +386,6 @@
       <h1><span class="surligne" style="--hl:var(--vert)">Plus</span></h1>
       <div class="grille-cartes">
       ${D.admin ? vueIngenieure() : ''}
-      ${achatActif() ? `<details class="carte"><summary>Ouvrir d'autres pétales</summary>
-        <p>Vous voulez prolonger d'autres thèmes à la maison ? Découvrez les accès disponibles.</p>
-        <a class="btn plein" href="#/acces">Voir les accès</a>
-      </details>` : ''}
       <details class="carte" open><summary>Installer Étincelle sur mon téléphone</summary>
         <p>Pour la retrouver comme une application, sans passer par un magasin d'applications :</p>
         <button class="btn plein" id="btn-install" type="button" hidden>Installer Étincelle</button>
@@ -451,13 +419,23 @@
         <p class="petit">Étincelle accompagne le bien-être familial. Elle ne remplace pas l'avis d'un médecin ou d'un professionnel de la santé ou du soutien psychologique.</p>
       </details>
 
+      <details class="carte"><summary>Conditions d'utilisation</summary>
+        <p>Étincelle et ses contenus (textes, activités, illustrations, méthode « QVE ») sont la propriété de BRILLE et protégés par le droit d'auteur.</p>
+        <ul>
+          <li>L'accès est <b>personnel</b> et réservé à la famille ou au groupe à qui le code a été remis.</li>
+          <li>Il est interdit de partager son code, de copier, de capturer pour diffuser, de republier ou de revendre les contenus.</li>
+          <li>L'accès peut être retiré en cas d'usage non conforme.</li>
+        </ul>
+        <p class="petit">Un filigrane au nom de votre accès apparaît sur les pages : il permet de retrouver l'origine d'un contenu diffusé sans autorisation.</p>
+      </details>
+
       <details class="carte"><summary>Contacter BRILLE</summary>
         <p>${esc(c.nom || '')}</p>
         ${c.email ? `<p><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></p>` : ''}
         ${c.telephone ? `<p><a href="tel:${esc(String(c.telephone).replace(/\s/g, ''))}">${esc(c.telephone)}</a></p>` : ''}
       </details>
       </div>
-      <p class="pied">Conçue et développée par ${esc(c.nom || 'BRILLE')}<br>© BRILLE · Étincelle${achatActif() ? '<br>' + liensLegaux() : ''}</p>
+      <p class="pied">Conçue et développée par ${esc(c.nom || 'BRILLE')}<br>© BRILLE · Étincelle · Tous droits réservés</p>
     </section>`;
   }
   function vueIngenieure() {
@@ -521,37 +499,22 @@
         <p>Le carnet est le fichier <b>carnet-familles.json</b> de votre dossier privé. Il contient les codes et les clés : il reste uniquement sur cet appareil, jamais en ligne.</p>
         <input type="file" id="f-carnet" accept=".json"><p class="erreur" id="st" role="status"></p></div></section>`;
     const actives = carnet.familles.filter(f => f.actif);
-    const stock = carnet.familles.filter(f => f.actif && f.vente && f.publie && !f.envoye).length;
-    const aPublier = carnet.familles.filter(f => f.actif && f.vente && !f.publie).length;
-    const ligneFam = (f, i) => f.actif ? `<div class="carte fam${f.admin ? ' fam-admin' : ''}" data-i="${i}">
-        ${f.admin ? '<span class="badge-admin">Mon accès ingénieure · protégé</span>' : ''}
-        <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe"${f.admin ? ' disabled' : ''}>
-        <p>Code : <code>${esc(f.code)}</code></p>
-        <p class="petit">Ajouté le ${esc(f.ajout || '')}${f.vente ? ' · ' + (f.envoye ? 'envoyé le ' + esc(f.envoye) + (f.acheteur ? ' à ' + esc(f.acheteur) : '') : (f.publie ? 'disponible pour la vente' : 'à publier')) : ''}</p>
-        <div class="chips">${f.admin ? cases('pf', f.petales).replace(/<input/g, '<input disabled') : cases('pf', f.petales)}</div>
+    const lignes = carnet.familles.map((f, i) => f.actif ? `<div class="carte fam" data-i="${i}">
+        <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe">
+        <p>Code : <code>${esc(f.code)}</code>${f.admin ? ' · accès ingénieure' : ''}</p>
+        <div class="chips">${cases('pf', f.petales)}</div>
         <div class="actions-fam">
           <button type="button" class="btn petit-btn" data-a="msg">Copier le message</button>
-          <button type="button" class="btn petit-btn" data-a="msgachat">Message d'achat</button>
-          ${f.vente ? `<button type="button" class="btn petit-btn gris" data-a="envoye">${f.envoye ? 'Remettre en stock' : 'Marquer comme envoyé'}</button>` : ''}
           <button type="button" class="btn petit-btn gris" data-a="lien">Copier le lien</button>
           <button type="button" class="btn petit-btn gris" data-a="qr">QR code</button>
-          ${f.admin ? '' : '<button type="button" class="btn petit-btn alerte" data-a="retirer">Retirer</button>'}
-        </div></div>` : '';
-    const lignes = carnet.familles.map((f, i) => f.admin ? ligneFam(f, i) : '').join('') + carnet.familles.map((f, i) => f.admin ? '' : ligneFam(f, i)).join('');
+          <button type="button" class="btn petit-btn alerte" data-a="retirer">Retirer</button>
+        </div></div>` : '').join('');
     return `<section class="vue"><a class="retour" href="#/plus">← Plus</a>
       <h1><span class="surligne" style="--hl:var(--vert)">Gérer les familles</span></h1>
       <div class="grille-cartes">
-      ${actives.some(f => f.vente) ? `<div class="carte teinte" style="background:var(--vert)"><h2>Après un paiement</h2>
-        <p class="petit">Codes disponibles pour la vente : <b>${stock}</b>${stock <= 3 ? '. Pensez à créer un nouveau lot.' : '.'}${aPublier ? ` ${aPublier} code(s) ne sont pas encore publiés : cliquez sur « Préparer les fichiers » puis déposez-les sur GitHub.` : ''}</p>
-        <input type="text" id="acheteur" placeholder="Nom ou e-mail de l'acheteur (pour vos notes)">
-        <button type="button" class="btn plein" id="prochain">Copier le message du prochain code</button>
-        <p class="petit">Le code est marqué « envoyé ». Collez ensuite le message dans un e-mail adressé à l'acheteur.</p></div>` : ''}
       <div class="carte"><h2>Ajouter une famille ou un groupe</h2>
-        <p class="petit">Un seul code pour tout un groupe d'atelier, c'est le plus simple. Cochez les pétales vécus en atelier. Pour la vente, créez un lot de codes « fleur complète » à l'avance : après chaque paiement, vous envoyez simplement un code du lot.</p>
+        <p class="petit">Un seul code pour tout un groupe d'atelier, c'est le plus simple. Cochez les pétales vécus en atelier.</p>
         <input type="text" id="nouveau-nom" placeholder="Nom (ex. Atelier mars, famille Martin)">
-        <label class="petit" for="nb-codes">Nombre de codes à créer (un lot de 20 est pratique pour les ventes)</label>
-        <input type="number" id="nb-codes" min="1" max="50" value="1">
-        <label class="coche" style="margin:10px 0"><input type="checkbox" id="lot-vente"> Ces codes sont pour la vente (stock)</label>
         <div class="chips">${cases('ajout', [])}</div>
         <button type="button" class="btn plein" id="creer">Créer le code</button>
         <p class="erreur" id="st" role="status"></p></div>
@@ -571,31 +534,17 @@
     if (imp) { imp.addEventListener('change', () => { const r = new FileReader(); r.onload = () => { try { const c = JSON.parse(r.result); if (c.v !== 2 || !c.cles || !c.familles) throw 0; ecrireCarnet(c); rendre(); } catch { st('Ce fichier n\'est pas un carnet valide.'); } }; r.readAsText(imp.files[0]); }); return; }
     const carnet = lireCarnet(); if (!carnet) return;
     const msgFamille = f => `Bonjour, voici votre accès personnel pour prolonger à la maison ce que nous avons vécu à l'atelier. Touchez ce lien, l'application s'ouvre toute seule : ${lienFamille(f)}\n(Si on vous demande le code, saisissez-le : ${f.code}). À bientôt, Tsiory (BRILLE)`;
-    const msgAchat = f => `Bonjour, merci pour votre achat d'un accès à Étincelle ! Touchez ce lien, l'application s'ouvre toute seule : ${lienFamille(f)}\n(Si on vous demande le code, saisissez-le : ${f.code}). Bon moment en famille, Tsiory (BRILLE)`;
     const copier = async (t, ok) => { try { await navigator.clipboard.writeText(t); st(ok); } catch { prompt('Copiez ce texte :', t); } };
     $app.querySelector('#creer').addEventListener('click', () => {
       const sel = [...$app.querySelectorAll('.ajout:checked')].map(x => x.dataset.id);
       if (!sel.length) { st('Cochez au moins un pétale vécu en atelier.'); return; }
-      const n = Math.max(1, Math.min(50, parseInt($app.querySelector('#nb-codes').value, 10) || 1));
-      const base = $app.querySelector('#nouveau-nom').value.trim() || 'Famille';
-      const crees = []; for (let i = 0; i < n; i++) crees.push(Acces.ajouterFamille(carnet, n > 1 ? `${base} ${String(i + 1).padStart(2, '0')}` : base, sel));
-      if ($app.querySelector('#lot-vente').checked) crees.forEach(f => { f.vente = true; });
-      ecrireCarnet(carnet); rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = (n === 1 ? 'Code créé : ' + crees[0].code : n + ' codes créés') + '. Pensez à publier (bouton « Préparer les fichiers »).'; }
-    });
-    const prochain = $app.querySelector('#prochain');
-    if (prochain) prochain.addEventListener('click', async () => {
-      const f = carnet.familles.find(x => x.actif && x.vente && x.publie && !x.envoye);
-      if (!f) { st('Plus de code disponible : créez un nouveau lot (case « pour la vente »), puis publiez les fichiers.'); return; }
-      const ach = ($app.querySelector('#acheteur').value || '').trim();
-      f.envoye = iso(new Date()); if (ach) f.acheteur = ach; ecrireCarnet(carnet);
-      await copier(msgAchat(f), '');
-      rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Message copié (code ' + f.code + '). Collez-le dans un e-mail à l\'acheteur.'; }
+      const f = Acces.ajouterFamille(carnet, $app.querySelector('#nouveau-nom').value.trim() || 'Famille', sel);
+      ecrireCarnet(carnet); rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Code créé : ' + f.code + '. Pensez à publier (bouton « Préparer les fichiers »).'; }
     });
     $app.querySelectorAll('.fam').forEach(bloc => {
       const f = carnet.familles[+bloc.dataset.i];
-      bloc.querySelector('.nomf').addEventListener('input', e => { if (f.admin) return; f.nom = e.target.value; ecrireCarnet(carnet); });
+      bloc.querySelector('.nomf').addEventListener('input', e => { f.nom = e.target.value; ecrireCarnet(carnet); });
       bloc.querySelectorAll('.pf').forEach(c => c.addEventListener('change', () => {
-        if (f.admin) { c.checked = true; return; }
         if (c.checked) { if (!f.petales.includes(c.dataset.id)) f.petales.push(c.dataset.id); }
         else { f.petales = f.petales.filter(x => x !== c.dataset.id); Acces.renouvelerCles(carnet, [c.dataset.id]); }
         ecrireCarnet(carnet); st('Modifié. Pensez à publier (bouton « Préparer les fichiers »).');
@@ -603,10 +552,8 @@
       bloc.addEventListener('click', async e => {
         const a = e.target.dataset.a; if (!a) return;
         if (a === 'msg') copier(msgFamille(f), 'Message copié, prêt à coller dans un SMS ou WhatsApp.');
-        if (a === 'msgachat') copier(msgAchat(f), 'Message d\'achat copié, prêt à coller dans un e-mail.');
-        if (a === 'envoye') { if (f.envoye) { delete f.envoye; delete f.acheteur; } else f.envoye = iso(new Date()); ecrireCarnet(carnet); rendre(); }
         if (a === 'lien') copier(lienFamille(f), 'Lien copié.');
-        if (a === 'retirer') { if (f.admin) return; if (!confirm(`Retirer l'accès de « ${f.nom} » ? Les clés seront renouvelées : publiez ensuite les fichiers.`)) return; f.actif = false; Acces.renouvelerCles(carnet); ecrireCarnet(carnet); rendre(); }
+        if (a === 'retirer') { if (!confirm(`Retirer l'accès de « ${f.nom} » ? Les clés seront renouvelées : publiez ensuite les fichiers.`)) return; f.actif = false; Acces.renouvelerCles(carnet); ecrireCarnet(carnet); rendre(); }
         if (a === 'qr') {
           try { await chargerScript('qrcode.js'); } catch { st('Le QR code n\'a pas pu se charger (connexion ?).'); return; }
           const q = qrcode(0, 'M'); q.addData(lienFamille(f)); q.make();
@@ -621,8 +568,7 @@
       if (!actives_ok(carnet)) { st('Ajoutez au moins une famille avec un pétale.'); return; }
       const r = await Acces.fabriquer(carnet, { details: D.details });
       telecharger('acces.json', r.acces); setTimeout(() => telecharger('contenu.enc.json', r.contenuEnc), 500);
-      carnet.familles.forEach(f => { if (f.actif && f.petales && f.petales.length) f.publie = true; }); ecrireCarnet(carnet);
-      st('Deux fichiers téléchargés : déposez acces.json et contenu.enc.json sur GitHub (Add file, Upload files, Commit changes).');
+      st('Deux fichiers téléchargés : déposez acces.json et contenu.enc.json sur GitHub.');
     });
     $app.querySelector('#sauver-carnet').addEventListener('click', () => telecharger('carnet-familles.json', carnet));
   }
@@ -642,7 +588,6 @@
     else if (r === 'petale') { html = vuePetale(param); tab = 'fleur'; apres = () => lierPetale(param); titre = `${petale(param)?.titre || 'Pétale'} · Étincelle`; }
     else if (r === 'semaine' || r === 'defi') { html = vueSemaine(param); tab = 'semaine'; apres = () => lierSemaine(param); titre = 'Cette semaine · Étincelle'; }
     else if (r === 'gestion') { html = vueGestion(); tab = 'plus'; apres = lierGestion; titre = 'Gérer les familles · Étincelle'; }
-    else if (r === 'acces') { html = achatActif() ? htmlAchat('fleur') : vueIntrouvable(); tab = 'plus'; apres = () => { if (achatActif()) lierAchat('fleur'); }; titre = 'Obtenir un accès · Étincelle'; }
     else if (r === 'plus') { html = vuePlus(); tab = 'plus'; apres = lierPlus; titre = 'Plus · Étincelle'; }
     else { html = vueIntrouvable(); tab = ''; }
     $app.innerHTML = html;
