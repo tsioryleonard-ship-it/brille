@@ -42,7 +42,7 @@ La vente est **désactivée** tant que `config.json` contient `"actif": false` d
 **Mise en place (une seule fois)** : suivez le guide « Encaisser les accès Étincelle avec Stripe ».
 1. Complétez les passages surlignés en jaune de `legal.html` (SIRET, adresse, médiateur, dates).
 2. Dans `config.json`, collez le lien de paiement Stripe de chaque offre dans `"lien"`. Passez `"actif"` à `true`.
-3. Changez le numéro de version dans `sw.js` (`etincelle-v15` devient `etincelle-v16`, et ainsi de suite à chaque mise à jour), puis publiez tous les fichiers sur GitHub (y compris `merci.html` et `legal.html`).
+3. Changez le numéro de version dans `sw.js` (`etincelle-v15` devient `etincelle-v18`, et ainsi de suite à chaque mise à jour), puis publiez tous les fichiers sur GitHub (y compris `merci.html` et `legal.html`).
 
 **Créer un stock de codes** : espace ingénieure, « Gérer les familles », nom « Achat », nombre 20, tous les pétales cochés, case « pour la vente » cochée, « Créer le code ». Puis « Préparer les fichiers à publier » et déposez les deux fichiers sur GitHub. Faites aussi « Télécharger une copie de mon carnet » et gardez-la en lieu sûr.
 
@@ -54,3 +54,10 @@ La vente est **désactivée** tant que `config.json` contient `"actif": false` d
 - Un an après l'ajout d'un code (la date est affichée), retirez-le si la famille ne renouvelle pas, puis republiez.
 - Un code peut être partagé : les conditions l'interdisent. En cas d'abus, retirez-le et republiez.
 - Remboursement : dans Stripe, puis « Retirer » le code dans « Gérer les familles » et republiez.
+
+
+## Version jeu (sons, étincelles, missions)
+- Nouveaux fichiers à publier avec les autres : `jeu.js` et `jeu.css`. `index.html` et `sw.js` ont été mis à jour (`sw.js` est passé à `etincelle-v18`).
+- Le jeu ne modifie ni les codes d'accès ni les contenus chiffrés : il s'ajoute par-dessus ce que l'application affiche.
+- Les points, niveaux et badges restent dans le téléphone de la famille (clé `brille-etincelle-jeu`).
+- Le dossier `_avant-jeu` contient les anciens `index.html` et `sw.js` : ne le publiez pas, vous pouvez le supprimer quand vous êtes sûre de garder cette version.
