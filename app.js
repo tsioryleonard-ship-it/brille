@@ -110,7 +110,7 @@
     const dec = $app.querySelector('#decouverte');
     if (dec) dec.addEventListener('click', async () => { try { await deverrouiller(D.config.codeDecouverte); document.body.classList.remove('verrouille'); premiere = true; rendre(); } catch { err.textContent = 'L\'extrait gratuit n\'est pas disponible pour le moment.'; } });
     champ.addEventListener('input', () => {
-      const net = champ.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, ing ? 12 : 8);
+      const net = champ.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
       champ.value = net.replace(/(.{4})(?=.)/g, '$1-');
     });
     champ.focus({ preventScroll: true });

@@ -24,7 +24,7 @@ Les textes sont dans trois fichiers (le quatrième, `formes.json`, ne se modifie
 
 Attention aux virgules et aux guillemets : ne supprimez pas ceux qui entourent les textes.
 
-Si vous modifiez `index.html`, `app.js` ou `style.css`, changez aussi le numéro dans `sw.js` (`etincelle-v11` devient `etincelle-v12`) pour que les téléphones prennent la nouvelle version.
+Si vous modifiez `index.html`, `app.js` ou `style.css`, changez aussi le numéro dans `sw.js` (`etincelle-v12` devient `etincelle-v13`) pour que les téléphones prennent la nouvelle version.
 
 ## 3. Les images
 
