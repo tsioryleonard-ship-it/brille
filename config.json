@@ -9,7 +9,7 @@
   },
   "messageAccueil": "Les ateliers vous ont donné de l'élan. Étincelle le prolonge à la maison : chaque semaine, un petit moment à vivre ensemble, parent et enfant.",
   "achat": {
-    "actif": false,
+    "actif": true,
     "offres": [
       {
         "id": "petale",
