@@ -49,7 +49,7 @@ La vente est **désactivée** tant que `config.json` contient `"actif": false` d
 **Après chaque paiement (2 minutes)** : vous recevez un e-mail de Stripe. Dans « Gérer les familles », saisissez le nom ou l'e-mail de l'acheteur, cliquez sur « Copier le message du prochain code », collez-le dans un e-mail à l'acheteur. Le code est marqué « envoyé » et le stock se met à jour.
 
 **À savoir**
-- Le tarif solidaire et la fleur complète ouvrent la même chose : ils piochent dans le même stock. Pour un accès à vie, écrivez « VIE » devant l'e-mail de l'acheteur, pour le retrouver plus tard.
+- Le tarif solidaire et la fleur complète ouvrent la même chose : ils piochent dans le même stock. Pour un accès de 5 ans, créez le code avec la durée « 5 ans » et écrivez « 5 ANS » devant l'e-mail de l'acheteur, pour le retrouver plus tard.
 - Un pétale à l'unité demande un code créé à part (seul le pétale choisi est coché), à publier avant l'envoi.
 - Un an après l'ajout d'un code (la date est affichée), retirez-le si la famille ne renouvelle pas, puis republiez.
 - Un code peut être partagé : les conditions l'interdisent. En cas d'abus, retirez-le et republiez.
@@ -68,7 +68,7 @@ La vente est **désactivée** tant que `config.json` contient `"actif": false` d
 - Copier-coller, clic droit et impression sont bloqués pour les familles (une capture d'écran reste possible).
 - « Conditions d'utilisation » dans l'onglet Plus, et « Tous droits réservés » en pied de page.
 - Extrait gratuit : créez un groupe « Découverte gratuite » avec un seul pétale, puis collez son code dans `config.json`, ligne `"codeDecouverte"`. Un bouton « Découvrir un extrait gratuit » apparaît sur l'écran d'entrée.
-- Version du service worker : `etincelle-v20`. La prochaine sera `etincelle-v21`.
+- Version du service worker : `etincelle-v21`. La prochaine sera `etincelle-v22`.
 
 ## Fin d'accès automatique (v20)
 Dans « Gérer les familles », choisissez une durée à la création du code (sans limite, 12 mois, 5 ans) ou modifiez la date « Fin d'accès » d'une famille, puis « Préparer les fichiers » et déposez-les sur GitHub. À la date, le code cesse d'ouvrir l'application. Ton accès ingénieure n'expire jamais.
