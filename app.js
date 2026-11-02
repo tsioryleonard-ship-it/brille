@@ -62,12 +62,17 @@
   async function deverrouiller(code, exigerAdmin) {    // ouvre le contenu autorisé par ce code
     const r = await Acces.ouvrir(code, ACCES.acces, ACCES.contenuEnc);
     if (exigerAdmin && !r.admin) throw new Error('admin');
-    D.details = r.details; D.admin = r.admin; D.nom = r.nom; D.apercu = null;
+    if (r.fin && !r.admin && iso(new Date()) > r.fin) { const e = new Error('expire'); e.fin = r.fin; throw e; }
+    D.details = r.details; D.admin = r.admin; D.nom = r.nom; D.fin = r.admin ? '' : r.fin; D.apercu = null;
     appliquerProtection();
     composer(Object.keys(r.details));
     try { localStorage.setItem(CLE_CODE, code); } catch { }
     return true;
   }
+  const dateLongue = d => { const [a, m, j] = d.split('-').map(Number); return `${String(j).padStart(2, '0')}/${String(m).padStart(2, '0')}/${a}`; };
+  const messageAcces = x => x && x.message === 'expire'
+    ? `Votre accès s'est terminé le ${dateLongue(x.fin)}. Pour le renouveler, écrivez à ${(D.config.contact || {}).email || 'BRILLE'}.`
+    : '';
   function verrouiller() {
     try { localStorage.removeItem(CLE_CODE); } catch { }
     D.petales = []; D.defis = []; D.details = {}; D.admin = false; D.apercu = null;
@@ -106,12 +111,12 @@
       const code = champ.value.trim(); if (!code) { err.textContent = 'Saisissez votre code.'; return; }
       bt.disabled = true; bt.textContent = 'Vérification…'; err.textContent = '';
       try { await deverrouiller(code, ing); document.body.classList.remove('verrouille'); premiere = true; rendre(); }
-      catch (x) { if (x.message !== 'admin' && x.message !== 'code') console.error(x); err.textContent = x.message === 'admin' ? 'Ce code n\'ouvre pas l\'espace ingénieure.' : 'Ce code n\'est pas reconnu. Vérifiez-le, ou contactez BRILLE.'; bt.disabled = false; bt.textContent = 'Entrer'; }
+      catch (x) { if (x.message !== 'admin' && x.message !== 'code' && x.message !== 'expire') console.error(x); err.textContent = x.message === 'expire' ? messageAcces(x) : x.message === 'admin' ? 'Ce code n\'ouvre pas l\'espace ingénieure.' : 'Ce code n\'est pas reconnu. Vérifiez-le, ou contactez BRILLE.'; bt.disabled = false; bt.textContent = 'Entrer'; }
     });
     const dec = $app.querySelector('#decouverte');
     if (dec) dec.addEventListener('click', async () => { try { await deverrouiller(D.config.codeDecouverte); document.body.classList.remove('verrouille'); premiere = true; rendre(); } catch { err.textContent = 'L\'extrait gratuit n\'est pas disponible pour le moment.'; } });
     champ.addEventListener('input', () => {
-      const net = champ.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, ing ? 12 : 8);
+      const net = champ.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
       champ.value = net.replace(/(.{4})(?=.)/g, '$1-');
     });
     champ.focus({ preventScroll: true });
@@ -436,6 +441,7 @@
       <h1><span class="surligne" style="--hl:var(--vert)">Plus</span></h1>
       <div class="grille-cartes">
       ${D.admin ? vueIngenieure() : ''}
+      ${!D.admin && D.fin ? `<div class="carte"><span class="etiquette">Mon accès</span><p style="margin:0">Votre accès est valable jusqu'au <b>${dateLongue(D.fin)}</b>. Pour le renouveler, écrivez à <a href="mailto:${esc((D.config.contact || {}).email || '')}">${esc((D.config.contact || {}).email || 'BRILLE')}</a>.</p></div>` : ''}
       ${achatActif() ? `<details class="carte"><summary>Ouvrir d'autres pétales</summary>
         <p>Vous voulez prolonger d'autres thèmes à la maison ? Découvrez les accès disponibles.</p>
         <a class="btn plein" href="#/acces">Voir les accès</a>
@@ -559,6 +565,9 @@
         ${f.admin ? '<span class="badge-admin">Mon accès ingénieure · protégé</span>' : ''}
         <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe"${f.admin ? ' disabled' : ''}>
         <p>Code : <code>${esc(f.code)}</code></p>
+        ${f.admin ? '' : `<label class="petit" style="display:block">Fin d'accès ${f.fin && iso(new Date()) > f.fin ? '<b style="color:#a33">(terminée)</b>' : ''}
+          <input type="date" class="finf" value="${esc(f.fin || '')}" style="padding:6px 10px;border:2px solid #e4dcec;border-radius:12px;font:inherit;margin-left:6px"></label>
+        <p class="petit" style="margin:2px 0 10px">${f.fin ? '' : 'Sans limite de durée. '}Laissez vide pour un accès sans date de fin.</p>`}
         <p class="petit">Ajouté le ${esc(f.ajout || '')}${f.vente ? ' · ' + (f.envoye ? 'envoyé le ' + esc(f.envoye) + (f.acheteur ? ' à ' + esc(f.acheteur) : '') : (f.publie ? 'disponible pour la vente' : 'à publier')) : ''}</p>
         <div class="chips">${f.admin ? cases('pf', f.petales).replace(/<input/g, '<input disabled') : cases('pf', f.petales)}</div>
         <div class="actions-fam">
@@ -583,6 +592,12 @@
         <input type="text" id="nouveau-nom" placeholder="Nom (ex. Atelier mars, famille Martin)">
         <label class="petit" for="nb-codes">Nombre de codes à créer (un lot de 20 est pratique pour les ventes)</label>
         <input type="number" id="nb-codes" min="1" max="50" value="1">
+        <label for="duree" class="petit" style="display:block;margin-top:6px"><b>Durée de l'accès</b> (compte à partir d'aujourd'hui)</label>
+        <select id="duree" style="width:100%;padding:10px 14px;border:2px solid #e4dcec;border-radius:16px;font:inherit;background:#fff;margin:4px 0 12px">
+          <option value="">Sans limite (familles du centre social)</option>
+          <option value="12m" selected>12 mois (fleur entière, un pétale)</option>
+          <option value="5a">5 ans (accès longue durée)</option>
+        </select>
         <label class="coche" style="margin:10px 0"><input type="checkbox" id="lot-vente"> Ces codes sont pour la vente (stock)</label>
         <div class="chips">${cases('ajout', [])}</div>
         <button type="button" class="btn plein" id="creer">Créer le code</button>
@@ -611,6 +626,8 @@
       const n = Math.max(1, Math.min(50, parseInt($app.querySelector('#nb-codes').value, 10) || 1));
       const base = $app.querySelector('#nouveau-nom').value.trim() || 'Famille';
       const crees = []; for (let i = 0; i < n; i++) crees.push(Acces.ajouterFamille(carnet, n > 1 ? `${base} ${String(i + 1).padStart(2, '0')}` : base, sel));
+      const dr = $app.querySelector('#duree').value;
+      if (dr) { const d = new Date(); d.setFullYear(d.getFullYear() + (dr === '5a' ? 5 : 1)); crees.forEach(f => { f.fin = iso(d); }); }
       if ($app.querySelector('#lot-vente').checked) crees.forEach(f => { f.vente = true; });
       ecrireCarnet(carnet); rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = (n === 1 ? 'Code créé : ' + crees[0].code : n + ' codes créés') + '. Pensez à publier (bouton « Préparer les fichiers »).'; }
     });
@@ -625,6 +642,8 @@
     });
     $app.querySelectorAll('.fam').forEach(bloc => {
       const f = carnet.familles[+bloc.dataset.i];
+      const fi = bloc.querySelector('.finf');
+      if (fi) fi.addEventListener('change', e => { f.fin = e.target.value || ''; ecrireCarnet(carnet); st('Date de fin modifiée. Pensez à publier (bouton « Préparer les fichiers »).'); });
       bloc.querySelector('.nomf').addEventListener('input', e => { if (f.admin) return; f.nom = e.target.value; ecrireCarnet(carnet); });
       bloc.querySelectorAll('.pf').forEach(c => c.addEventListener('change', () => {
         if (f.admin) { c.checked = true; return; }
@@ -694,11 +713,12 @@
       const lien = decodeURIComponent(m[1]);
       history.replaceState(null, '', location.pathname + location.search + '#/');
       try { await deverrouiller(lien); document.body.classList.remove('verrouille'); premiere = true; rendre(); return; }
-      catch { ecranCode('Ce lien n\'est plus valide. Entrez votre code ou contactez BRILLE.'); return; }
+      catch (x) { ecranCode(messageAcces(x) || 'Ce lien n\'est plus valide. Entrez votre code ou contactez BRILLE.'); return; }
     }
     const code = codeMemorise();
-    if (code) { try { await deverrouiller(code); document.body.classList.remove('verrouille'); rendre(); return; } catch { /* code retiré ou changé */ } }
-    ecranCode(code ? 'Votre accès n\'est plus valide. Entrez un nouveau code ou contactez BRILLE.' : '');
+    let raison = null;
+    if (code) { try { await deverrouiller(code); document.body.classList.remove('verrouille'); rendre(); return; } catch (x) { raison = x; /* code retiré, changé ou expiré */ } }
+    ecranCode(code ? (messageAcces(raison) || 'Votre accès n\'est plus valide. Entrez un nouveau code ou contactez BRILLE.') : '');
   }).catch(() => {
     $app.innerHTML = '<section class="vue"><h1>Oups</h1><p>Impossible de charger le contenu. Vérifiez votre connexion et rechargez la page.</p></section>';
   });

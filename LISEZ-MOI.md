@@ -68,4 +68,10 @@ La vente est **désactivée** tant que `config.json` contient `"actif": false` d
 - Copier-coller, clic droit et impression sont bloqués pour les familles (une capture d'écran reste possible).
 - « Conditions d'utilisation » dans l'onglet Plus, et « Tous droits réservés » en pied de page.
 - Extrait gratuit : créez un groupe « Découverte gratuite » avec un seul pétale, puis collez son code dans `config.json`, ligne `"codeDecouverte"`. Un bouton « Découvrir un extrait gratuit » apparaît sur l'écran d'entrée.
-- Version du service worker : `etincelle-v19`. Les anciens fichiers sont dans `_avant-jeu/avant-protection`.
+- Version du service worker : `etincelle-v20`. La prochaine sera `etincelle-v21`.
+
+## Fin d'accès automatique (v20)
+Dans « Gérer les familles », choisissez une durée à la création du code (sans limite, 12 mois, 5 ans) ou modifiez la date « Fin d'accès » d'une famille, puis « Préparer les fichiers » et déposez-les sur GitHub. À la date, le code cesse d'ouvrir l'application. Ton accès ingénieure n'expire jamais.
+Attention : pour un lot de codes « vente », la durée compte à partir de la création du lot.
+
+**Ne déposez plus d'ancien zip par-dessus : cette version contient les jeux.**
