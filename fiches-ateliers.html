@@ -172,8 +172,9 @@ details.cadre > summary { cursor: pointer; font-weight: 700; color: var(--accent
 /* Cartes 63 x 88 mm (format jeu de cartes standard) ; 1em = 1mm à l'impression */
 .pcard { --u: .9mm; font-size: var(--u); width: 63em; height: 88em; box-sizing: border-box; background: #fff; border: 2em solid var(--pc); border-radius: 3.2em; font-family: var(--font); color: #2E2A2A; line-height: 1.2; overflow: hidden; flex: none; }
 @media (max-width: 760px) { .pcard { --u: .7mm; } }
-.pcard .pin { height: 100%; display: flex; flex-direction: column; background: #fff; }
-.phead { background: var(--pc); height: 12em; flex: none; display: flex; align-items: center; justify-content: center; padding: 0 3em; text-align: center; }
+.pcard .pin { height: 100%; display: flex; flex-direction: column; background: #fff; box-sizing: border-box; padding: calc(var(--u) * 1.8); }
+.pcard.back .pin { padding: 0; }
+.phead { background: var(--pc); border-radius: calc(var(--u) * 1.2); height: 12em; flex: none; display: flex; align-items: center; justify-content: center; padding: 0 3em; text-align: center; }
 .phead b { font-size: 3.5em; font-weight: 700; line-height: 1.15; }
 .pill { flex: none; height: calc(var(--u) * 40); display: grid; place-items: center; font-size: calc(var(--u) * 25); line-height: 1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; padding-top: calc(var(--u) * 3); }
 .ptext { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: calc(var(--u) * 1) calc(var(--u) * 3) calc(var(--u) * 4); font-weight: 700; overflow-wrap: anywhere; hyphens: auto; }
@@ -181,9 +182,9 @@ details.cadre > summary { cursor: pointer; font-weight: 700; color: var(--accent
 .wl { width: 100%; height: calc(var(--u) * 3.4); border-bottom: calc(var(--u) * .3) solid rgba(46,42,42,.4); }
 .zl { margin-top: calc(var(--u) * 1.5); font-size: .45em; font-weight: 700; background: var(--sc); padding: .15em .9em; border-radius: 99em; letter-spacing: .08em; text-transform: uppercase; }
 .back .pin { align-items: center; justify-content: center; position: relative; }
-.bmain { width: 50em; height: auto; }
+.bmain { width: 46em; height: auto; }
 .pcard.back { border: 0; }
-.bsd { position: absolute; top: 3em; left: 3em; width: 9em; height: 9em; border-radius: 2em; }
+.bsd { position: absolute; top: 8em; left: 8em; width: 9em; height: 9em; border-radius: 2em; }
 .dh { margin: 22px 0 10px; font-size: 17px; text-align: center; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
 .dh .sw { width: 16px; height: 16px; border-radius: 50%; background: var(--pc); border: 2px solid var(--fg); }
 .dh small { font-weight: 500; color: var(--muted); font-size: 13px; }
