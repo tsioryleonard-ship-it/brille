@@ -170,7 +170,7 @@ details.cadre > summary { cursor: pointer; font-weight: 700; color: var(--accent
 .pdfl { display: inline-flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
 /* Cartes 63 x 88 mm (format jeu de cartes standard) ; 1em = 1mm à l'impression */
-.pcard { --u: .9mm; font-size: var(--u); width: 63em; height: 88em; box-sizing: border-box; background: #fff; border: .25em solid #d8d2c6; border-radius: 3.2em; font-family: var(--font); color: #2E2A2A; line-height: 1.2; overflow: hidden; flex: none; }
+.pcard { --u: .9mm; font-size: var(--u); width: 63em; height: 88em; box-sizing: border-box; background: #fff; border: 2em solid var(--pc); border-radius: 3.2em; font-family: var(--font); color: #2E2A2A; line-height: 1.2; overflow: hidden; flex: none; }
 @media (max-width: 760px) { .pcard { --u: .7mm; } }
 .pcard .pin { height: 100%; display: flex; flex-direction: column; background: #fff; }
 .phead { background: var(--pc); height: 12em; flex: none; display: flex; align-items: center; justify-content: center; padding: 0 3em; text-align: center; }
@@ -182,7 +182,8 @@ details.cadre > summary { cursor: pointer; font-weight: 700; color: var(--accent
 .zl { margin-top: calc(var(--u) * 1.5); font-size: .45em; font-weight: 700; background: var(--sc); padding: .15em .9em; border-radius: 99em; letter-spacing: .08em; text-transform: uppercase; }
 .back .pin { align-items: center; justify-content: center; position: relative; }
 .bmain { width: 50em; height: auto; }
-.bsd { position: absolute; bottom: 5em; left: 50%; transform: translateX(-50%); width: 9em; height: 9em; border-radius: 2em; }
+.pcard.back { border: 0; }
+.bsd { position: absolute; top: 3em; left: 3em; width: 9em; height: 9em; border-radius: 2em; }
 .dh { margin: 22px 0 10px; font-size: 17px; text-align: center; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
 .dh .sw { width: 16px; height: 16px; border-radius: 50%; background: var(--pc); border: 2px solid var(--fg); }
 .dh small { font-weight: 500; color: var(--muted); font-size: 13px; }
@@ -208,7 +209,7 @@ details.cadre > summary { cursor: pointer; font-weight: 700; color: var(--accent
   .toolhead { padding: 8px 14px; font-size: 12px; } .tool { padding: 10px 14px; gap: 6px; } .tool h4 { font-size: 13px; } .how, .mat { font-size: 9.8px; }
   .cr { padding: 12px 14px; gap: 10px; } .box { padding: 8px 10px; } .checks { font-size: 9.5px; } .notes textarea { min-height: 44px; }
   .fiche { break-inside: auto; }
-  .sheet .pcard { --u: 1mm; outline: .15mm solid #b9b3a8; outline-offset: -.1mm; }
+  .sheet .pcard { --u: 1mm; border-radius: 0; }
 }
 </style>
 
