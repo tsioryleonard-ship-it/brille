@@ -503,3 +503,22 @@ body.protege img { -webkit-user-drag: none; pointer-events: auto; }
 .impr-feuille .bil-histo p { text-align: left; margin: 2mm 0 0; color: #6f6767; }
 .impr-feuille p.bil-pied { margin: auto 0 0; font-size: 8.5pt; color: #6f6767; }
 .aff-nom i { font-style: normal; font-weight: 600; height: auto; min-height: 6mm; }
+
+/* ===== v24 ===== */
+.mot blockquote::before { content: none; display: none; }
+.hero-accueil p { max-width: calc(100% - 150px); }
+@media (min-width: 900px) { .hero-accueil p { max-width: calc(100% - 270px); } }
+.carte.famille .fam-ajout input[type=text] { flex: 1 1 auto; width: auto; min-width: 0; }
+.fam-ajout .btn, .fam-ajout .btn.plein { flex: 0 0 auto; width: auto; padding-left: 22px; padding-right: 22px; }
+.rangs { display: grid; gap: 8px; margin: 10px 0 4px; }
+.rang { display: flex; align-items: center; gap: 8px; background: #fff; border: 2px solid #e4dcec; border-radius: 18px; padding: 6px 8px; }
+.rang-nom { flex: 0 0 74px; font-weight: 600; font-size: .85rem; line-height: 1.15; word-break: break-word; text-align: left; }
+.echelle.mini { flex: 1; margin: 0; gap: 4px; }
+.echelle.mini button { min-height: 46px; padding: 4px 0; border-radius: 12px; border-width: 2px; }
+.echelle.mini button svg { width: 30px; height: 30px; }
+.bil-rangs { display: grid; grid-template-columns: repeat(auto-fit, minmax(26mm, 1fr)); gap: 3mm; margin-top: 2mm; }
+.bil-rang { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.bil-rang svg { width: 16mm; height: 16mm; }
+.bil-rang b { font-size: 10pt; }
+.bil-rang span { font-size: 8pt; color: #6f6767; }
+.bil-rien { width: 16mm; height: 16mm; display: grid; place-items: center; color: #999; }

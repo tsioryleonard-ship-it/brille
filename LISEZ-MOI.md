@@ -97,3 +97,11 @@ Attention : pour un lot de codes « vente », la durée compte à partir de la c
 - « À propos d'Étincelle » : reformulé (la QVE est pensée pour l'enfant ; le parent qui revient de Main tendue prolonge à la maison avec son enfant).
 - Fichiers modifiés : `app.js`, `style.css`, `config.json`, `sw.js` (`etincelle-v23`), `legal.html`. La prochaine version de `sw.js` sera `etincelle-v24`.
 - Les fichiers PRIVÉS (`gestion-des-acces.html`, `petales.json`, `defis.json`, `parcours-mensuels-PRIVE.json`, carnet des familles) ne sont jamais sur GitHub : gardez-les dans le dossier Drive PRIVÉ.
+
+## Version 24 (5 nov. 2026, soir)
+- Mot de l'ingénieure : guillemet seul retiré.
+- Tableau « Niveau Graine » : couleurs BRILLE pastel (plus de dégradé), placé sous la fleur.
+- Accueil : texte élargi jusqu'au dessin de la famille.
+- « Notre famille » : champ prénom et bouton « Ajouter » rééquilibrés.
+- Bilan : une ligne de visages par enfant (prénom ou « Enfant 2 »…), enregistrée et imprimée avec le bilan.
+- Fichiers modifiés : app.js, jeu.js, jeu.css, style.css, sw.js (etincelle-v25 : l'installation recharge maintenant les fichiers depuis le réseau, plus de vieille copie). Prochaine version du sw : v26.
