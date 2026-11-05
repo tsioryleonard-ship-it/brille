@@ -86,3 +86,14 @@ Attention : pour un lot de codes « vente », la durée compte à partir de la c
 - Jeu : chaque semaine du parcours vécue rapporte 6 étincelles (une seule fois par semaine et par pétale), le mois complet 15 étincelles et le badge « Un mois ensemble ». Publiez aussi `jeu.js`.
 - Parcours : une semaine ne s'ouvre que lorsque la précédente a été vécue. Chaque semaine a son bouton « Lancer la mission » (pas à pas) ; la fin du mois déclenche une grande fête (pluie de pétales, médaille, badge) et une carte souvenir avec les prénoms (facultatif). Publiez aussi `jeu.css`.
 - Un pétale dont le parcours d'un mois est terminé reçoit une médaille 🏅 et un contour doré sur la fleur d'accueil, et une médaille dans la liste des pétales.
+
+
+## Version 23 (5 nov. 2026) : accueil, famille, bilan imprimable
+- **Où est la version de référence** : le dossier « Étincelle – version finale » sur Google Drive. C'est lui qu'on met à jour, depuis n'importe quel ordinateur, puis qu'on publie sur GitHub.
+- Accueil : signature « Rindra Tsiory · Fondatrice de BRILLE » sous le mot de l'ingénieure ; bannière « L'aventure BRILLE commence maintenant ! » (le texte explicatif a été retiré).
+- Message secondaire pour les familles qui n'ont pas suivi d'atelier : `messageHorsAtelier` dans `config.json` (modifiable sans coder).
+- « Notre famille » : prénom du parent + prénoms des enfants, sans limite. Tous les prénoms apparaissent sur la carte souvenir, le pétale à coller et la fleur d'aventure (la taille s'adapte). Les prénoms restent dans le téléphone.
+- Bilan de la semaine : le parent indique combien d'enfants ont répondu (avec la remarque « en groupe, c'est ça aussi une famille épanouie ensemble ») et peut imprimer ou enregistrer en PDF une feuille A4 archivable, avec l'historique des semaines précédentes.
+- « À propos d'Étincelle » : reformulé (la QVE est pensée pour l'enfant ; le parent qui revient de Main tendue prolonge à la maison avec son enfant).
+- Fichiers modifiés : `app.js`, `style.css`, `config.json`, `sw.js` (`etincelle-v23`), `legal.html`. La prochaine version de `sw.js` sera `etincelle-v24`.
+- Les fichiers PRIVÉS (`gestion-des-acces.html`, `petales.json`, `defis.json`, `parcours-mensuels-PRIVE.json`, carnet des familles) ne sont jamais sur GitHub : gardez-les dans le dossier Drive PRIVÉ.
