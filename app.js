@@ -35,7 +35,8 @@
     return f;
   };
   const jointNoms = l => (l.length > 1 ? l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1] : (l[0] || ''));
-  const nomsFamille = () => { const f = famille(), p = f.parents.trim(); return jointNoms([...(p ? [p] : []), ...f.enfants]); };
+  const nomDeFamille = () => { const p = famille().parents.trim().replace(/^famille\s+/i, ''); return p ? 'Famille ' + p : ''; };   // « parents » contient désormais le nom de famille
+  const nomsFamille = () => { const n = nomDeFamille(), e = jointNoms(famille().enfants); return n && e ? n + ' : ' + e : (n || e); };
   const nomsCarte = pc => ((pc && pc.noms) || '').trim() || nomsFamille();       // un prénom saisi à la main sur une carte reste prioritaire
   let familleOuverte = false;
 
@@ -105,6 +106,7 @@
     const ing = onglet === 'ing';
     $app.innerHTML = `<section class="vue acces">
       ${motIngenieure()}
+      ${heroEtincelle()}
       <div class="onglets-acces" role="tablist" aria-label="Type d'accès">
         <button type="button" role="tab" id="t-fam" aria-selected="${!ing}">Accès famille</button>
         <button type="button" role="tab" id="t-ing" aria-selected="${ing}">Accès ingénieure</button>
@@ -227,6 +229,12 @@
   const etincelleDeco = '<svg class="etincelle-deco" viewBox="0 0 80 80" aria-hidden="true"><path d="M40 4l7 24 24 7-24 7-7 24-7-24-24-7 24-7z" fill="#fff" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/><path d="M64 50l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#cbe1b6" stroke="#000" stroke-width="2" stroke-linejoin="round"/></svg>';
 
   const etoileDeco = (c, pos) => `<svg class="av-etoile av-${pos}" viewBox="0 0 80 80" aria-hidden="true"><path d="M40 4l7 24 24 7-24 7-7 24-7-24-24-7 24-7z" fill="${c}" stroke="#2E2A2A" stroke-width="3" stroke-linejoin="round"/></svg>`;
+  const heroEtincelle = () => `<div class="hero-accueil">
+        <img class="logo-etincelle" src="logo-etincelle.png" alt="" width="320" height="320">
+        <span class="etiquette">La suite des ateliers</span>
+        <h1>Étincelle</h1>
+        <p>${esc(D.config.messageAccueil)}</p>
+      </div>`;
   const motIngenieure = () => `<figure class="mot">
       <figcaption>Le mot de l'ingénieure QVE</figcaption>
       <blockquote>Défendre l'épanouissement et l'harmonie familiale : redonner sa place au lien, à l'écoute et au bien-être de l'enfant, pour mieux vivre le quotidien.</blockquote>
@@ -238,10 +246,10 @@
     const f = famille(), vide = !f.parents.trim() && !f.enfants.length;
     const puces = f.enfants.map((e, i) => `<li><span>${esc(e)}</span><button type="button" class="x" data-i="${i}" aria-label="Retirer ${esc(e)}">✕</button></li>`).join('');
     return `<details class="carte famille" id="carte-famille"${vide || familleOuverte ? ' open' : ''}>
-      <summary>👨‍👩‍👧‍👦 Notre famille${vide ? '' : ' : ' + esc(nomsFamille())}</summary>
-      <p class="petit">L'aventure se vit ensemble. Ajoutez les prénoms de toute la famille : ils seront tous sur vos cartes souvenirs, pour que personne ne soit oublié. Les prénoms restent sur ce téléphone.</p>
-      <label for="fam-parents" class="aide">Prénom du ou des parents</label>
-      <input type="text" id="fam-parents" maxlength="60" value="${esc(f.parents)}" placeholder="Ex. Sarah" autocomplete="off">
+      <summary>👨‍👩‍👧‍👦 ${esc(nomDeFamille() || 'Notre famille')}</summary>
+      <p class="petit">L'aventure se vit ensemble. Indiquez le nom de famille et les prénoms de tous les enfants : ils seront sur vos cartes souvenirs, pour que personne ne soit oublié. Ces informations restent sur ce téléphone.</p>
+      <label for="fam-parents" class="aide">Le nom de famille</label>
+      <input type="text" id="fam-parents" maxlength="60" value="${esc(f.parents)}" placeholder="Ex. Martin" autocomplete="off">
       <label for="fam-enfant" class="aide">Les enfants de 6 à 12 ans : autant que vous voulez</label>
       <ul class="puces-enfants" aria-label="Enfants de la famille">${puces}</ul>
       <div class="fam-ajout"><input type="text" id="fam-enfant" maxlength="24" placeholder="Prénom d'un enfant" autocomplete="off"><button type="button" class="btn plein" id="fam-ajouter">Ajouter</button></div>
@@ -260,7 +268,7 @@
     };
     const redessiner = () => { familleOuverte = true; zone.outerHTML = carteFamille(); maj(); lierFamille(); };
     zone.querySelector('#fam-parents').addEventListener('input', e => { famille().parents = e.target.value.slice(0, 60); sauver(); });
-    zone.querySelector('#fam-parents').addEventListener('change', () => { familleOuverte = true; const s = zone.querySelector('summary'); if (s) s.textContent = '👨‍👩‍👧‍👦 Notre famille' + (nomsFamille() ? ' : ' + nomsFamille() : ''); });
+    zone.querySelector('#fam-parents').addEventListener('change', () => { familleOuverte = true; const s = zone.querySelector('summary'); if (s) s.textContent = '👨‍👩‍👧‍👦 ' + (nomDeFamille() || 'Notre famille'); });
     const ajouter = () => {
       const champ = zone.querySelector('#fam-enfant'), nom = champ.value.trim().replace(/\s+/g, ' ').slice(0, 24);
       if (!nom) return;
@@ -289,18 +297,15 @@
     }).join('');
     const pDefi = defi ? petale(defi.petale) : null;
     return `<section class="vue">
-      ${motIngenieure()}
-      <aside class="aventure-banniere" aria-label="L'aventure BRILLE commence maintenant">
+      <aside class="aventure-banniere" aria-label="L'aventure BRILLE continue ici">
         ${etoileDeco('#f49f4c', 'g')}${etoileDeco('#a8dbeb', 'd')}
-        <h2 class="av-titre"><span class="av-mot">L'aventure</span><span class="av-brille" aria-label="BRILLE">${[...'BRILLE'].map((l, i) => `<b aria-hidden="true" style="--c:${['#f49f4c', '#a4c2e7', '#f5abaf', '#cbe1b6', '#b8aed7', '#a8dbeb'][i]};--i:${i}">${l}</b>`).join('')}</span><span class="av-mot">commence maintenant !</span></h2>
+        <h2 class="av-titre"><span class="av-mot">L'aventure</span><span class="av-brille" aria-label="BRILLE">${[...'BRILLE'].map((l, i) => `<b aria-hidden="true" style="--c:${['#f49f4c', '#a4c2e7', '#f5abaf', '#cbe1b6', '#b8aed7', '#a8dbeb'][i]};--i:${i}">${l}</b>`).join('')}</span><span class="av-mot">continue ici</span></h2>
+        <div class="av-bas">
+          <img class="av-logo" src="logo-etincelle.png" alt="" width="320" height="320">
+          ${D.config.messageHorsAtelier ? `<p class="av-petit">${esc(D.config.messageHorsAtelier)}</p>` : ''}
+        </div>
       </aside>
-      <div class="hero-accueil">
-        <img class="logo-etincelle" src="logo-etincelle.png" alt="" width="320" height="320">
-        <span class="etiquette">La suite des ateliers</span>
-        <h1>Étincelle</h1>
-        <p>${esc(D.config.messageAccueil)}</p>
-        ${D.config.messageHorsAtelier ? `<p class="hors-atelier">${esc(D.config.messageHorsAtelier)}</p>` : ''}
-      </div>
+      ${motIngenieure()}
 
       <div class="grille">
       <div class="col-gauche">
@@ -314,10 +319,6 @@
         <p class="legende">${txtLegende(mode)}</p>
         <p class="legende ensemble">🌸 Chacun peut remplir sa fleur, mais le plus beau, c'est de vivre l'aventure ensemble : c'est comme ça que le lien se crée.</p>
       </div>
-      ${defi ? `<a class="carte teinte" href="#/semaine" style="display:block;text-decoration:none;background:${pDefi?.couleur || 'var(--jaune)'}">
-        <span class="etiquette">Cette semaine</span>
-        <h3 style="margin-bottom:.25em">${esc(defi.titre)}</h3>
-        <p style="margin:0">${esc(defi.consigne.split('. ')[0])}.</p></a>` : ''}
       </div>
 
       <div class="col-droite">
@@ -481,7 +482,7 @@
       <p>${esc(garde.idee || '')}</p>
       <label for="pc-garde" class="aide">${esc(garde.invite || 'Notre rituel')}</label>
       <textarea id="pc-garde" maxlength="300" placeholder="Écrivez-le avec votre enfant…">${esc(pc.garde)}</textarea>
-      ${fini ? `<label for="pc-noms" class="aide">Les prénoms de toute la famille, parents et tous les enfants, pour la carte souvenir</label><input type="text" id="pc-noms" maxlength="240" value="${esc(nomsCarte(pc))}" placeholder="Ex. Sarah, Léo et Inès">` : ''}
+      ${fini ? `<label for="pc-noms" class="aide">Le nom de famille et les prénoms des enfants, pour la carte souvenir</label><input type="text" id="pc-noms" maxlength="240" value="${esc(nomsCarte(pc))}" placeholder="Ex. Famille Martin : Léo et Inès">` : ''}
       <button type="button" class="btn" id="pc-enreg">Garder</button><p class="ok" id="pc-ok" role="status"></p></div>` : '';
     return `${entete}${cadre}${barre}<p class="petit">${faites} semaine${faites > 1 ? 's' : ''} sur 4 · commencé le ${dateCourte(pc.debut)}</p>${sem}${souvenir}${rituel}`;
   }
@@ -619,7 +620,7 @@
     const pg = document.createElement('style'); pg.id = 'impr-page'; pg.textContent = '@page { size: A4; margin: 0 }'; document.head.appendChild(pg);
     const ov = document.createElement('div'); ov.className = 'impr-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
     ov.innerHTML = `<div class="impr-bar">
-        ${type === 'carte' ? `<label>Prénoms de la famille sur la carte <input type="text" id="impr-noms" maxlength="240" value="${esc(nomsCarte(pc))}" placeholder="Ex. Sarah, Léo et Inès"></label>` : '<span></span>'}
+        ${type === 'carte' ? `<label>Nom et prénoms de la famille sur la carte <input type="text" id="impr-noms" maxlength="240" value="${esc(nomsCarte(pc))}" placeholder="Ex. Famille Martin : Léo et Inès"></label>` : '<span></span>'}
         <button type="button" class="btn plein" id="impr-go">🖨️ Imprimer</button><button type="button" class="btn gris" id="impr-x">Fermer</button></div>
       <p class="impr-aide">${type === 'bilan' ? 'Pour l\'archiver : dans la fenêtre d\'impression, choisissez « Enregistrer au format PDF », ou imprimez sur du papier A4 et rangez la feuille dans un classeur. ' : 'Imprimez sur du papier A4, de préférence épais. '}Dans la fenêtre d'impression, choisissez « Marges : aucune » et cochez « Graphiques d'arrière-plan » pour garder les couleurs.</p>
       <div class="impr-feuilles"></div>`;
@@ -781,7 +782,7 @@
       </details>
 
       <details class="carte"><summary>Mes données et ma vie privée</summary>
-        <p>Vos bilans et vos notes sont enregistrés <b>uniquement sur ce téléphone</b>. Il n'y a ni compte, ni serveur : BRILLE ne les voit pas et ne peut pas les récupérer. Seuls des prénoms sont demandés (pas de nom de famille) : n'ajoutez pas d'informations sensibles.</p>
+        <p>Vos bilans et vos notes sont enregistrés <b>uniquement sur ce téléphone</b>. Il n'y a ni compte, ni serveur : BRILLE ne les voit pas et ne peut pas les récupérer. Seuls un nom de famille et des prénoms sont demandés : n'ajoutez pas d'informations sensibles.</p>
         <p class="petit">Si vous changez de téléphone ou videz les données du navigateur, vous perdez l'historique, sauf si vous l'enregistrez avant.</p>
         <button class="btn discret plein" id="exporter" type="button">Enregistrer une copie de mes données</button>
         <label class="btn discret plein" style="margin-top:12px">Récupérer une copie<input type="file" id="importer" accept="application/json,.json" hidden></label>

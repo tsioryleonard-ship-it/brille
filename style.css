@@ -522,3 +522,12 @@ body.protege img { -webkit-user-drag: none; pointer-events: auto; }
 .bil-rang b { font-size: 10pt; }
 .bil-rang span { font-size: 8pt; color: #6f6767; }
 .bil-rien { width: 16mm; height: 16mm; display: grid; place-items: center; color: #999; }
+
+/* ===== v26 ===== */
+.brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: #000; }
+.brand-nom { font-family: 'Gruppo', 'Quicksand', sans-serif; font-size: 2rem; line-height: 1; -webkit-text-stroke: .8px #000; letter-spacing: .01em; }
+body.verrouille .brand-nom { display: none; }
+.av-bas { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 10px auto 0; max-width: 640px; }
+.av-logo { width: 120px; height: auto; display: block; }
+.av-petit { margin: 0; font-size: .85rem; font-weight: 400; line-height: 1.4; color: var(--doux); text-align: center; hyphens: none; -webkit-hyphens: none; }
+@media (min-width: 900px) { .av-bas { flex-direction: row; justify-content: center; gap: 22px; } .av-logo { width: 150px; } .av-petit { font-size: .95rem; text-align: left; } .brand-nom { font-size: 2.3rem; } }
