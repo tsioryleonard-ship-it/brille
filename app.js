@@ -383,6 +383,9 @@
       <div class="pc-med"><img src="p-${esc(p.id)}.png" alt=""><div><b>${esc(pr.titre)}</b><br>Vécu ensemble du ${dateCourte(pc.debut)} au ${dateCourte(pc.fini || pc.debut)}${pc.nb > 1 ? ` · parcours n°${pc.nb}` : ''}</div></div>
       ${pc.noms ? `<p class="pc-noms">${esc(pc.noms)}</p>` : ''}
       <p>4 semaines pour vous retrouver, vous écouter et mieux vous comprendre. L'harmonie et l'épanouissement se vivent au quotidien : vous venez de le vivre ensemble.</p></div>
+      <div class="pc-impr"><button type="button" class="btn plein" id="pc-carte">🖨️ Imprimer mon pétale à coller</button>
+        <button type="button" class="btn" id="pc-affiche">🌸 Imprimer ma fleur d'aventure</button>
+        <p class="petit">La fleur d'aventure (A4) s'imprime une seule fois. À chaque parcours terminé, imprimez votre pétale : découpez-le et collez-le à sa place.</p></div>
       <button type="button" class="btn gris" id="pc-reprendre">Recommencer un nouveau mois</button>` : '';
     const rituel = fini || pc.garde ? `<div class="pc-garde"><span class="etiquette">Ce que nous gardons</span><h3>${esc(garde.titre || 'Notre rituel')}</h3>
       <p>${esc(garde.idee || '')}</p>
@@ -414,12 +417,95 @@
       if (nm) { redessiner(); const o = zone.querySelector('#pc-ok'); if (o) o.textContent = ok ? 'Gardé sur votre téléphone.' : 'Impossible d\'enregistrer sur ce téléphone.'; }
       else zone.querySelector('#pc-ok').textContent = ok ? 'Rituel gardé sur votre téléphone.' : 'Impossible d\'enregistrer sur ce téléphone.';
     });
+    const bc = zone.querySelector('#pc-carte'); if (bc) bc.addEventListener('click', () => ouvrirImpression('carte', id));
+    const ba = zone.querySelector('#pc-affiche'); if (ba) ba.addEventListener('click', () => ouvrirImpression('affiche', id));
     const r = zone.querySelector('#pc-reprendre');
     if (r) r.addEventListener('click', () => {
       if (!confirm('Recommencer un nouveau mois ? Votre carte souvenir et votre rituel sont gardés.')) return;
       const pc = parcoursDe(id); pc.sem = {}; pc.fini = ''; pc.debut = iso(new Date()); sauver();
       document.dispatchEvent(new CustomEvent('brille:parcours-reset', { detail: { id } })); redessiner();
     });
+  }
+
+  /* ---------- Impression : carte souvenir et fleur à collectionner (A4) ---------- */
+  const NS = 'http://www.w3.org/2000/svg';
+  const MM = 190 / 1380;                                  // mm par unité de la fleur : sur l'affiche, la fleur fait 190 mm de large
+  const _bb = {};
+  function bboxPetale(id) {
+    if (_bb[id]) return _bb[id];
+    const sv = document.createElementNS(NS, 'svg'); sv.setAttribute('style', 'position:absolute;left:-9999px;width:0;height:0');
+    const pa = document.createElementNS(NS, 'path'); pa.setAttribute('d', D.formes[id].d); sv.appendChild(pa); document.body.appendChild(sv);
+    const b = pa.getBBox(); sv.remove(); return (_bb[id] = { x: b.x, y: b.y, w: b.width, h: b.height });
+  }
+  const coupe = (t, max = 15, nl = 3) => { const m = String(t || '').split(/\s+/).filter(Boolean), l = []; let c = ''; m.forEach(w => { if ((c + ' ' + w).trim().length > max && c) { l.push(c); c = w; } else c = (c + ' ' + w).trim(); }); if (c) l.push(c); return l.slice(0, nl); };
+  function autocollant(p, pc) {                           // le pétale à découper, à l'échelle exacte de la fleur à collectionner
+    const f = D.formes[p.id], b = bboxPetale(p.id), pad = 10, ic = f.icone;
+    const noms = coupe(pc.noms || 'Notre famille', 13, 2), fs = 32, k = 0.62;
+    const iw = ic.w * k, ih = ic.h * k;
+    return `<svg class="impr-colle" xmlns="${NS}" viewBox="${b.x - pad} ${b.y - pad} ${b.w + 2 * pad} ${b.h + 2 * pad}" style="width:${((b.w + 2 * pad) * MM).toFixed(1)}mm;height:${((b.h + 2 * pad) * MM).toFixed(1)}mm" role="img" aria-label="Pétale à découper">
+      <path d="${f.d}" fill="${p.couleur}" stroke="#2E2A2A" stroke-width="5" stroke-linejoin="round"/>
+      <text x="${f.cx}" y="${f.cy - 92}" text-anchor="middle" font-family="Gruppo, Quicksand, sans-serif" font-size="46" font-weight="700" fill="#2E2A2A">BRAVO !</text>
+      <image href="p-${esc(p.id)}.png" x="${f.cx - iw / 2}" y="${f.cy - 78}" width="${iw}" height="${ih}"/>
+      ${noms.map((t, i) => `<text x="${f.cx}" y="${f.cy + 78 + i * (fs + 4)}" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="${fs}" font-weight="700" fill="#2E2A2A">${esc(t)}</text>`).join('')}
+    </svg>`;
+  }
+  function htmlCarte(p, pc) {                             // carte légère : le pétale à découper et à coller sur la fleur d'aventure
+    const pr = p.parcours, noms = (pc.noms || '').trim() || 'Notre famille';
+    return `<section class="impr-feuille cert cl" style="--pc:${p.couleur}">
+      <div class="cert-cadre">
+        <div class="cert-bandeau">${D.petales.map(x => `<i style="background:${x.couleur}"></i>`).join('')}</div>
+        <img class="cl-logo" src="logo-brille.png" alt="BRILLE">
+        <h1>Bravo !</h1>
+        <p class="cl-sous">Un pétale de plus sur votre fleur d'aventure BRILLE</p>
+        <div class="cl-colle">${autocollant(p, pc)}</div>
+        <p class="cl-ciseaux">✂ Découpez le long du trait et collez-le sur l'emplacement « ${esc(p.titre)} » de votre fleur.</p>
+        <p class="cl-recap"><b>${esc(noms)}</b> ont vécu ensemble, du ${dateCourte(pc.debut)} au ${dateCourte(pc.fini || pc.debut)}, le parcours <b>« ${esc(pr.titre)} »</b>.<br>L'harmonie et l'épanouissement se vivent au quotidien.</p>
+        <div class="cl-carnet"><b>Notre souvenir du mois</b>
+          <span>Ce qui a changé chez nous : <i></i></span>
+          <span>Ce que nous gardons${pc.garde ? ' : ' + esc(pc.garde) : ' : '} ${pc.garde ? '' : '<i></i>'}</span></div>
+      </div></section>`;
+  }
+  function htmlAffiche() {
+    const VB = '30 238 1380 1392';
+    const places = D.petales.map(p => {
+      const f = D.formes[p.id]; if (!f) return '';
+      const l = coupe(p.titre, 18, 3);
+      return `<g><path d="${f.d}" fill="${p.couleur}" fill-opacity=".22" stroke="#8d8795" stroke-width="5" stroke-dasharray="16 11" stroke-linejoin="round"/>
+        ${l.map((t, i) => `<text x="${f.cx}" y="${f.cy - 10 + i * 38}" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="32" font-weight="600" fill="#6f6767">${esc(t)}</text>`).join('')}</g>`;
+    }).join('');
+    const leg = D.petales.map(p => `<li><i style="border-color:${p.couleur}"></i>${esc(p.titre)}</li>`).join('');
+    return `<section class="impr-feuille aff">
+      <h1>Notre aventure BRILLE</h1>
+      <p class="aff-sous">7 pétales, 7 parcours d'un mois à vivre ensemble. À chaque parcours terminé, on imprime son pétale et on le colle ici.</p>
+      <svg viewBox="${VB}" style="width:190mm;height:${(1392 * MM).toFixed(1)}mm" role="img" aria-label="Fleur d'aventure à compléter">${places}<image href="centre.png" x="546" y="734" width="352" height="352"/></svg>
+      <div class="aff-pied"><p class="aff-nom">Notre famille : <i></i></p><p class="aff-sous">Quand la fleur est complète, elle brille ! Cochez chaque pétale collé :</p><ul class="aff-leg">${leg}</ul></div></section>`;
+  }
+  function ouvrirImpression(type, id) {
+    if (document.querySelector('.impr-ov')) return;
+    const p = petale(id), pc = parcoursDe(id);
+    const pg = document.createElement('style'); pg.id = 'impr-page'; pg.textContent = '@page { size: A4; margin: 0 }'; document.head.appendChild(pg);
+    const ov = document.createElement('div'); ov.className = 'impr-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+    ov.innerHTML = `<div class="impr-bar">
+        ${type === 'carte' ? `<label>Prénoms sur la carte <input type="text" id="impr-noms" maxlength="60" value="${esc(pc.noms || '')}" placeholder="Ex. Sarah et Léo"></label>` : '<span></span>'}
+        <button type="button" class="btn plein" id="impr-go">🖨️ Imprimer</button><button type="button" class="btn gris" id="impr-x">Fermer</button></div>
+      <p class="impr-aide">Imprimez sur du papier A4, de préférence épais. Dans la fenêtre d'impression, choisissez « Marges : aucune » et cochez « Graphiques d'arrière-plan » pour garder les couleurs.</p>
+      <div class="impr-feuilles"></div>`;
+    document.body.appendChild(ov); document.body.classList.add('impr-on');
+    const zone = ov.querySelector('.impr-feuilles');
+    const ajuster = () => {                               // réduit le milieu de la carte si les textes sont longs, pour que tout tienne sur la page
+      const cad = zone.querySelector('.cert-cadre'), mid = zone.querySelector('.cert-mid'); if (!cad || !mid) return;
+      let k = 1; mid.style.zoom = 1;
+      while (cad.scrollHeight > cad.clientHeight + 1 && k > 0.55) { k -= 0.03; mid.style.zoom = k.toFixed(2); }
+    };
+    const dessiner = () => { zone.innerHTML = type === 'carte' ? htmlCarte(p, pc) : htmlAffiche(); const z = Math.min(1, (innerWidth - 24) / 794); zone.style.setProperty('--z', z); ajuster(); };
+    dessiner();
+    const nm = ov.querySelector('#impr-noms');
+    if (nm) nm.addEventListener('input', () => { pc.noms = nm.value.trim().slice(0, 60); sauver(); dessiner(); });
+    const fermer = () => { ov.remove(); pg.remove(); document.body.classList.remove('impr-on'); document.removeEventListener('keydown', cle); const t = $app.querySelector('#pc-noms'); if (t) t.value = pc.noms || ''; };
+    const cle = e => { if (e.key === 'Escape') fermer(); };
+    document.addEventListener('keydown', cle);
+    ov.querySelector('#impr-x').addEventListener('click', fermer);
+    ov.querySelector('#impr-go').addEventListener('click', () => window.print());
   }
 
   function lierPetale(id) {
