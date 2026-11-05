@@ -318,3 +318,19 @@ body.protege { -webkit-user-select: none; user-select: none; -webkit-touch-callo
 body.protege input, body.protege textarea { -webkit-user-select: text; user-select: text; }
 body.protege img { -webkit-user-drag: none; pointer-events: auto; }
 @media print { body.protege > * { display: none !important; } body.protege::before { content: "Impression non autorisée : contenu protégé BRILLE."; display: block; padding: 24px; font-size: 18px; } }
+
+/* Parcours d'un mois */
+.parcours .pc-intro { margin: 0 0 12px; }
+.pc-barre { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 6px 0 4px; }
+.pc-barre i { height: 10px; border-radius: 6px; background: rgba(255,255,255,.65); }
+.pc-barre i.ok { background: #fff; box-shadow: inset 0 0 0 3px rgba(0,0,0,.55); }
+.pc-sem { background: rgba(255,255,255,.75); border-radius: 20px; padding: 0 14px; margin: 10px 0; }
+.pc-sem summary { cursor: pointer; display: flex; gap: 12px; align-items: center; padding: 12px 0; list-style: none; }
+.pc-sem summary::-webkit-details-marker { display: none; }
+.pc-num { flex: none; width: 34px; height: 34px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-weight: 600; }
+.pc-sem.fait .pc-num { background: #000; color: #fff; }
+.pc-sem[open] { padding-bottom: 14px; }
+.pc-mission { font-weight: 500; margin: 0 0 10px; }
+.pc-garde { background: #fff; border-radius: 20px; padding: 14px 16px; margin-top: 14px; }
+.pc-garde textarea { width: 100%; min-height: 80px; margin: 8px 0; font: inherit; padding: 10px; border: 2px solid #e4dcec; border-radius: 14px; }
+.pc-bravo { font-weight: 600; margin: 14px 0 8px; }

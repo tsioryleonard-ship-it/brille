@@ -15,7 +15,7 @@
 
   /* ---------- Stockage local (avec solution de repli si le téléphone le bloque) ---------- */
   let memoire = null;
-  const vide = () => ({ v: 1, mode: 'parent', bilans: {}, enfant: {}, defisFaits: {}, ensembleFaits: {} });
+  const vide = () => ({ v: 1, mode: 'parent', bilans: {}, enfant: {}, defisFaits: {}, ensembleFaits: {}, parcours: {} });
   const charger = () => {
     if (memoire) return memoire;
     try { const brut = localStorage.getItem(CLE); memoire = brut ? Object.assign(vide(), JSON.parse(brut)) : vide(); }
@@ -332,6 +332,8 @@
         <label class="coche"><input type="checkbox" id="fait" ${fait ? 'checked' : ''}> Nous l'avons fait ensemble</label>
       </div>` : ''}
 
+      ${p.parcours ? `<div class="carte parcours teinte" id="parcours" style="background:${p.couleur}">${parcoursHtml(p)}</div>` : ''}
+
       </div><div>
       <div class="carte" id="bilan">
         <h2>Notre bilan de la semaine</h2>
@@ -354,6 +356,57 @@
     </section>`;
   }
 
+  /* ---------- Parcours d'un mois (4 semaines, suivi dans le téléphone) ---------- */
+  const JOUR = 86400000;
+  const parcoursDe = id => { const S = charger(); S.parcours = S.parcours || {}; return S.parcours[id] || (S.parcours[id] = { debut: '', sem: {}, garde: '', fini: '', nb: 0 }); };
+  const semCourante = pc => { if (!pc.debut) return 1; const j = Math.floor((new Date(iso(new Date())) - new Date(pc.debut)) / JOUR); return Math.max(1, Math.min(4, Math.floor(j / 7) + 1)); };
+  function parcoursHtml(p) {
+    const pr = p.parcours, pc = parcoursDe(p.id), faites = Object.keys(pc.sem).length, cur = semCourante(pc);
+    const garde = pr.garde || {};
+    const barre = `<div class="pc-barre" role="img" aria-label="${faites} semaine(s) sur 4 vécue(s)">${[1, 2, 3, 4].map(n => `<i class="${pc.sem[n] ? 'ok' : ''}"></i>`).join('')}</div>`;
+    const entete = `<span class="etiquette">Parcours d'un mois</span><h2>${esc(pr.titre)}</h2><p class="pc-intro">${esc(pr.intro)}</p>`;
+    if (!pc.debut) return `${entete}<p class="petit">4 semaines, un petit défi à vivre à deux chaque semaine. Si une semaine est ratée, on la reprend sans rattraper : le rythme est le vôtre.</p><button type="button" class="btn plein" id="pc-debut">Commencer notre mois</button>`;
+    const sem = pr.semaines.map((w, i) => {
+      const n = i + 1, fait = pc.sem[n];
+      return `<details class="pc-sem${fait ? ' fait' : ''}" ${n === cur && !fait ? 'open' : ''}>
+        <summary><span class="pc-num">${fait ? '✓' : n}</span><span><b>Semaine ${n}</b> · ${esc(w.titre)}${n === cur && !fait ? ' <em>(cette semaine)</em>' : ''}</span></summary>
+        <p class="pc-mission">${esc(w.mission)}</p>
+        <ol class="etapes">${w.etapes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
+        <div class="parler"><b>Pour en parler ensuite</b><ul>${w.enParler.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+        <label class="coche"><input type="checkbox" class="pc-fait" data-n="${n}" ${fait ? 'checked' : ''}> Nous l'avons vécue ensemble</label>
+      </details>`;
+    }).join('');
+    const fini = faites === 4;
+    const rituel = fini || pc.garde ? `<div class="pc-garde"><span class="etiquette">Ce que nous gardons</span><h3>${esc(garde.titre || 'Notre rituel')}</h3>
+      <p>${esc(garde.idee || '')}</p>
+      <label for="pc-garde" class="aide">${esc(garde.invite || 'Notre rituel')}</label>
+      <textarea id="pc-garde" maxlength="300" placeholder="Écrivez-le avec votre enfant…">${esc(pc.garde)}</textarea>
+      <button type="button" class="btn" id="pc-enreg">Garder notre rituel</button><p class="ok" id="pc-ok" role="status"></p></div>` : '';
+    const bravo = fini ? `<p class="pc-bravo">🎉 Mois vécu ensemble${pc.nb > 1 ? ` (parcours n°${pc.nb})` : ''} ! Gardez votre rituel pour que ça dure.</p><button type="button" class="btn gris" id="pc-reprendre">Recommencer un nouveau mois</button>` : '';
+    return `${entete}${barre}<p class="petit">${faites} semaine${faites > 1 ? 's' : ''} sur 4 · commencé le ${dateCourte(pc.debut)}</p>${sem}${bravo}${rituel}`;
+  }
+  function lierParcours(id) {
+    const zone = $app.querySelector('#parcours'); if (!zone) return;
+    const p = petale(id);
+    const redessiner = () => { zone.innerHTML = parcoursHtml(p); lierParcours(id); };
+    const b = zone.querySelector('#pc-debut');
+    if (b) b.addEventListener('click', () => { const pc = parcoursDe(id); pc.debut = iso(new Date()); sauver(); redessiner(); });
+    zone.querySelectorAll('.pc-fait').forEach(c => c.addEventListener('change', () => {
+      const pc = parcoursDe(id), n = c.dataset.n;
+      if (c.checked) pc.sem[n] = iso(new Date()); else delete pc.sem[n];
+      if (Object.keys(pc.sem).length === 4 && !pc.fini) { pc.fini = iso(new Date()); pc.nb = (pc.nb || 0) + 1; }
+      else if (Object.keys(pc.sem).length < 4) pc.fini = '';
+      sauver(); redessiner();
+    }));
+    const g = zone.querySelector('#pc-enreg');
+    if (g) g.addEventListener('click', () => {
+      parcoursDe(id).garde = zone.querySelector('#pc-garde').value.trim().slice(0, 300); const ok = sauver();
+      zone.querySelector('#pc-ok').textContent = ok ? 'Rituel gardé sur votre téléphone.' : 'Impossible d\'enregistrer sur ce téléphone.';
+    });
+    const r = zone.querySelector('#pc-reprendre');
+    if (r) r.addEventListener('click', () => { const pc = parcoursDe(id); pc.sem = {}; pc.fini = ''; pc.debut = iso(new Date()); sauver(); redessiner(); });
+  }
+
   function lierPetale(id) {
     const sem = debutSemaine();
     const choix = { parent: bilansDe(id, 'parent').find(b => b.w === sem)?.s || null, enfant: bilansDe(id, 'enfant').find(b => b.w === sem)?.s || null };
@@ -364,6 +417,7 @@
         boutons.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
       }));
     });
+    lierParcours(id);
     const c = $app.querySelector('#fait');
     if (c) c.addEventListener('change', () => { const S = charger(); if (c.checked) S.ensembleFaits[id] = iso(new Date()); else delete S.ensembleFaits[id]; sauver(); });
     if (!$app.querySelector('#enregistrer')) return;      // pétale fermé : rien à lier
@@ -528,7 +582,7 @@
       try {
         const d = JSON.parse(await f.text());
         if (!d || typeof d !== 'object' || typeof d.bilans !== 'object') throw new Error('format');
-        memoire = Object.assign(vide(), { bilans: d.bilans || {}, enfant: d.enfant || {}, defisFaits: d.defisFaits || {}, ensembleFaits: d.ensembleFaits || {}, mode: d.mode === 'enfant' ? 'enfant' : 'parent' }); sauver();
+        memoire = Object.assign(vide(), { bilans: d.bilans || {}, enfant: d.enfant || {}, defisFaits: d.defisFaits || {}, ensembleFaits: d.ensembleFaits || {}, parcours: d.parcours || {}, mode: d.mode === 'enfant' ? 'enfant' : 'parent' }); sauver();
         msg('Vos données ont été récupérées.');
       } catch { msg('Ce fichier n\'est pas une copie valide d\'Étincelle.'); }
     });
@@ -602,6 +656,9 @@
         <div class="chips">${cases('ajout', [])}</div>
         <button type="button" class="btn plein" id="creer">Créer le code</button>
         <p class="erreur" id="st" role="status"></p></div>
+      <div class="carte"><h2>Ajouter les parcours d'un mois</h2>
+        <p class="petit">Choisissez le fichier <b>parcours-mensuels-PRIVE.json</b> (sur votre ordinateur, jamais sur GitHub). Les parcours sont ajoutés aux pétales, puis chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
+        <input type="file" id="f-parcours" accept=".json"><p class="erreur" id="st-parcours" role="status"></p></div>
       <div class="carte"><h2>Publier les changements</h2>
         <p>Après chaque ajout ou retrait, téléchargez les deux fichiers, puis déposez-les sur GitHub (Add file → Upload files → Commit changes). Les familles les prennent en compte dans les minutes qui suivent.</p>
         <button type="button" class="btn plein" id="fabriquer">Préparer les fichiers à publier</button>
@@ -674,6 +731,16 @@
       telecharger('acces.json', r.acces); setTimeout(() => telecharger('contenu.enc.json', r.contenuEnc), 500);
       carnet.familles.forEach(f => { if (f.actif && f.petales && f.petales.length) f.publie = true; }); ecrireCarnet(carnet);
       st('Deux fichiers téléchargés : déposez acces.json et contenu.enc.json sur GitHub (Add file, Upload files, Commit changes).');
+    });
+    const fp = $app.querySelector('#f-parcours');
+    if (fp) fp.addEventListener('change', async e => {
+      const f = e.target.files[0], m = $app.querySelector('#st-parcours'); if (!f) return;
+      try {
+        const d = JSON.parse(await f.text()); let n = 0;
+        Object.keys(d).forEach(id => { if (D.details[id] && d[id] && Array.isArray(d[id].semaines) && d[id].semaines.length === 4) { D.details[id].parcours = d[id]; const x = D.petales.find(q => q.id === id); if (x) x.parcours = d[id]; n++; } });
+        if (!n) throw new Error('vide');
+        m.style.color = ''; m.textContent = n + ' parcours ajoutés. Cliquez maintenant sur « Préparer les fichiers à publier ».';
+      } catch { m.style.color = '#a33'; m.textContent = 'Ce fichier n\'est pas valide.'; }
     });
     $app.querySelector('#sauver-carnet').addEventListener('click', () => telecharger('carnet-familles.json', carnet));
   }

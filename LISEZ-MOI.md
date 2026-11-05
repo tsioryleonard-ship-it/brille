@@ -75,3 +75,12 @@ Dans « Gérer les familles », choisissez une durée à la création du code (s
 Attention : pour un lot de codes « vente », la durée compte à partir de la création du lot.
 
 **Ne déposez plus d'ancien zip par-dessus : cette version contient les jeux.**
+
+
+## Parcours d'un mois par pétale (v22)
+- Chaque pétale propose un parcours de 4 semaines (une mission à vivre à deux par semaine, suivi dans le téléphone) et un « rituel qu'on garde » à la fin.
+- Le contenu est dans `parcours-mensuels-PRIVE.json` : fichier PRIVÉ, à garder sur votre ordinateur, jamais sur GitHub.
+- Pour l'ajouter : ouvrez l'application avec votre accès ingénieure, onglet Plus, « Gérer les familles », carte « Ajouter les parcours d'un mois », choisissez le fichier. Puis « Préparer les fichiers à publier » et déposez `acces.json` et `contenu.enc.json` sur GitHub avec les fichiers de ce dossier (`app.js`, `style.css`, `sw.js`). Les codes existants continuent de fonctionner.
+- Les parcours restent chiffrés : seules les familles ayant le pétale les voient.
+- Version du service worker : `etincelle-v22`.
+- Jeu : chaque semaine du parcours vécue rapporte 6 étincelles (une seule fois par semaine et par pétale), le mois complet 15 étincelles et le badge « Un mois ensemble ». Publiez aussi `jeu.js`.

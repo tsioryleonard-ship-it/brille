@@ -15,7 +15,7 @@
   const COULEURS = ['#f49f4c', '#f5abaf', '#cbe1b6', '#b8aed7', '#fdd5a5', '#a8dbeb', '#ebc6e0', '#f8f4b8', '#a4c2e7'];
 
   /* ---------- Mémoire du jeu (séparée de celle de l'application) ---------- */
-  const neuf = () => ({ pts: 0, missionsJour: {}, nMissions: 0, missions: {}, defis: {}, nDefis: 0, bilans: {}, nBilans: 0, badges: [], ouverts: [] });
+  const neuf = () => ({ pts: 0, missionsJour: {}, nMissions: 0, missions: {}, defis: {}, nDefis: 0, bilans: {}, nBilans: 0, badges: [], ouverts: [], parcoursSem: {}, parcoursFin: {}, nSemaines: 0, nParcours: 0 });
   let S;
   try { S = Object.assign(neuf(), JSON.parse(localStorage.getItem(CLE) || '{}')); } catch { S = neuf(); }
   const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(S)); } catch { } };
@@ -32,6 +32,8 @@
     { id: 'defi', e: '🎯', n: 'Défi relevé', ok: () => S.nDefis >= 1 },
     { id: 'trois', e: '🏅', n: '3 missions', ok: () => S.nMissions >= 3 },
     { id: 'cinq', e: '🔥', n: '5 défis', ok: () => S.nDefis >= 5 },
+    { id: 'semaine', e: '🗓️', n: 'Une semaine du parcours', ok: () => S.nSemaines >= 1 },
+    { id: 'mois', e: '🏆', n: 'Un mois ensemble', ok: () => S.nParcours >= 1 },
     { id: 'fleur', e: '🌸', n: 'Tous mes pétales', ok: () => S.ouverts.length > 0 && S.ouverts.every(id => S.missions[id]) }
   ];
 
@@ -317,6 +319,17 @@
       if (id && S.missionsJour[id] !== aujourd) { S.missionsJour[id] = aujourd; S.missions[id] = aujourd; S.nMissions++; gagner(8, cb, 'mute'); }
     }
   });
+
+  /* Parcours d'un mois : chaque semaine vécue rapporte des étincelles, le mois complet un badge.
+     (écouté en phase de capture : la carte est redessinée juste après par l'application) */
+  document.addEventListener('change', e => {
+    const cb = e.target; if (!cb || !cb.classList || !cb.classList.contains('pc-fait') || !cb.checked) return;
+    const id = idPetale(), n = cb.dataset.n, aujourd = iso(new Date()), c = centre(cb);
+    const zone = cb.closest('#parcours'), toutes = zone ? zone.querySelectorAll('.pc-fait:checked').length : 0;
+    sfx('fanfare'); petalesVolants(c.x, c.y, 18);
+    if (id && !S.parcoursSem[id + '-' + n]) { S.parcoursSem[id + '-' + n] = aujourd; S.nSemaines++; gagner(6, cb, 'mute'); }
+    if (id && toutes === 4 && !S.parcoursFin[id]) { S.parcoursFin[id] = aujourd; S.nParcours++; gagner(15, cb, 'mute'); setTimeout(() => bandeau('Un mois vécu ensemble 🏆', 'Gardez votre rituel pour que ça dure !'), 900); }
+  }, true);
 
   document.addEventListener('click', e => {
     const t = e.target; if (!t || !t.closest) return;
