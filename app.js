@@ -50,9 +50,17 @@
     const ancien = document.getElementById('filigrane'); if (ancien) ancien.remove();
     if (!actif) return;
     const txt = `Accès : ${D.nom || 'famille accompagnée'} · BRILLE · usage personnel`;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="240"><text x="30" y="130" transform="rotate(-24 210 120)" font-family="sans-serif" font-size="17" font-weight="600" fill="#000" fill-opacity="0.085">${xmlesc(txt)}</text></svg>`;
     const f = document.createElement('div'); f.id = 'filigrane'; f.setAttribute('aria-hidden', 'true');
-    f.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+    const poser = police => {                          // la police Quicksand est embarquée dans l'image (une image SVG ne voit pas les polices de la page)
+      const css = police ? `<style>@font-face{font-family:'QS';src:url(data:font/woff2;base64,${police}) format('woff2');font-weight:600}</style>` : '';
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="240">${css}<text x="30" y="130" transform="rotate(-24 210 120)" font-family="${police ? "'QS', " : ''}Quicksand, sans-serif" font-size="17" font-weight="600" fill="#000" fill-opacity="0.085">${xmlesc(txt)}</text></svg>`;
+      f.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+    };
+    poser('');
+    fetch('quicksand-latin-600-normal.woff2').then(r => r.arrayBuffer()).then(buf => {
+      let bin = ''; const u = new Uint8Array(buf); for (let i = 0; i < u.length; i += 8192) bin += String.fromCharCode.apply(null, u.subarray(i, i + 8192));
+      poser(btoa(bin));
+    }).catch(() => {});
     document.body.appendChild(f);
   }
   const champSaisie = t => t && /^(INPUT|TEXTAREA)$/.test(t.tagName);
@@ -228,6 +236,9 @@
     const pDefi = defi ? petale(defi.petale) : null;
     return `<section class="vue">
       ${motIngenieure()}
+      <aside class="bienvenue-aventure"><span class="etiquette">🗺️ L'aventure BRILLE commence</span>
+        <h2>Bienvenue dans l'aventure BRILLE !</h2>
+        <p>Chaque pétale de la fleur est un petit parcours d'un mois, à vivre à deux : une mission par semaine, à votre rythme. Commencez par le pétale qui vous parle le plus, puis continuez dans l'ordre que vous choisissez. À chaque mois terminé, vous gagnez un pétale à coller sur votre fleur d'aventure.</p></aside>
       <div class="hero-accueil">
         <img class="logo-etincelle" src="logo-etincelle.png" alt="" width="320" height="320">
         <span class="etiquette">La suite des ateliers</span>
