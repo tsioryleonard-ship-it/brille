@@ -531,3 +531,6 @@ body.verrouille .brand-nom { display: none; }
 .av-logo { width: 120px; height: auto; display: block; }
 .av-petit { margin: 0; font-size: .85rem; font-weight: 400; line-height: 1.4; color: var(--doux); text-align: center; hyphens: none; -webkit-hyphens: none; }
 @media (min-width: 900px) { .av-bas { flex-direction: row; justify-content: center; gap: 22px; } .av-logo { width: 150px; } .av-petit { font-size: .95rem; text-align: left; } .brand-nom { font-size: 2.3rem; } }
+
+/* ===== v29 ===== */
+[hidden] { display: none !important; }
