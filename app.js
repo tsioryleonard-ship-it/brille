@@ -445,6 +445,9 @@
     return null;                                       // pas de verrou entre pétales : chaque famille choisit son ordre
   }
   const semCourante = pc => { for (let n = 1; n <= 4; n++) if (!pc.sem[n]) return n; return 4; };
+  // Petit mot affiché quand une semaine du parcours est vécue (aussi lu par jeu.js)
+  const MOTS_SEMAINE = ['🌱 La graine est plantée : premier pas fait ensemble.', '🌿 La tige pousse : votre fleur prend racine.', '🌷 Le bourgeon se prépare : vous avez trouvé votre rythme à deux.', '🌸 La fleur s\'ouvre : bravo, ce mois, vous l\'avez vécu ensemble !'];
+  window.BRILLE_MOTS_SEM = MOTS_SEMAINE;
   function parcoursHtml(p) {
     const pr = p.parcours, pc = parcoursDe(p.id), faites = Object.keys(pc.sem).length, cur = semCourante(pc);
     const garde = pr.garde || {};
@@ -461,7 +464,7 @@
       const n = i + 1, fait = pc.sem[n], ouverte = n === 1 || !!pc.sem[n - 1];
       if (!ouverte) return `<div class="pc-sem verrou"><div class="pc-lock"><span class="pc-num" aria-hidden="true">🔒</span><span><b>Semaine ${n}</b> · ${esc(w.titre)}<br><small>Se débloque quand la semaine ${n - 1} est vécue ensemble</small></span></div></div>`;
       return `<details class="pc-sem${fait ? ' fait' : ''}" data-n="${n}" ${n === cur && !fait ? 'open' : ''}>
-        <summary><span class="pc-num">${fait ? '✓' : n}</span><span><b>Semaine ${n}</b> · ${esc(w.titre)}${n === cur && !fait ? ' <em>(cette semaine)</em>' : ''}</span></summary>
+        <summary><span class="pc-num">${fait ? '✓' : n}</span><span><b>Semaine ${n}</b> · ${esc(w.titre)}${n === cur && !fait ? ' <em>(cette semaine)</em>' : ''}${fait ? `<br><small class="pc-mot-sem">${esc(MOTS_SEMAINE[i] || '')}</small>` : ''}</span></summary>
         <p class="pc-mission">${esc(w.mission)}</p>
         ${fait ? '' : `<button type="button" class="btn plein pc-lancer" data-n="${n}">🎮 Lancer la mission <small>(${w.etapes.length} étapes)</small></button><p class="jeu-aide">Ou lisez les étapes, vivez-les à votre rythme, puis cochez la case.</p>`}
         <ol class="etapes">${w.etapes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>

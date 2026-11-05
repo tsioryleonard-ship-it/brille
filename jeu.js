@@ -418,6 +418,7 @@
     const id = idPetale(), n = cb.dataset.n, aujourd = iso(new Date()), c = centre(cb);
     const zone = cb.closest('#parcours'), toutes = zone ? zone.querySelectorAll('.pc-fait:checked').length : 0;
     sfx('fanfare'); petalesVolants(c.x, c.y, 18);
+    const mot = (window.BRILLE_MOTS_SEM || [])[Number(n) - 1]; if (mot && Number(n) < 4) bandeau(mot, 'Semaine ' + n + ' vécue ensemble');
     if (id && !S.parcoursSem[id + '-' + n]) { S.parcoursSem[id + '-' + n] = aujourd; S.nSemaines++; gagner(6, cb, 'mute'); }
     if (id && toutes === 4 && !S.parcoursFin[id]) { S.parcoursFin[id] = aujourd; S.medailles[id] = aujourd; S.nParcours++; gagner(15, cb, 'mute'); setTimeout(() => feteMois(id), 500); }
   }, true);
