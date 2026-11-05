@@ -84,7 +84,7 @@
     const r = await Acces.ouvrir(code, ACCES.acces, ACCES.contenuEnc);
     if (exigerAdmin && !r.admin) throw new Error('admin');
     if (r.fin && !r.admin && iso(new Date()) > r.fin) { const e = new Error('expire'); e.fin = r.fin; throw e; }
-    D.details = r.details; D.admin = r.admin; D.nom = r.nom; D.fin = r.admin ? '' : r.fin; D.apercu = null;
+    document.body.dataset.admin = r.admin ? '1' : ''; D.details = r.details; D.admin = r.admin; D.nom = r.nom; D.fin = r.admin ? '' : r.fin; D.apercu = null;
     appliquerProtection();
     composer(Object.keys(r.details));
     try { localStorage.setItem(CLE_CODE, code); } catch { }
@@ -96,6 +96,7 @@
     : '';
   function verrouiller() {
     try { localStorage.removeItem(CLE_CODE); } catch { }
+    document.body.dataset.admin = '';
     D.petales = []; D.defis = []; D.details = {}; D.admin = false; D.apercu = null;
     appliquerProtection();
     ecranCode();
@@ -786,6 +787,7 @@
         <p class="petit">Si vous changez de téléphone ou videz les données du navigateur, vous perdez l'historique, sauf si vous l'enregistrez avant.</p>
         <button class="btn discret plein" id="exporter" type="button">Enregistrer une copie de mes données</button>
         <label class="btn discret plein" style="margin-top:12px">Récupérer une copie<input type="file" id="importer" accept="application/json,.json" hidden></label>
+        <button class="btn discret plein" id="raz-etincelles" type="button" style="margin-top:12px">Remettre mes étincelles à zéro ✨</button>
         <button class="btn alerte plein" id="effacer" type="button" style="margin-top:12px">Effacer toutes mes données</button>
         <button class="btn plein" id="verrouiller" type="button" style="margin-top:12px">Verrouiller l'application</button>
         <p class="petit">« Verrouiller » ne supprime pas vos bilans : il faudra simplement saisir de nouveau votre code famille.</p>
@@ -853,9 +855,14 @@
       } catch { msg('Ce fichier n\'est pas une copie valide d\'Étincelle.'); }
     });
     $app.querySelector('#verrouiller').addEventListener('click', verrouiller);
+    $app.querySelector('#raz-etincelles').addEventListener('click', () => {
+      if (!confirm('Remettre vos étincelles, niveaux et badges à zéro ? Vos bilans et vos notes sont gardés.')) return;
+      if (window.BrilleJeu) window.BrilleJeu.remiseAZero();
+      msg('Vos étincelles sont remises à zéro.');
+    });
     $app.querySelector('#effacer').addEventListener('click', () => {
       if (!confirm('Effacer tous vos bilans, notes et défis ? Cette action est définitive.')) return;
-      memoire = vide(); sauver(); msg('Toutes vos données ont été effacées.');
+      memoire = vide(); sauver(); if (window.BrilleJeu) window.BrilleJeu.remiseAZero(); msg('Toutes vos données ont été effacées.');
     });
   }
 

@@ -18,7 +18,15 @@
   const neuf = () => ({ pts: 0, missionsJour: {}, nMissions: 0, missions: {}, defis: {}, nDefis: 0, bilans: {}, nBilans: 0, badges: [], ouverts: [], parcoursSem: {}, parcoursFin: {}, medailles: {}, nSemaines: 0, nParcours: 0 });
   let S;
   try { S = Object.assign(neuf(), JSON.parse(localStorage.getItem(CLE) || '{}')); } catch { S = neuf(); }
-  const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(S)); } catch { } };
+  const lireJeu = () => { try { return Object.assign(neuf(), JSON.parse(localStorage.getItem(CLE) || '{}')); } catch { return neuf(); } };
+  /* Session ingénieure : bac à sable. Les étincelles gagnées pendant vos tests ne sont jamais enregistrées. */
+  const estAdmin = () => document.body.dataset.admin === '1';
+  let bac = false;
+  const garde = () => {
+    if (estAdmin() && !bac) { S = neuf(); bac = true; }
+    else if (!estAdmin() && bac) { S = lireJeu(); bac = false; }
+  };
+  const sauver = () => { if (estAdmin()) return; try { localStorage.setItem(CLE, JSON.stringify(S)); } catch { } };
 
   const NIVEAUX = [
     { p: 0, n: 'Graine', e: '🌱' }, { p: 20, n: 'Pousse', e: '🌿' }, { p: 50, n: 'Bourgeon', e: '🌷' },
@@ -137,6 +145,7 @@
 
   /* ---------- Gains, niveaux, badges ---------- */
   function gagner(n, el, raison) {
+    garde();
     const avant = niveauDe(S.pts); S.pts += n;
     const { x, y } = centre(el); if (raison !== 'fin') flotte(`+${n} ✨`, x, y);
     if (!calme && raison !== 'mute' && raison !== 'fin') petalesVolants(x, y, 8);
@@ -161,13 +170,14 @@
 
   /* ---------- Accueil : tableau de jeu ---------- */
   function htmlHud() {
+    garde();
     const k = niveauDe(S.pts), nv = NIVEAUX[k], suiv = NIVEAUX[k + 1];
     const pct = suiv ? Math.round((S.pts - nv.p) / (suiv.p - nv.p) * 100) : 100;
     const reste = suiv ? suiv.p - S.pts : 0;
     return `<div class="jeu-niv"><span class="jeu-emo" aria-hidden="true">${nv.e}</span>
         <div><b>Niveau « ${nv.n} »</b><small>${S.pts} étincelle${S.pts > 1 ? 's' : ''} ✨</small></div></div>
       <div class="jeu-barre" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i></div>
-      <p class="jeu-aide">${suiv ? `Encore ${reste} ✨ pour devenir « ${suiv.n} » ${suiv.e}. Chaque mission vécue ensemble en rapporte !` : 'Votre fleur brille de mille feux !'}</p>
+      <p class="jeu-aide">${suiv ? `Encore ${reste} ✨ pour devenir « ${suiv.n} » ${suiv.e}. Chaque mission vécue ensemble en rapporte !` : 'Votre fleur brille de mille feux !'}${estAdmin() ? ' <b>Mode ingénieure : vos étincelles de test ne sont pas enregistrées.</b>' : ''}</p>
       <div class="jeu-badges" aria-label="Badges">${BADGES.map(b => { const a = S.badges.includes(b.id); return `<span class="jeu-badge${a ? ' on' : ''}" title="${esc(b.n)}"><i aria-hidden="true">${a ? b.e : '🔒'}</i><small>${esc(b.n)}</small></span>`; }).join('')}</div>`;
   }
   function majHud() { const h = app.querySelector('.jeu-hud'); if (h) h.innerHTML = htmlHud(); }
@@ -448,6 +458,7 @@
     else if (h === 'petale') ameliorerPetale();
     else if (h === 'semaine' || h === 'defi') ameliorerSemaine();
   }
+  window.BrilleJeu = { remiseAZero() { S = neuf(); bac = estAdmin(); try { localStorage.removeItem(CLE); } catch { } majHud(); } };
   new MutationObserver(ameliorer).observe(app, { childList: true });
   window.addEventListener('hashchange', () => setTimeout(ameliorer, 0));
   ameliorer();
