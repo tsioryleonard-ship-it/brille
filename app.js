@@ -359,13 +359,26 @@
   /* ---------- Parcours d'un mois (4 semaines, suivi dans le téléphone) ---------- */
   const JOUR = 86400000;
   const parcoursDe = id => { const S = charger(); S.parcours = S.parcours || {}; return S.parcours[id] || (S.parcours[id] = { debut: '', sem: {}, garde: '', fini: '', nb: 0 }); };
+  /* L'aventure BRILLE : un pétale par mois, dans cet ordre. Pour changer l'ordre, modifiez cette liste. */
+  const ORDRE = ['organisation', 'emotions', 'apprentissages', 'liens', 'droits', 'equilibre', 'briller'];
+  const parcoursFini = id => { const pc = (charger().parcours || {})[id]; return !!(pc && (pc.nb > 0 || pc.fini || Object.keys(pc.sem || {}).length === 4)); };
+  const petalesAventure = () => ORDRE.map(i => petale(i)).filter(q => q && q.ouvert && q.parcours);   // ceux que la famille peut vivre
+  function precedentAVivre(id) {                         // le pétale à terminer avant celui-ci (jamais pour l'accès ingénieure)
+    return null;                                       // pas de verrou entre pétales : chaque famille choisit son ordre
+  }
   const semCourante = pc => { for (let n = 1; n <= 4; n++) if (!pc.sem[n]) return n; return 4; };
   function parcoursHtml(p) {
     const pr = p.parcours, pc = parcoursDe(p.id), faites = Object.keys(pc.sem).length, cur = semCourante(pc);
     const garde = pr.garde || {};
     const barre = `<div class="pc-barre" role="img" aria-label="${faites} semaine(s) sur 4 vécue(s)">${[1, 2, 3, 4].map(n => `<i class="${pc.sem[n] ? 'ok' : ''}"></i>`).join('')}</div>`;
     const entete = `<span class="etiquette">Parcours d'un mois</span><h2>${esc(pr.titre)}</h2><p class="pc-intro">${esc(pr.intro)}</p>`;
-    if (!pc.debut) return `${entete}<p class="petit">4 semaines à vivre à deux, une mission par semaine. Une semaine s'ouvre quand la précédente a été vécue : prenez le temps qu'il faut, sans pression.</p><button type="button" class="btn plein" id="pc-debut">Commencer notre mois</button>`;
+    const aventure = petalesAventure(), rang = aventure.findIndex(q => q.id === p.id) + 1, nbf = aventure.filter(q => parcoursFini(q.id)).length;
+    const cadre = aventure.length > 1 ? `<p class="pc-aventure">🗺️ Aventure BRILLE · ${nbf} pétale${nbf > 1 ? 's' : ''} terminé${nbf > 1 ? 's' : ''} sur ${aventure.length}</p>` : '';
+    if (!pc.debut) {
+      const avant = precedentAVivre(p.id);
+      if (avant) return `${entete}${cadre}<div class="pc-verrou-petale"><span class="pc-num" aria-hidden="true">🔒</span><p>Ce parcours s'ouvre quand vous aurez terminé le mois précédent de votre aventure : <b>« ${esc(avant.parcours.titre)} »</b> (pétale « ${esc(avant.titre)} »).</p></div><a class="btn plein" href="#/petale/${esc(avant.id)}">Aller au mois en cours</a>`;
+      return `${entete}${cadre}<p class="petit">4 semaines à vivre à deux, une mission par semaine. Une semaine s'ouvre quand la précédente a été vécue : prenez le temps qu'il faut, sans pression.</p><button type="button" class="btn plein" id="pc-debut">Commencer notre mois</button>`;
+    }
     const sem = pr.semaines.map((w, i) => {
       const n = i + 1, fait = pc.sem[n], ouverte = n === 1 || !!pc.sem[n - 1];
       if (!ouverte) return `<div class="pc-sem verrou"><div class="pc-lock"><span class="pc-num" aria-hidden="true">🔒</span><span><b>Semaine ${n}</b> · ${esc(w.titre)}<br><small>Se débloque quand la semaine ${n - 1} est vécue ensemble</small></span></div></div>`;
@@ -385,6 +398,7 @@
       <p>4 semaines pour vous retrouver, vous écouter et mieux vous comprendre. L'harmonie et l'épanouissement se vivent au quotidien : vous venez de le vivre ensemble.</p></div>
       <div class="pc-impr"><button type="button" class="btn plein" id="pc-carte">🖨️ Imprimer mon pétale à coller</button>
         <button type="button" class="btn" id="pc-affiche">🌸 Imprimer ma fleur d'aventure</button>
+        ${parcoursTermines().length > 1 ? '<button type="button" class="btn" id="pc-tous">🖨️ Tous mes pétales gagnés (1 feuille)</button>' : ''}
         <p class="petit">La fleur d'aventure (A4) s'imprime une seule fois. À chaque parcours terminé, imprimez votre pétale : découpez-le et collez-le à sa place.</p></div>
       <button type="button" class="btn gris" id="pc-reprendre">Recommencer un nouveau mois</button>` : '';
     const rituel = fini || pc.garde ? `<div class="pc-garde"><span class="etiquette">Ce que nous gardons</span><h3>${esc(garde.titre || 'Notre rituel')}</h3>
@@ -393,14 +407,14 @@
       <textarea id="pc-garde" maxlength="300" placeholder="Écrivez-le avec votre enfant…">${esc(pc.garde)}</textarea>
       ${fini ? `<label for="pc-noms" class="aide">Vos prénoms, pour la carte souvenir (facultatif)</label><input type="text" id="pc-noms" maxlength="60" value="${esc(pc.noms || '')}" placeholder="Ex. Sarah et Léo">` : ''}
       <button type="button" class="btn" id="pc-enreg">Garder</button><p class="ok" id="pc-ok" role="status"></p></div>` : '';
-    return `${entete}${barre}<p class="petit">${faites} semaine${faites > 1 ? 's' : ''} sur 4 · commencé le ${dateCourte(pc.debut)}</p>${sem}${souvenir}${rituel}`;
+    return `${entete}${cadre}${barre}<p class="petit">${faites} semaine${faites > 1 ? 's' : ''} sur 4 · commencé le ${dateCourte(pc.debut)}</p>${sem}${souvenir}${rituel}`;
   }
   function lierParcours(id) {
     const zone = $app.querySelector('#parcours'); if (!zone) return;
     const p = petale(id);
     const redessiner = () => { zone.innerHTML = parcoursHtml(p); lierParcours(id); };
     const b = zone.querySelector('#pc-debut');
-    if (b) b.addEventListener('click', () => { const pc = parcoursDe(id); pc.debut = iso(new Date()); sauver(); redessiner(); });
+    if (b) b.addEventListener('click', () => { if (precedentAVivre(id)) return; const pc = parcoursDe(id); pc.debut = iso(new Date()); sauver(); redessiner(); });
     zone.querySelectorAll('.pc-fait').forEach(c => c.addEventListener('change', () => {
       const pc = parcoursDe(id), n = c.dataset.n;
       if (c.checked) pc.sem[n] = iso(new Date()); else delete pc.sem[n];
@@ -418,6 +432,7 @@
       else zone.querySelector('#pc-ok').textContent = ok ? 'Rituel gardé sur votre téléphone.' : 'Impossible d\'enregistrer sur ce téléphone.';
     });
     const bc = zone.querySelector('#pc-carte'); if (bc) bc.addEventListener('click', () => ouvrirImpression('carte', id));
+    const bt = zone.querySelector('#pc-tous'); if (bt) bt.addEventListener('click', () => ouvrirImpression('petales', id));
     const ba = zone.querySelector('#pc-affiche'); if (ba) ba.addEventListener('click', () => ouvrirImpression('affiche', id));
     const r = zone.querySelector('#pc-reprendre');
     if (r) r.addEventListener('click', () => {
@@ -465,18 +480,26 @@
           <span>Ce que nous gardons${pc.garde ? ' : ' + esc(pc.garde) : ' : '} ${pc.garde ? '' : '<i></i>'}</span></div>
       </div></section>`;
   }
+  const parcoursTermines = () => ORDRE.map(i => petale(i)).filter(q => q && q.parcours && Object.keys(parcoursDe(q.id).sem || {}).length === 4);
+  function htmlPetales() {                                // tous les pétales gagnés, sur une seule feuille
+    const l = parcoursTermines();
+    return `<section class="impr-feuille pl"><h1>Mes pétales gagnés</h1>
+      <p class="aff-sous">Découpez chaque pétale le long du trait et collez-le à sa place sur votre fleur d'aventure BRILLE.</p>
+      <div class="pl-grille">${l.map(q => `<figure>${autocollant(q, parcoursDe(q.id))}<figcaption>${esc(q.titre)}</figcaption></figure>`).join('')}</div>
+      <p class="aff-sous pl-pied">Un pétale à la fois, dans l'ordre que vous choisissez : la fleur se complète à votre rythme.</p></section>`;
+  }
   function htmlAffiche() {
     const VB = '30 238 1380 1392';
     const places = D.petales.map(p => {
       const f = D.formes[p.id]; if (!f) return '';
       const l = coupe(p.titre, 18, 3);
       return `<g><path d="${f.d}" fill="${p.couleur}" fill-opacity=".22" stroke="#8d8795" stroke-width="5" stroke-dasharray="16 11" stroke-linejoin="round"/>
-        ${l.map((t, i) => `<text x="${f.cx}" y="${f.cy - 10 + i * 38}" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="32" font-weight="600" fill="#6f6767">${esc(t)}</text>`).join('')}</g>`;
+        ${l.map((t, i) => `<text x="${f.cx}" y="${f.cy - 10 + i * 38}" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="30" font-weight="600" fill="#6f6767">${esc(t)}</text>`).join('')}</g>`;
     }).join('');
-    const leg = D.petales.map(p => `<li><i style="border-color:${p.couleur}"></i>${esc(p.titre)}</li>`).join('');
+    const leg = ORDRE.map(i => D.petales.find(q => q.id === i)).filter(Boolean).map(p => `<li><i style="border-color:${p.couleur}"></i>${esc(p.titre)}</li>`).join('');
     return `<section class="impr-feuille aff">
       <h1>Notre aventure BRILLE</h1>
-      <p class="aff-sous">7 pétales, 7 parcours d'un mois à vivre ensemble. À chaque parcours terminé, on imprime son pétale et on le colle ici.</p>
+      <p class="aff-sous">7 pétales, un parcours d'un mois pour chacun, dans l'ordre que l'on choisit. À chaque mois terminé, on imprime son pétale et on le colle ici.</p>
       <svg viewBox="${VB}" style="width:190mm;height:${(1392 * MM).toFixed(1)}mm" role="img" aria-label="Fleur d'aventure à compléter">${places}<image href="centre.png" x="546" y="734" width="352" height="352"/></svg>
       <div class="aff-pied"><p class="aff-nom">Notre famille : <i></i></p><p class="aff-sous">Quand la fleur est complète, elle brille ! Cochez chaque pétale collé :</p><ul class="aff-leg">${leg}</ul></div></section>`;
   }
@@ -497,7 +520,7 @@
       let k = 1; mid.style.zoom = 1;
       while (cad.scrollHeight > cad.clientHeight + 1 && k > 0.55) { k -= 0.03; mid.style.zoom = k.toFixed(2); }
     };
-    const dessiner = () => { zone.innerHTML = type === 'carte' ? htmlCarte(p, pc) : htmlAffiche(); const z = Math.min(1, (innerWidth - 24) / 794); zone.style.setProperty('--z', z); ajuster(); };
+    const dessiner = () => { zone.innerHTML = type === 'carte' ? htmlCarte(p, pc) : type === 'petales' ? htmlPetales() : htmlAffiche(); const z = Math.min(1, (innerWidth - 24) / 794); zone.style.setProperty('--z', z); ajuster(); };
     dessiner();
     const nm = ov.querySelector('#impr-noms');
     if (nm) nm.addEventListener('input', () => { pc.noms = nm.value.trim().slice(0, 60); sauver(); dessiner(); });

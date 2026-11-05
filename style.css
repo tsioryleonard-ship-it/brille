@@ -422,3 +422,13 @@ body.protege img { -webkit-user-drag: none; pointer-events: auto; }
 .cl-carnet span { display: flex; gap: 2mm; align-items: end; }
 .cl-carnet i { flex: 1; border-bottom: .35mm solid #8d8795; height: 5mm; }
 .aff-leg i { border: .7mm solid #8d8795; background: #fff !important; border-radius: 1mm; }
+
+.pc-aventure { font-weight: 600; background: rgba(255,255,255,.7); border-radius: 999px; padding: 6px 14px; display: inline-block; margin: 0 0 10px; font-size: .92rem; }
+.pc-verrou-petale { display: flex; gap: 12px; align-items: flex-start; background: rgba(255,255,255,.7); border-radius: 20px; padding: 12px 14px; margin: 8px 0 12px; }
+.pc-verrou-petale p { margin: 0; }
+.pl { padding: 12mm 10mm; display: flex; flex-direction: column; align-items: center; }
+.pl h1 { font-family: 'Gruppo', 'Quicksand', sans-serif; font-size: 30pt; margin: 0; }
+.pl-grille { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm 4mm; margin: 6mm 0; width: 100%; justify-items: center; }
+.pl-grille figure { margin: 0; border: .35mm dashed #8d8795; border-radius: 4mm; padding: 2mm; }
+.pl-grille figcaption { font-size: 8.5pt; color: #6f6767; margin-top: 1mm; }
+.pl-pied { margin-top: auto; }
