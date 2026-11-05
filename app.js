@@ -755,6 +755,13 @@
   /* ----- Plus ----- */
   let invitationInstall = null;
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); invitationInstall = e; const b = document.getElementById('btn-install'); if (b) b.hidden = false; });
+  // Le bouton « Installer Étincelle » : un seul écouteur pour toute la page, même si l'invitation arrive après l'affichage de « Plus ».
+  document.addEventListener('click', async e => {
+    const bt = e.target.closest && e.target.closest('#btn-install'); if (!bt) return;
+    if (!invitationInstall) { bt.hidden = true; return; }
+    try { invitationInstall.prompt(); await invitationInstall.userChoice; } catch { }
+    invitationInstall = null; bt.hidden = true;
+  });
   function vuePlus() {
     const c = D.config.contact || {};
     return `<section class="vue">
@@ -837,7 +844,7 @@
       D.apercu = ids.length === D.vitrine.length ? null : ids; composer(ids.length ? ids : D.vitrine.map(v => v.id));
     });
     const bi = $app.querySelector('#btn-install');
-    if (bi && invitationInstall) { bi.hidden = false; bi.addEventListener('click', async () => { invitationInstall.prompt(); await invitationInstall.userChoice; invitationInstall = null; bi.hidden = true; }); }
+    if (bi && invitationInstall) bi.hidden = false;
     const msg = t => { $app.querySelector('#retour-donnees').textContent = t; };
     $app.querySelector('#exporter').addEventListener('click', () => {
       const blob = new Blob([JSON.stringify(charger(), null, 2)], { type: 'application/json' });
