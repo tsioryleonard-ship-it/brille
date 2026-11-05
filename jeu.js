@@ -15,7 +15,7 @@
   const COULEURS = ['#f49f4c', '#f5abaf', '#cbe1b6', '#b8aed7', '#fdd5a5', '#a8dbeb', '#ebc6e0', '#f8f4b8', '#a4c2e7'];
 
   /* ---------- Mémoire du jeu (séparée de celle de l'application) ---------- */
-  const neuf = () => ({ pts: 0, missionsJour: {}, nMissions: 0, missions: {}, defis: {}, nDefis: 0, bilans: {}, nBilans: 0, badges: [], ouverts: [], parcoursSem: {}, parcoursFin: {}, nSemaines: 0, nParcours: 0 });
+  const neuf = () => ({ pts: 0, missionsJour: {}, nMissions: 0, missions: {}, defis: {}, nDefis: 0, bilans: {}, nBilans: 0, badges: [], ouverts: [], parcoursSem: {}, parcoursFin: {}, medailles: {}, nSemaines: 0, nParcours: 0 });
   let S;
   try { S = Object.assign(neuf(), JSON.parse(localStorage.getItem(CLE) || '{}')); } catch { S = neuf(); }
   const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(S)); } catch { } };
@@ -171,7 +171,26 @@
       <div class="jeu-badges" aria-label="Badges">${BADGES.map(b => { const a = S.badges.includes(b.id); return `<span class="jeu-badge${a ? ' on' : ''}" title="${esc(b.n)}"><i aria-hidden="true">${a ? b.e : '🔒'}</i><small>${esc(b.n)}</small></span>`; }).join('')}</div>`;
   }
   function majHud() { const h = app.querySelector('.jeu-hud'); if (h) h.innerHTML = htmlHud(); }
+  /* Médaille sur les pétales dont le parcours d'un mois est terminé (fleur et liste) */
+  function medailles() {
+    app.querySelectorAll('a.petale').forEach(a => {
+      const id = (a.getAttribute('href') || '').split('/').pop();
+      if (!S.medailles[id] || a.querySelector('.jeu-med-svg')) return;
+      const path = a.querySelector('path'); if (!path || !path.getBBox) return;
+      const bb = path.getBBox();
+      path.setAttribute('stroke', '#f4b400'); path.setAttribute('stroke-width', '16'); path.setAttribute('stroke-linejoin', 'round');
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('class', 'jeu-med-svg'); t.setAttribute('x', bb.x + bb.width * 0.84); t.setAttribute('y', bb.y + bb.height * 0.2);
+      t.setAttribute('text-anchor', 'middle'); t.setAttribute('font-size', '100'); t.setAttribute('aria-hidden', 'true'); t.textContent = '🏅';
+      (path.parentNode || a).appendChild(t);
+    });
+    app.querySelectorAll('a.ligne-petale:not(.ferme)').forEach(a => {
+      const id = (a.getAttribute('href') || '').split('/').pop();
+      if (S.medailles[id] && !a.querySelector('.jeu-med')) { const s = document.createElement('span'); s.className = 'jeu-med'; s.textContent = '🏅'; s.setAttribute('aria-label', 'Un mois vécu ensemble'); a.appendChild(s); }
+    });
+  }
   function ameliorerAccueil() {
+    medailles();
     const ouverts = [...app.querySelectorAll('a.ligne-petale:not(.ferme)')].map(a => (a.getAttribute('href') || '').split('/').pop());
     if (ouverts.length) { S.ouverts = ouverts; sauver(); }
     if (app.querySelector('.jeu-hud')) return;
@@ -199,12 +218,13 @@
   }
   const idPetale = () => (location.hash.match(/#\/petale\/([^/?]+)/) || [])[1] || '';
 
-  function lancerMission(carte, etapes) {
+  function lancerMission(carte, etapes, opts) {
+    opts = opts || {};
     const id = idPetale();
-    const titre = (carte.querySelector('h2') || {}).textContent || 'Mission';
-    const meta = [...carte.querySelectorAll('.meta span')].map(s => s.textContent.trim());
-    const questions = [...carte.querySelectorAll('.parler li')].map(li => li.textContent.trim()).filter(Boolean);
-    const couleur = getComputedStyle(carte).backgroundColor;
+    const titre = opts.titre || (carte.querySelector('h2') || {}).textContent || 'Mission';
+    const meta = opts.meta || [...carte.querySelectorAll('.meta span')].map(s => s.textContent.trim());
+    const questions = opts.questions || [...carte.querySelectorAll('.parler li')].map(li => li.textContent.trim()).filter(Boolean);
+    const couleur = opts.couleur || getComputedStyle(carte).backgroundColor;
     const total = etapes.length;
     let pos = 0, qi = -1, fini = false;
     const ov = document.createElement('div'); ov.className = 'jeu-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Mission : ' + titre);
@@ -275,7 +295,20 @@
       };
       rend();
     }
+    function finSemaine() {
+      fini = true;
+      const nouveau = !S.parcoursSem[id + '-' + opts.n];
+      opts.valider();                       // coche la case de la semaine : l'application et le jeu l'enregistrent
+      if (opts.dernier) { fermer(); return; }          // dernière semaine : la grande fête prend le relais
+      montrer(`<div class="jeu-gros" aria-hidden="true">🏆</div><h2>Semaine vécue !</h2>
+        <p>Bravo : vous avez avancé ensemble. La semaine suivante vient de s'ouvrir.</p>
+        ${nouveau ? '<p class="jeu-gain">+6 ✨</p>' : ''}
+        <button type="button" class="btn plein" id="j-fermer">Retour au parcours 🌸</button>`, '#j-fermer', 'Semaine vécue ! Bravo, vous avez avancé ensemble. La semaine suivante vient de s\'ouvrir.');
+      sfx('fanfare'); petalesVolants(innerWidth / 2, innerHeight / 3, 34);
+      ecran.querySelector('#j-fermer').addEventListener('click', () => { sfx('pop'); fermer(); });
+    }
     function fin() {
+      if (opts.valider) return finSemaine();
       fini = true;
       const aujourd = iso(new Date()), deja = S.missionsJour[id] === aujourd;
       S.missionsJour[id] = aujourd; S.missions[id] = aujourd; S.nMissions += deja ? 0 : 1; sauver();
@@ -320,6 +353,54 @@
     }
   });
 
+  /* Lancer la mission d'une semaine du parcours (pas à pas, comme « À faire ensemble ») */
+  document.addEventListener('click', e => {
+    const b = e.target && e.target.closest && e.target.closest('.pc-lancer'); if (!b) return;
+    const det = b.closest('details'), zone = b.closest('#parcours'); if (!det || !zone) return;
+    const n = Number(det.dataset.n);
+    const etapes = [...det.querySelectorAll('.etapes li')].map(li => li.textContent.trim()).filter(Boolean); if (!etapes.length) return;
+    const questions = [...det.querySelectorAll('.parler li')].map(li => li.textContent.trim()).filter(Boolean);
+    const titre = ((zone.querySelector('h2') || {}).textContent || 'Parcours') + ' · semaine ' + n;
+    const dernier = zone.querySelectorAll('.pc-fait:checked').length === 3;
+    sfx('debut');
+    lancerMission(det, etapes, {
+      titre, questions, n, dernier, meta: ['Semaine ' + n + ' sur 4'], couleur: getComputedStyle(zone).backgroundColor,
+      valider() { const cb = zone.querySelector('.pc-fait[data-n="' + n + '"]'); if (cb && !cb.checked) { cb.checked = true; cb.dispatchEvent(new Event('change', { bubbles: true })); } }
+    });
+  });
+  document.addEventListener('brille:parcours-reset', e => {
+    const id = e.detail && e.detail.id; if (!id) return;
+    Object.keys(S.parcoursSem).forEach(k => { if (k.indexOf(id + '-') === 0) delete S.parcoursSem[k]; });
+    delete S.parcoursFin[id]; sauver();
+  });
+
+  /* La grande fête de fin de mois */
+  function feteMois(id) {
+    if (document.querySelector('.jeu-fete')) return;
+    const zone = app.querySelector('#parcours');
+    const titre = zone ? (zone.querySelector('h2') || {}).textContent : '';
+    const couleur = zone ? getComputedStyle(zone).backgroundColor : '#fdd5a5';
+    const ov = document.createElement('div'); ov.className = 'jeu-ov jeu-fete'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Un mois ensemble');
+    ov.style.setProperty('--c', couleur);
+    ov.innerHTML = `<div class="jeu-ov-in"><div class="jeu-ecran entre">
+      <div class="jeu-gros" aria-hidden="true">🏆</div>
+      <h2>Un mois ensemble !</h2>
+      <p class="jeu-fete-txt">Pendant 4 semaines, vous avez été là, l'un pour l'autre. Semaine après semaine, vous avez fait l'effort d'avancer ensemble, de créer du lien et d'apprendre à mieux vous comprendre.</p>
+      <div class="jeu-medaille"><img src="p-${esc(id)}.png" alt=""><div><b>${esc(titre)}</b><span>4 semaines · parent et enfant</span></div></div>
+      <p class="jeu-fete-txt"><b>L'harmonie et l'épanouissement se vivent au quotidien.</b> Vous venez de le prouver.</p>
+      <p class="jeu-gain">+15 ✨</p>
+      <p class="jeu-fete-txt">Badge « Un mois ensemble » 🏆 gagné.</p>
+      <button type="button" class="btn plein" id="j-souvenir">Voir notre carte souvenir 🌸</button>
+    </div></div>`;
+    document.body.appendChild(ov); document.body.classList.add('jeu-fige');
+    const fermer = () => { ov.remove(); document.body.classList.remove('jeu-fige'); const g = app.querySelector('.pc-souvenir') || app.querySelector('#parcours'); if (g) g.scrollIntoView({ behavior: calme ? 'auto' : 'smooth', block: 'center' }); };
+    ov.querySelector('#j-souvenir').addEventListener('click', () => { sfx('pop'); fermer(); });
+    ov.querySelector('#j-souvenir').focus({ preventScroll: true });
+    sfx('niveau'); setTimeout(() => sfx('fanfare'), 700);
+    petalesVolants(innerWidth / 2, innerHeight / 3, 40);
+    [0, 1, 2, 3, 4, 5].forEach(k => setTimeout(() => petalesVolants(innerWidth * (0.12 + 0.15 * k), innerHeight / 3, 16), 400 + k * 450));
+  }
+
   /* Parcours d'un mois : chaque semaine vécue rapporte des étincelles, le mois complet un badge.
      (écouté en phase de capture : la carte est redessinée juste après par l'application) */
   document.addEventListener('change', e => {
@@ -328,7 +409,7 @@
     const zone = cb.closest('#parcours'), toutes = zone ? zone.querySelectorAll('.pc-fait:checked').length : 0;
     sfx('fanfare'); petalesVolants(c.x, c.y, 18);
     if (id && !S.parcoursSem[id + '-' + n]) { S.parcoursSem[id + '-' + n] = aujourd; S.nSemaines++; gagner(6, cb, 'mute'); }
-    if (id && toutes === 4 && !S.parcoursFin[id]) { S.parcoursFin[id] = aujourd; S.nParcours++; gagner(15, cb, 'mute'); setTimeout(() => bandeau('Un mois vécu ensemble 🏆', 'Gardez votre rituel pour que ça dure !'), 900); }
+    if (id && toutes === 4 && !S.parcoursFin[id]) { S.parcoursFin[id] = aujourd; S.medailles[id] = aujourd; S.nParcours++; gagner(15, cb, 'mute'); setTimeout(() => feteMois(id), 500); }
   }, true);
 
   document.addEventListener('click', e => {

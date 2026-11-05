@@ -334,3 +334,13 @@ body.protege img { -webkit-user-drag: none; pointer-events: auto; }
 .pc-garde { background: #fff; border-radius: 20px; padding: 14px 16px; margin-top: 14px; }
 .pc-garde textarea { width: 100%; min-height: 80px; margin: 8px 0; font: inherit; padding: 10px; border: 2px solid #e4dcec; border-radius: 14px; }
 .pc-bravo { font-weight: 600; margin: 14px 0 8px; }
+
+.pc-sem.verrou { background: rgba(255,255,255,.4); padding: 4px 14px; }
+.pc-lock { display: flex; gap: 12px; align-items: center; padding: 10px 0; opacity: .75; }
+.pc-lock small { font-weight: 400; }
+.pc-sem .btn.pc-lancer { margin: 4px 0 6px; }
+.pc-souvenir { background: #fff; border-radius: 20px; padding: 14px 16px; margin: 14px 0 10px; border: 3px solid rgba(0,0,0,.8); }
+.pc-med { display: flex; gap: 14px; align-items: center; margin: 10px 0; }
+.pc-med img { width: 64px; height: 64px; object-fit: contain; flex: none; }
+.pc-noms { font-weight: 600; font-size: 1.1rem; margin: 4px 0; }
+.pc-garde input[type=text] { width: 100%; font: inherit; padding: 10px; border: 2px solid #e4dcec; border-radius: 14px; margin: 6px 0 10px; }

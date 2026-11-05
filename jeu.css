@@ -73,3 +73,12 @@ body.jeu-fige { overflow: hidden; }
 .jeu-auto { align-self: flex-start; margin: 0 0 4px; padding: 8px 14px; border-radius: 999px; border: 2px solid #000; background: #fff; font-size: .85rem; font-weight: 600; }
 .jeu-auto[aria-pressed="true"] { background: #f8f4b8; }
 .jeu-ecoute { background: #fff; }
+
+.jeu-fete .jeu-ov-in { text-align: center; }
+.jeu-fete h2 { font-size: 2rem; margin: 8px 0; }
+.jeu-fete-txt { margin: 8px 0; }
+.jeu-medaille { display: flex; gap: 14px; align-items: center; justify-content: center; background: #fff; border-radius: 22px; padding: 12px 16px; margin: 12px auto; text-align: left; max-width: 420px; }
+.jeu-medaille img { width: 64px; height: 64px; object-fit: contain; flex: none; }
+.jeu-medaille span { display: block; font-size: .9rem; }
+
+.jeu-med { margin-left: 6px; font-size: 20px; align-self: center; }

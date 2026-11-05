@@ -359,31 +359,38 @@
   /* ---------- Parcours d'un mois (4 semaines, suivi dans le téléphone) ---------- */
   const JOUR = 86400000;
   const parcoursDe = id => { const S = charger(); S.parcours = S.parcours || {}; return S.parcours[id] || (S.parcours[id] = { debut: '', sem: {}, garde: '', fini: '', nb: 0 }); };
-  const semCourante = pc => { if (!pc.debut) return 1; const j = Math.floor((new Date(iso(new Date())) - new Date(pc.debut)) / JOUR); return Math.max(1, Math.min(4, Math.floor(j / 7) + 1)); };
+  const semCourante = pc => { for (let n = 1; n <= 4; n++) if (!pc.sem[n]) return n; return 4; };
   function parcoursHtml(p) {
     const pr = p.parcours, pc = parcoursDe(p.id), faites = Object.keys(pc.sem).length, cur = semCourante(pc);
     const garde = pr.garde || {};
     const barre = `<div class="pc-barre" role="img" aria-label="${faites} semaine(s) sur 4 vécue(s)">${[1, 2, 3, 4].map(n => `<i class="${pc.sem[n] ? 'ok' : ''}"></i>`).join('')}</div>`;
     const entete = `<span class="etiquette">Parcours d'un mois</span><h2>${esc(pr.titre)}</h2><p class="pc-intro">${esc(pr.intro)}</p>`;
-    if (!pc.debut) return `${entete}<p class="petit">4 semaines, un petit défi à vivre à deux chaque semaine. Si une semaine est ratée, on la reprend sans rattraper : le rythme est le vôtre.</p><button type="button" class="btn plein" id="pc-debut">Commencer notre mois</button>`;
+    if (!pc.debut) return `${entete}<p class="petit">4 semaines à vivre à deux, une mission par semaine. Une semaine s'ouvre quand la précédente a été vécue : prenez le temps qu'il faut, sans pression.</p><button type="button" class="btn plein" id="pc-debut">Commencer notre mois</button>`;
     const sem = pr.semaines.map((w, i) => {
-      const n = i + 1, fait = pc.sem[n];
-      return `<details class="pc-sem${fait ? ' fait' : ''}" ${n === cur && !fait ? 'open' : ''}>
+      const n = i + 1, fait = pc.sem[n], ouverte = n === 1 || !!pc.sem[n - 1];
+      if (!ouverte) return `<div class="pc-sem verrou"><div class="pc-lock"><span class="pc-num" aria-hidden="true">🔒</span><span><b>Semaine ${n}</b> · ${esc(w.titre)}<br><small>Se débloque quand la semaine ${n - 1} est vécue ensemble</small></span></div></div>`;
+      return `<details class="pc-sem${fait ? ' fait' : ''}" data-n="${n}" ${n === cur && !fait ? 'open' : ''}>
         <summary><span class="pc-num">${fait ? '✓' : n}</span><span><b>Semaine ${n}</b> · ${esc(w.titre)}${n === cur && !fait ? ' <em>(cette semaine)</em>' : ''}</span></summary>
         <p class="pc-mission">${esc(w.mission)}</p>
+        ${fait ? '' : `<button type="button" class="btn plein pc-lancer" data-n="${n}">🎮 Lancer la mission <small>(${w.etapes.length} étapes)</small></button><p class="jeu-aide">Ou lisez les étapes, vivez-les à votre rythme, puis cochez la case.</p>`}
         <ol class="etapes">${w.etapes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
         <div class="parler"><b>Pour en parler ensuite</b><ul>${w.enParler.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
-        <label class="coche"><input type="checkbox" class="pc-fait" data-n="${n}" ${fait ? 'checked' : ''}> Nous l'avons vécue ensemble</label>
+        <label class="coche"><input type="checkbox" class="pc-fait" data-n="${n}" ${fait ? 'checked' : ''} ${pc.sem[n + 1] ? 'disabled' : ''}> Nous l'avons vécue ensemble</label>
       </details>`;
     }).join('');
     const fini = faites === 4;
+    const souvenir = fini ? `<div class="pc-souvenir"><span class="etiquette">Notre carte souvenir 🏅</span>
+      <div class="pc-med"><img src="p-${esc(p.id)}.png" alt=""><div><b>${esc(pr.titre)}</b><br>Vécu ensemble du ${dateCourte(pc.debut)} au ${dateCourte(pc.fini || pc.debut)}${pc.nb > 1 ? ` · parcours n°${pc.nb}` : ''}</div></div>
+      ${pc.noms ? `<p class="pc-noms">${esc(pc.noms)}</p>` : ''}
+      <p>4 semaines pour vous retrouver, vous écouter et mieux vous comprendre. L'harmonie et l'épanouissement se vivent au quotidien : vous venez de le vivre ensemble.</p></div>
+      <button type="button" class="btn gris" id="pc-reprendre">Recommencer un nouveau mois</button>` : '';
     const rituel = fini || pc.garde ? `<div class="pc-garde"><span class="etiquette">Ce que nous gardons</span><h3>${esc(garde.titre || 'Notre rituel')}</h3>
       <p>${esc(garde.idee || '')}</p>
       <label for="pc-garde" class="aide">${esc(garde.invite || 'Notre rituel')}</label>
       <textarea id="pc-garde" maxlength="300" placeholder="Écrivez-le avec votre enfant…">${esc(pc.garde)}</textarea>
-      <button type="button" class="btn" id="pc-enreg">Garder notre rituel</button><p class="ok" id="pc-ok" role="status"></p></div>` : '';
-    const bravo = fini ? `<p class="pc-bravo">🎉 Mois vécu ensemble${pc.nb > 1 ? ` (parcours n°${pc.nb})` : ''} ! Gardez votre rituel pour que ça dure.</p><button type="button" class="btn gris" id="pc-reprendre">Recommencer un nouveau mois</button>` : '';
-    return `${entete}${barre}<p class="petit">${faites} semaine${faites > 1 ? 's' : ''} sur 4 · commencé le ${dateCourte(pc.debut)}</p>${sem}${bravo}${rituel}`;
+      ${fini ? `<label for="pc-noms" class="aide">Vos prénoms, pour la carte souvenir (facultatif)</label><input type="text" id="pc-noms" maxlength="60" value="${esc(pc.noms || '')}" placeholder="Ex. Sarah et Léo">` : ''}
+      <button type="button" class="btn" id="pc-enreg">Garder</button><p class="ok" id="pc-ok" role="status"></p></div>` : '';
+    return `${entete}${barre}<p class="petit">${faites} semaine${faites > 1 ? 's' : ''} sur 4 · commencé le ${dateCourte(pc.debut)}</p>${sem}${souvenir}${rituel}`;
   }
   function lierParcours(id) {
     const zone = $app.querySelector('#parcours'); if (!zone) return;
@@ -400,11 +407,19 @@
     }));
     const g = zone.querySelector('#pc-enreg');
     if (g) g.addEventListener('click', () => {
-      parcoursDe(id).garde = zone.querySelector('#pc-garde').value.trim().slice(0, 300); const ok = sauver();
-      zone.querySelector('#pc-ok').textContent = ok ? 'Rituel gardé sur votre téléphone.' : 'Impossible d\'enregistrer sur ce téléphone.';
+      const pc = parcoursDe(id);
+      pc.garde = zone.querySelector('#pc-garde').value.trim().slice(0, 300);
+      const nm = zone.querySelector('#pc-noms'); if (nm) pc.noms = nm.value.trim().slice(0, 60);
+      const ok = sauver();
+      if (nm) { redessiner(); const o = zone.querySelector('#pc-ok'); if (o) o.textContent = ok ? 'Gardé sur votre téléphone.' : 'Impossible d\'enregistrer sur ce téléphone.'; }
+      else zone.querySelector('#pc-ok').textContent = ok ? 'Rituel gardé sur votre téléphone.' : 'Impossible d\'enregistrer sur ce téléphone.';
     });
     const r = zone.querySelector('#pc-reprendre');
-    if (r) r.addEventListener('click', () => { const pc = parcoursDe(id); pc.sem = {}; pc.fini = ''; pc.debut = iso(new Date()); sauver(); redessiner(); });
+    if (r) r.addEventListener('click', () => {
+      if (!confirm('Recommencer un nouveau mois ? Votre carte souvenir et votre rituel sont gardés.')) return;
+      const pc = parcoursDe(id); pc.sem = {}; pc.fini = ''; pc.debut = iso(new Date()); sauver();
+      document.dispatchEvent(new CustomEvent('brille:parcours-reset', { detail: { id } })); redessiner();
+    });
   }
 
   function lierPetale(id) {
