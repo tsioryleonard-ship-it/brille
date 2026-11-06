@@ -967,24 +967,25 @@
     const actives = carnet.familles.filter(f => f.actif);
     const stock = carnet.familles.filter(f => f.actif && f.vente && f.publie && !f.envoye).length;
     const aPublier = carnet.familles.filter(f => f.actif && f.vente && !f.publie).length;
-    const ligneFam = (f, i) => f.actif ? `<div class="carte fam${f.admin ? ' fam-admin' : ''}" data-i="${i}">
-        ${f.admin ? '<span class="badge-admin">Mon accès ingénieure · protégé</span>' : ''}
-        <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe"${f.admin ? ' disabled' : ''}>
-        <p>Code : <code>${esc(f.code)}</code></p>
-        ${f.admin ? '' : `<label class="petit" style="display:block">Fin d'accès ${f.fin && iso(new Date()) > f.fin ? '<b style="color:#a33">(terminée)</b>' : ''}
+    const ligneFam = (f, i) => f.actif ? `<div class="carte fam${f.admin ? ' fam-admin' : ''}${f.essai ? ' fam-essai' : ''}" data-i="${i}">
+        ${f.admin ? '<span class="badge-admin">Mon accès ingénieure · protégé</span>' : ''}${f.essai ? '<span class="badge-admin" style="background:#f49f4c;color:#2b2b2b">🔒 Code d\'essai · protégé · à ne jamais envoyer à une famille</span>' : ''}
+        <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe"${f.admin || f.essai ? ' disabled' : ''}>
+        <p>Code : <code>${f.essai ? '••••-••••' : esc(f.code)}</code></p>
+        ${f.essai ? '<p class="petit" style="margin:2px 0 10px">Ce code est utilisé automatiquement par l\'essai gratuit (après la vérification par e-mail). Ne le modifiez pas, ne le retirez pas.</p>' : ''}
+        ${f.admin || f.essai ? '' : `<label class="petit" style="display:block">Fin d'accès ${f.fin && iso(new Date()) > f.fin ? '<b style="color:#a33">(terminée)</b>' : ''}
           <input type="date" class="finf" value="${esc(f.fin || '')}" style="padding:6px 10px;border:2px solid #e4dcec;border-radius:12px;font:inherit;margin-left:6px"></label>
         <p class="petit" style="margin:2px 0 10px">${f.fin ? '' : 'Sans limite de durée. '}Laissez vide pour un accès sans date de fin.</p>`}
         <p class="petit">Ajouté le ${esc(f.ajout || '')}${f.vente ? ' · ' + (f.envoye ? 'envoyé le ' + esc(f.envoye) + (f.acheteur ? ' à ' + esc(f.acheteur) : '') : (f.publie ? 'disponible pour la vente' : 'à publier')) : ''}</p>
-        <div class="chips">${f.admin ? cases('pf', f.petales).replace(/<input/g, '<input disabled') : cases('pf', f.petales)}</div>
-        <div class="actions-fam">
+        <div class="chips">${f.admin || f.essai ? cases('pf', f.petales).replace(/<input/g, '<input disabled') : cases('pf', f.petales)}</div>
+        ${f.essai ? '' : `<div class="actions-fam">
           <button type="button" class="btn petit-btn" data-a="msg">Copier le message</button>
           <button type="button" class="btn petit-btn" data-a="msgachat">Message d'achat</button>
           ${f.vente ? `<button type="button" class="btn petit-btn gris" data-a="envoye">${f.envoye ? 'Remettre en stock' : 'Marquer comme envoyé'}</button>` : ''}
           <button type="button" class="btn petit-btn gris" data-a="lien">Copier le lien</button>
           <button type="button" class="btn petit-btn gris" data-a="qr">QR code</button>
           ${f.admin ? '' : '<button type="button" class="btn petit-btn alerte" data-a="retirer">Retirer</button>'}
-        </div></div>` : '';
-    const lignes = carnet.familles.map((f, i) => f.admin ? ligneFam(f, i) : '').join('') + carnet.familles.map((f, i) => f.admin ? '' : ligneFam(f, i)).join('');
+        </div>`}</div>` : '';
+    const lignes = carnet.familles.map((f, i) => f.admin ? ligneFam(f, i) : '').join('') + carnet.familles.map((f, i) => f.admin || f.essai ? '' : ligneFam(f, i)).join('') + carnet.familles.map((f, i) => f.essai && !f.admin ? ligneFam(f, i) : '').join('');
     return `<section class="vue"><a class="retour" href="#/plus">← Plus</a>
       <h1><span class="surligne" style="--hl:var(--vert)">Gérer les familles</span></h1>
       <div class="grille-cartes">
@@ -1071,9 +1072,10 @@
       const f = carnet.familles[+bloc.dataset.i];
       const fi = bloc.querySelector('.finf');
       if (fi) fi.addEventListener('change', e => { f.fin = e.target.value || ''; ecrireCarnet(carnet); st('Date de fin modifiée. Pensez à publier (bouton « Préparer les fichiers »).'); });
-      bloc.querySelector('.nomf').addEventListener('input', e => { if (f.admin) return; f.nom = e.target.value; ecrireCarnet(carnet); });
+      bloc.querySelector('.nomf').addEventListener('input', e => { if (f.admin || f.essai) return; f.nom = e.target.value; ecrireCarnet(carnet); });
       bloc.querySelectorAll('.pf').forEach(c => c.addEventListener('change', () => {
         if (f.admin) { c.checked = true; return; }
+        if (f.essai) { c.checked = f.petales.includes(c.dataset.id); return; }
         if (c.checked) { if (!f.petales.includes(c.dataset.id)) f.petales.push(c.dataset.id); }
         else { f.petales = f.petales.filter(x => x !== c.dataset.id); Acces.renouvelerCles(carnet, [c.dataset.id]); }
         ecrireCarnet(carnet); st('Modifié. Pensez à publier (bouton « Préparer les fichiers »).');
@@ -1229,7 +1231,8 @@
   });
   (() => {
     const st = document.createElement('style');
-    st.textContent = `.hero-accueil{display:block!important;position:relative;overflow:hidden}
+    st.textContent = `.fam-essai{background:#fdd5a5!important;border:2px solid #f49f4c}.fam-essai code{background:#fff6e8}
+.hero-accueil{display:block!important;position:relative;overflow:hidden}
 .hero-accueil .logo-etincelle{position:static!important;float:right;width:min(42%,230px)!important;height:auto!important;margin:0 0 4px 14px!important;shape-outside:margin-box}
 .hero-accueil h1{font-size:clamp(2.2rem,9vw,3.8rem);line-height:1.05;margin:.25em 0 .3em}
 .hero-accueil p{text-align:justify;hyphens:auto;-webkit-hyphens:auto;max-width:none!important;padding-right:0!important;margin:0 0 .7em}

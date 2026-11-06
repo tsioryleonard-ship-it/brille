@@ -220,3 +220,7 @@ Les liens « Conditions générales · Confidentialité · Mentions légales » 
 - L'écran d'accueil parle aussi aux familles sans atelier : « Pas encore venus en atelier ? Testez gratuitement un pétale pendant 7 jours, en famille. » (visible seulement quand l'essai est actif).
 - La famille illustrée passe en haut à droite et le texte l'épouse en s'étirant (texte justifié), sans espace vide.
 - Dans « Gérer les familles », la carte « Codes d'essai gratuit » disparaît quand le serveur d'essai est branché (ligne `"serveur"` de `config.json`) : les codes sont alors gérés dans le script Google.
+
+## Version 44 : codes d'essai protégés (en orange)
+
+Dans « Gérer les familles », les 7 lignes « Essai · … » sont en **orange**, avec le badge « 🔒 Code d'essai · protégé ». Leur code est masqué (••••-••••), et il n'y a plus ni boutons (copier le message, le lien, le QR code, retirer), ni date de fin, ni cases modifiables : impossible de les envoyer ou de les casser par erreur. Elles sont rangées en bas de la liste.
