@@ -214,3 +214,9 @@ Tant que les codes sont vides, le bouton d'essai n'apparaît pas.
 ## Version 42 : liens vers les conditions et mentions légales
 
 Les liens « Conditions générales · Confidentialité · Mentions légales » sont maintenant visibles sur l'écran d'accueil, sur l'écran e-mail de l'essai gratuit et en bas de l'onglet Plus (avant, ils n'apparaissaient que si l'achat était activé).
+
+## Version 43 : accueil pour tous, mise en page, carte admin
+
+- L'écran d'accueil parle aussi aux familles sans atelier : « Pas encore venus en atelier ? Testez gratuitement un pétale pendant 7 jours, en famille. » (visible seulement quand l'essai est actif).
+- La famille illustrée passe en haut à droite et le texte l'épouse en s'étirant (texte justifié), sans espace vide.
+- Dans « Gérer les familles », la carte « Codes d'essai gratuit » disparaît quand le serveur d'essai est branché (ligne `"serveur"` de `config.json`) : les codes sont alors gérés dans le script Google.

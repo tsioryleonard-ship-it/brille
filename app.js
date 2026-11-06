@@ -294,6 +294,7 @@
         <span class="etiquette">La suite des ateliers</span>
         <h1>Étincelle</h1>
         <p>${esc(D.config.messageAccueil)}</p>
+        ${essaiDispo() ? `<p class="hero-essai">Pas encore venus en atelier ? <b>Testez gratuitement un pétale pendant ${essaiJours()} jours</b>, en famille.</p>` : ''}
       </div>`;
   const motIngenieure = () => `<figure class="mot">
       <figcaption>Le mot de l'ingénieure QVE</figcaption>
@@ -1010,10 +1011,10 @@
       <div class="carte"><h2>Ajouter les parcours d'un mois</h2>
         <p class="petit">Choisissez le fichier <b>parcours-mensuels-PRIVE.json</b> (sur votre ordinateur, jamais sur GitHub). Les parcours sont ajoutés aux pétales, puis chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
         <input type="file" id="f-parcours" accept=".json"><p class="erreur" id="st-parcours" role="status"></p></div>
-      <div class="carte"><h2>Codes d'essai gratuit</h2>
+      ${essaiServeur() ? '' : `<div class="carte"><h2>Codes d'essai gratuit</h2>
         <p class="petit">Une seule fois : crée 7 codes d'essai (un par pétale). Ensuite, les familles qui n'ont pas suivi d'atelier testent un pétale pendant ${essaiJours()} jours, tout seul, sans rien à faire de ton côté. Le bloc copié est à coller dans <b>config.json</b> (ligne <code>"codes"</code>), puis publie les fichiers.</p>
         <button type="button" class="btn plein" id="creer-essai">Créer les codes d'essai</button>
-        <p class="erreur" id="st-essai" role="status"></p></div>
+        <p class="erreur" id="st-essai" role="status"></p></div>`}
       <div class="carte"><h2>Publier les changements</h2>
         <p>Après chaque ajout ou retrait, téléchargez les deux fichiers, puis déposez-les sur GitHub (Add file → Upload files → Commit changes). Les familles les prennent en compte dans les minutes qui suivent.</p>
         <button type="button" class="btn plein" id="fabriquer">Préparer les fichiers à publier</button>
@@ -1228,7 +1229,14 @@
   });
   (() => {
     const st = document.createElement('style');
-    st.textContent = `.essai-bandeau{background:#cbe1b6;color:#2b2b2b;text-align:center;padding:8px 14px;border-radius:14px;margin:0 0 12px;font-weight:600}.essai-bandeau a{color:inherit}
+    st.textContent = `.hero-accueil{display:block!important;position:relative;overflow:hidden}
+.hero-accueil .logo-etincelle{position:static!important;float:right;width:min(42%,230px)!important;height:auto!important;margin:0 0 4px 14px!important;shape-outside:margin-box}
+.hero-accueil h1{font-size:clamp(2.2rem,9vw,3.8rem);line-height:1.05;margin:.25em 0 .3em}
+.hero-accueil p{text-align:justify;hyphens:auto;-webkit-hyphens:auto;max-width:none!important;padding-right:0!important;margin:0 0 .7em}
+.hero-accueil .hero-essai{background:rgba(255,255,255,.55);border-radius:14px;padding:10px 14px;text-align:left}
+.hero-accueil::after{content:'';display:block;clear:both}
+@media(max-width:520px){.hero-accueil .logo-etincelle{width:min(38%,150px)!important}}
+.essai-bandeau{background:#cbe1b6;color:#2b2b2b;text-align:center;padding:8px 14px;border-radius:14px;margin:0 0 12px;font-weight:600}.essai-bandeau a{color:inherit}
 .essai-q{font-size:1.35rem;line-height:1.3;margin:8px 0 14px}.essai-choix{display:grid;gap:10px;margin-bottom:10px}.essai-c{text-align:left;white-space:normal;height:auto;padding:12px 16px}
 .essai-p{display:grid;grid-template-columns:48px 1fr;gap:6px 12px;align-items:center;background:var(--c,#f8f4b8);border-radius:18px;padding:12px;margin:8px 0}.essai-p img{width:48px;height:48px;object-fit:contain}.essai-p .btn{grid-column:1/-1}
 .essai-autres{margin:10px 0}.reprise{background:#fdd5a5;color:#2b2b2b;border-radius:16px;padding:12px 14px;margin:10px 0}
