@@ -61,10 +61,34 @@
   const essaiJours = () => Math.max(1, parseInt(essaiCfg().jours, 10) || 7);
   const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
   const essaiCodes = () => { const o = {}; Object.entries(essaiCfg().codes || {}).forEach(([k, c]) => { if (normCode(c)) o[k] = String(c).trim(); }); return o; };
-  const essaiDispo = () => essaiCfg().actif !== false && Object.keys(essaiCodes()).length > 0;
+  /* Avec un « serveur » (petit script Google gratuit, voir SERVEUR-ESSAI.md), l'essai exige un e-mail vérifié : un essai par adresse,
+     sur n'importe quel téléphone, et les codes d'essai ne sont plus dans config.json. Sans serveur : verrou sur le téléphone seulement. */
+  const essaiServeur = () => String(essaiCfg().serveur || '').trim();
+  const essaiPetales = () => essaiServeur() ? (Array.isArray(essaiCfg().petales) && essaiCfg().petales.length ? essaiCfg().petales : (D.vitrine || []).map(v => v.id)) : Object.keys(essaiCodes());
+  const essaiDispo = () => essaiCfg().actif !== false && (!!essaiServeur() || Object.keys(essaiCodes()).length > 0);
+  const appelServeur = async corps => {
+    const r = await fetch(essaiServeur(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(corps) });
+    if (!r.ok) throw new Error('reseau'); return r.json();
+  };
   const essaiPour = code => { const n = normCode(code); const t = Object.entries(essaiCodes()).find(([, c]) => normCode(c) === n); return t ? t[0] : ''; };
-  const lireEssais = () => { try { return JSON.parse(localStorage.getItem(CLE_ESSAI) || '{}') || {}; } catch { return {}; } };
-  const ecrireEssais = E => { try { localStorage.setItem(CLE_ESSAI, JSON.stringify(E)); } catch { } };
+  const essaiPause = () => { const n = parseInt(essaiCfg().pause, 10); return Number.isFinite(n) && n >= 0 ? n : 30; };   // jours d'attente après un essai
+  /* Un seul essai à la fois, puis une pause avant le suivant. La date du dernier essai est gardée à deux endroits du téléphone
+     (mémoire de l'appli + cookie) : vider l'historique ne suffit pas à le recommencer. */
+  const lireEssai = () => {
+    const lots = [];
+    try { const o = JSON.parse(localStorage.getItem(CLE_ESSAI) || 'null'); if (o && o.d) lots.push({ p: o.p, d: o.d }); else if (o && typeof o === 'object') Object.entries(o).forEach(([p, d]) => { if (/^\d{4}-\d\d-\d\d$/.test(d)) lots.push({ p, d }); }); } catch { }
+    try { const m = document.cookie.match(/(?:^|; )brille_essai=([^;]+)/); if (m) { const [p, d] = decodeURIComponent(m[1]).split('|'); if (/^\d{4}-\d\d-\d\d$/.test(d || '')) lots.push({ p, d }); } } catch { }
+    return lots.sort((a, b) => a.d < b.d ? 1 : -1)[0] || null;
+  };
+  const ecrireEssai = R => {
+    try { localStorage.setItem(CLE_ESSAI, JSON.stringify(R)); } catch { }
+    try { document.cookie = 'brille_essai=' + encodeURIComponent(R.p + '|' + R.d) + '; max-age=63072000; path=/; SameSite=Lax'; } catch { }
+  };
+  const essaiEtat = () => {
+    const R = lireEssai(); if (!R) return null;
+    const fin = plusJours(R.d, essaiJours() - 1), libre = plusJours(fin, essaiPause() + 1), auj = iso(new Date());
+    return { R, fin, libre, actif: auj <= fin, bloque: auj > fin && auj < libre };
+  };
   const joursRestants = fin => Math.max(0, Math.round((new Date(fin + 'T00:00:00') - jour(new Date())) / 86400000) + 1);
   const titreEnfant = id => { const v = (D.vitrine || []).find(x => x.id === id); return v ? (v.miroir || v.titre) : id; };
   function composer(ouverts) {                        // ouverts : liste d'identifiants de pétales ouverts
@@ -99,8 +123,15 @@
   async function deverrouiller(code, exigerAdmin) {    // ouvre le contenu autorisé par ce code
     const r = await Acces.ouvrir(code, ACCES.acces, ACCES.contenuEnc);
     if (exigerAdmin && !r.admin) throw new Error('admin');
-    const ess = r.admin ? '' : essaiPour(code);          // code d'essai : la semaine démarre à la première ouverture
-    if (ess) { const E = lireEssais(); if (!E[ess]) { E[ess] = iso(new Date()); ecrireEssais(E); } r.fin = plusJours(E[ess], essaiJours() - 1); }
+    const ess = r.admin ? '' : (essaiPour(code) || (/^Essai ·/.test(r.nom || '') ? Object.keys(r.details || {})[0] || '' : ''));
+    if (ess) {
+      let s = essaiEtat();
+      if (s && s.actif && s.R.p !== ess) { const e = new Error('autre'); e.p = s.R.p; e.fin = s.fin; throw e; }      // déjà un essai en cours ailleurs
+      if (s && !s.actif && s.bloque) { const e = new Error('pause'); e.fin = s.fin; e.libre = s.libre; throw e; }   // pause entre deux essais
+      if (essaiServeur()) { if (!s || !s.actif) throw new Error('demarrer'); }                                      // seul le serveur démarre un essai
+      else if (!s || (!s.actif && !s.bloque)) { ecrireEssai({ p: ess, d: iso(new Date()) }); s = essaiEtat(); }     // sans serveur : démarrage local
+      r.fin = s.fin;
+    }
     if (r.fin && !r.admin && iso(new Date()) > r.fin) { const e = new Error('expire'); e.fin = r.fin; e.essai = !!ess; throw e; }
     document.body.dataset.admin = r.admin ? '1' : ''; D.details = r.details; D.admin = r.admin; D.nom = ess ? 'Essai BRILLE' : r.nom; D.fin = r.admin ? '' : r.fin; D.essai = ess; D.apercu = null;
     appliquerProtection();
@@ -109,7 +140,13 @@
     return true;
   }
   const dateLongue = d => { const [a, m, j] = d.split('-').map(Number); return `${String(j).padStart(2, '0')}/${String(m).padStart(2, '0')}/${a}`; };
-  const messageAcces = x => x && x.message === 'expire'
+  const messageAcces = x => x && x.message === 'pause'
+    ? `Votre semaine d'essai s'est terminée le ${dateLongue(x.fin)}. Merci d'avoir testé Étincelle ! Un nouvel essai sera possible à partir du ${dateLongue(x.libre)}. Pour continuer ce pétale dès maintenant, ${achatActif() ? 'touchez « Obtenir un accès » ci-dessous' : 'écrivez à ' + ((D.config.contact || {}).email || 'BRILLE')}.`
+    : x && x.message === 'demarrer'
+    ? `Pour démarrer un essai gratuit, touchez « Tester gratuitement » sur l'écran d'accueil.`
+    : x && x.message === 'autre'
+    ? `Vous avez déjà un essai en cours sur « ${titreEnfant(x.p)} », jusqu'au ${dateLongue(x.fin)}. Un seul pétale à la fois : reprenez-le avec son code.`
+    : x && x.message === 'expire'
     ? (x.essai ? `Votre semaine d'essai s'est terminée le ${dateLongue(x.fin)}. Merci d'avoir testé Étincelle ! Pour continuer ce pétale, ${achatActif() ? 'touchez « Obtenir un accès » ci-dessous' : 'écrivez à ' + ((D.config.contact || {}).email || 'BRILLE')}.`
       : `Votre accès s'est terminé le ${dateLongue(x.fin)}. Pour le renouveler, écrivez à ${(D.config.contact || {}).email || 'BRILLE'}.`)
     : '';
@@ -1016,7 +1053,7 @@
       ecrireCarnet(carnet);
       const bloc = JSON.stringify({ actif: true, jours: essaiJours(), codes }, null, 2);
       const e = $app.querySelector('#st-essai');
-      try { await navigator.clipboard.writeText(bloc); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Les 7 codes sont créés et le bloc est copié. Colle-le dans config.json (à la place de « essai »), puis « Préparer les fichiers » et publie.'; } }
+      try { await navigator.clipboard.writeText(bloc); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Les 7 codes sont créés et le bloc est copié. ' + (essaiServeur() ? 'Colle-le dans le script Google (liste CODES), puis « Préparer les fichiers » et publie.' : 'Colle-le dans config.json (ligne « codes »), puis « Préparer les fichiers » et publie.'); } }
       catch { prompt('Copiez ce bloc pour config.json :', bloc); }
     });
     const prochain = $app.querySelector('#prochain');
@@ -1090,8 +1127,8 @@
   function ecranEssai(etape, scores) {
     etape = etape || 0; scores = scores || {};
     document.body.classList.add('verrouille');
-    const Q = essaiCfg().questions || [], codes = essaiCodes();
-    const E = lireEssais();
+    const Q = essaiCfg().questions || [], codes = essaiCodes(), srv = !!essaiServeur();
+    const S = essaiEtat();
     const retour = `<button type="button" class="btn discret" id="es-retour" style="margin-top:12px">← Retour</button>`;
     const lierRetour = () => { const r = $app.querySelector('#es-retour'); if (r) r.addEventListener('click', () => etape > 0 ? ecranEssai(etape - 1, scores) : ecranCode()); };
     window.scrollTo(0, 0);
@@ -1108,27 +1145,75 @@
       }));
       lierRetour(); return;
     }
-    const dispo = Object.keys(codes);
+    const dispo = essaiPetales();
     const reco = dispo.slice().sort((a, b) => (scores[b] || 0) - (scores[a] || 0))[0];
     const carteP = (id, grand) => {
       const v = (D.vitrine || []).find(x => x.id === id); if (!v) return '';
-      const debut = E[id], fin = debut ? plusJours(debut, essaiJours() - 1) : '', fini = fin && iso(new Date()) > fin;
-      const lib = fini ? 'Essai terminé' : debut ? `Reprendre (${joursRestants(fin)} j)` : `Essayer ${essaiJours()} jours`;
+      const mien = S && S.R.p === id, bloc = !!(S && ((S.actif && !mien) || S.bloque));
+      const lib = S && S.actif ? (mien ? `Reprendre (${joursRestants(S.fin)} j)` : 'Un essai est déjà en cours') : S && S.bloque ? `Possible le ${dateLongue(S.libre)}` : `Essayer ${essaiJours()} jours`;
       return `<div class="essai-p" style="--c:${esc(v.couleur)}"><img src="p-${esc(id)}.png" alt=""><div><b>${esc(v.miroir || v.titre)}</b><br><small>${esc(v.miroirSous || '')}</small></div>
-        <button type="button" class="btn ${grand ? 'plein' : ''} essai-go" data-id="${esc(id)}" ${fini ? 'disabled' : ''}>${lib}</button></div>`;
+        <button type="button" class="btn ${grand ? 'plein' : ''} essai-go" data-id="${esc(id)}" ${bloc ? 'disabled' : ''}>${lib}</button></div>`;
     };
     $app.innerHTML = `<section class="vue acces"><div class="carte"><span class="etiquette">Votre pétale conseillé</span>
       <h1 class="essai-q">On vous propose de commencer par là</h1>
+      ${S && S.bloque ? `<p class="erreur" role="status" style="color:inherit">Votre essai s'est terminé le ${dateLongue(S.fin)}. Merci de l'avoir testé ! Un nouvel essai sera possible à partir du ${dateLongue(S.libre)}.</p>` : ''}
       ${carteP(reco, true)}
-      <p class="petit">Votre essai de ${essaiJours()} jours démarre à la première ouverture. Pas de paiement, pas d'engagement : à la fin, il s'arrête tout seul.</p>
+      <p class="petit">Votre essai de ${essaiJours()} jours démarre à la première ouverture. Pas de paiement, pas d'engagement : à la fin, il s'arrête tout seul. Un seul pétale à la fois, avec une pause ${essaiPause() >= 28 && essaiPause() <= 31 ? 'd\'un mois' : 'de ' + essaiPause() + ' jours'} avant l'essai suivant.</p>
       ${dispo.length > 1 ? `<details class="essai-autres"><summary>Choisir un autre pétale</summary>${dispo.filter(x => x !== reco).map(x => carteP(x, false)).join('')}</details>` : ''}
       <p class="erreur" id="es-err" role="alert"></p>${retour}</div></section>`;
     $app.querySelectorAll('.essai-go').forEach(b => b.addEventListener('click', async () => {
+      if (srv) { ecranEmail(b.dataset.id); return; }
       const err = $app.querySelector('#es-err'); b.disabled = true;
       try { await deverrouiller(codes[b.dataset.id]); document.body.classList.remove('verrouille'); location.hash = '#/petale/' + b.dataset.id; premiere = true; rendre(); }
       catch (x) { if (err) err.textContent = messageAcces(x) || 'L\'essai n\'est pas disponible pour le moment.'; b.disabled = false; }
     }));
     lierRetour();
+  }
+  function ecranEmail(id, etape, email, info) {
+    etape = etape || 1; email = email || '';
+    document.body.classList.add('verrouille'); window.scrollTo(0, 0);
+    const v = (D.vitrine || []).find(x => x.id === id) || {}, nom = v.miroir || v.titre || '';
+    const retour = `<button type="button" class="btn discret" id="em-retour" style="margin-top:12px">← Retour</button>`;
+    const err = m => { const e = $app.querySelector('#em-err'); if (e) e.textContent = m; };
+    if (etape === 1) {
+      $app.innerHTML = `<section class="vue acces"><div class="carte"><span class="etiquette">Essai gratuit · ${esc(nom)}</span>
+        <h1 class="essai-q">Votre adresse e-mail</h1>
+        <p>Nous vous envoyons un code à 6 chiffres pour démarrer votre essai de ${essaiJours()} jours. C'est ce qui garantit <b>un essai par famille</b>.</p>
+        <input type="email" id="em-mail" autocomplete="email" inputmode="email" placeholder="prenom@exemple.fr" value="${esc(email)}" style="width:100%;font-size:1.05rem;padding:12px;border-radius:12px;border:1px solid #ccc">
+        <label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-size:.9rem"><input type="checkbox" id="em-ok" style="margin-top:3px"><span>J'accepte que mon adresse serve uniquement à vérifier cet essai. Elle est conservée sous une forme chiffrée, illisible, et jamais utilisée pour m'écrire.</span></label>
+        <button type="button" class="btn plein" id="em-envoi">Recevoir mon code</button>
+        <p class="erreur" id="em-err" role="alert"></p>${retour}</div></section>`;
+      $app.querySelector('#em-envoi').addEventListener('click', async ev => {
+        const m = $app.querySelector('#em-mail').value.trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m)) return err('Cette adresse e-mail ne semble pas valide.');
+        if (!$app.querySelector('#em-ok').checked) return err('Merci de cocher la case pour continuer.');
+        ev.target.disabled = true; err('');
+        try { const r = await appelServeur({ action: 'demande', email: m, petale: id }); if (!r.ok) throw new Error('x'); ecranEmail(id, 2, m); }
+        catch { err('Connexion impossible pour le moment. Vérifiez votre réseau et réessayez.'); ev.target.disabled = false; }
+      });
+    } else {
+      $app.innerHTML = `<section class="vue acces"><div class="carte"><span class="etiquette">Essai gratuit · ${esc(nom)}</span>
+        <h1 class="essai-q">Entrez votre code</h1>
+        <p>Si l'adresse <b>${esc(email)}</b> est valable, un code à 6 chiffres vient d'être envoyé (pensez aux courriers indésirables). Il est valable 10 minutes.</p>
+        ${info ? `<p class="petit">${esc(info)}</p>` : ''}
+        <input type="text" id="em-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" style="width:100%;font-size:1.6rem;letter-spacing:.4em;text-align:center;padding:12px;border-radius:12px;border:1px solid #ccc">
+        <button type="button" class="btn plein" id="em-verif" style="margin-top:12px">Démarrer mon essai</button>
+        <p class="petit">Pas de code ? Si votre essai précédent date de moins d'un mois, aucun code n'est envoyé.</p>
+        <p class="erreur" id="em-err" role="alert"></p>${retour}</div></section>`;
+      $app.querySelector('#em-verif').addEventListener('click', async ev => {
+        const c = $app.querySelector('#em-code').value.replace(/\D/g, '');
+        if (c.length !== 6) return err('Le code contient 6 chiffres.');
+        ev.target.disabled = true; err('');
+        try {
+          const r = await appelServeur({ action: 'verifier', email, code: c, petale: id });
+          if (!r.ok) { err(r.raison === 'trop' ? 'Trop d\'essais. Demandez un nouveau code.' : r.raison === 'pause' ? 'Votre essai précédent est terminé. Un nouvel essai sera possible à partir du ' + dateLongue(r.libre) + '.' : 'Code incorrect ou expiré.'); ev.target.disabled = false; return; }
+          ecrireEssai({ p: r.petale, d: r.debut });
+          await deverrouiller(r.code); document.body.classList.remove('verrouille');
+          location.hash = '#/petale/' + r.petale; premiere = true; rendre();
+        } catch (x) { err(messageAcces(x) || 'Connexion impossible pour le moment. Réessayez.'); ev.target.disabled = false; }
+      });
+    }
+    const rt = $app.querySelector('#em-retour'); if (rt) rt.addEventListener('click', () => etape === 2 ? ecranEmail(id, 1, email) : ecranEssai(99));
   }
   const lienApp = () => location.origin + location.pathname.replace(/index\.html$/, '');
   document.addEventListener('click', async e => {

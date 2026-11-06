@@ -190,3 +190,17 @@ Tant que les codes sont vides, le bouton d'essai n'apparaît pas.
 - Les pétales d'essai restent protégés (filigrane « Essai BRILLE », pas de copier-coller).
 - Défis réécrits (`defis.json`, fichier PRIVÉ) : plus courts, ludiques, « Et si… ? ». À recharger dans `gestion-des-acces.html`, puis republier `acces.json` et `contenu.enc.json`.
 - Fichiers modifiés : `app.js`, `config.json`, `sw.js` (etincelle-v37). Prochaine version du sw : etincelle-v38.
+
+
+## Version 39 : un essai à la fois, avec une pause d'un mois
+
+- Une famille sans atelier peut essayer **un seul pétale à la fois, pendant 7 jours**. Ensuite, un **nouvel essai n'est possible qu'après 30 jours** (réglable dans `config.json`, ligne `"pause": 30`).
+- Cela marche même si la famille répond autrement au petit test : le blocage est lié au téléphone, pas au pétale choisi.
+- La date du dernier essai est gardée à deux endroits du téléphone, donc vider l'historique ne suffit pas à le recommencer. En revanche, « effacer toutes les données du site », un autre navigateur ou un autre téléphone permettent de recommencer : sans serveur, c'est impossible à empêcher complètement.
+- Semaine 1 de chaque parcours d'un mois : repensée pour ne plus reprendre l'activité « À faire ensemble » (observer et remarquer, sans dessiner).
+
+## Version 40 : essai verrouillé par e-mail (facultatif)
+
+- Si tu mets l'adresse de ton script Google dans `config.json` (ligne `"serveur"`), l'essai exige un **e-mail vérifié** (code à 6 chiffres) : un essai par adresse, sur n'importe quel téléphone. Les codes d'essai sortent alors de `config.json`.
+- Si la ligne `"serveur"` est vide, le bouton « Tester gratuitement » **n'apparaît pas** (sauf si des codes sont dans `config.json` : l'ancien verrou sur le téléphone s'applique alors).
+- La mise en place est expliquée dans `SERVEUR-ESSAI.md` (fichier privé, à garder dans le Drive).

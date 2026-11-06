@@ -12,15 +12,18 @@
   "essai": {
     "actif": true,
     "jours": 7,
-    "codes": {
-      "emotions": "ZBKA-V6RP",
-      "apprentissages": "XX37-VN2V",
-      "liens": "HT4Z-59ZY",
-      "droits": "RAL9-HV4N",
-      "equilibre": "LSU3-FPB2",
-      "briller": "YFU7-5QJ8",
-      "organisation": "76HW-PPFA"
-    },
+    "pause": 30,
+    "serveur": "https://script.google.com/macros/s/AKfycbyD3zcCHp4vypW5Ll3Tb2doVtsevlh9LoQiR5q9VXkYd2_JJJs4WhES06LDku2koPGuhw/exec",
+    "petales": [
+      "emotions",
+      "apprentissages",
+      "liens",
+      "droits",
+      "equilibre",
+      "briller",
+      "organisation"
+    ],
+    "codes": {},
     "questions": [
       {
         "q": "Ces temps-ci, qu'est-ce qui pèse le plus dans votre quotidien de famille ?",
