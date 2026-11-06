@@ -537,3 +537,6 @@ body.verrouille .brand-nom { display: none; }
 
 /* ===== v30 ===== */
 .pc-mot-sem { color: #4d7a35; font-weight: 600; line-height: 1.35; }
+
+/* v36 : espace entre les cartes de « Plus » et « Conditions d'utilisation » (grand écran) */
+.grille-cartes + details.carte { margin-top: 24px; }
