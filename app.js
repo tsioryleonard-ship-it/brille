@@ -182,6 +182,7 @@
         ${!ing && essaiDispo() ? `<button type="button" class="btn plein" id="essai" style="margin-top:10px">🌱 Tester gratuitement ${essaiJours() === 7 ? 'une semaine' : essaiJours() + ' jours'}</button><p class="petit" style="margin:6px 0 0">Répondez à 3 questions : nous vous conseillons un pétale à essayer, sans paiement ni engagement.</p>` : ''}
         ${!ing && !essaiDispo() && D.config.codeDecouverte ? '<button type="button" class="btn plein gris" id="decouverte" style="margin-top:10px">Découvrir un extrait gratuit</button>' : ''}
         ${ing ? '' : (achatActif() ? `<p class="petit">Vous n'avez pas suivi d'atelier ? <button type="button" class="lien" id="voir-offres">Obtenir un accès</button></p>` : `<p class="petit">Vous n'avez pas encore de code ? Écrivez à <a href="mailto:${esc(c.email || '')}">${esc(c.email || '')}</a>.</p>`)}
+        <p class="petit liens-legaux" style="margin-top:14px">${liensLegaux()}</p>
       </div></section>`;
     $app.querySelector('#t-fam').addEventListener('click', () => ecranCode('', 'fam'));
     $app.querySelector('#t-ing').addEventListener('click', () => ecranCode('', 'ing'));
@@ -894,7 +895,7 @@
         <p class="petit">Un filigrane au nom de votre accès apparaît sur les pages : il permet de retrouver l'origine d'un contenu diffusé sans autorisation.</p>
       </details>
 
-      <p class="pied">Conçue et développée par ${esc(c.nom || 'BRILLE')}<br>© BRILLE · Étincelle · Tous droits réservés${achatActif() ? '<br>' + liensLegaux() : ''}</p>
+      <p class="pied">Conçue et développée par ${esc(c.nom || 'BRILLE')}<br>© BRILLE · Étincelle · Tous droits réservés<br>${liensLegaux()}</p>
     </section>`;
   }
   function vueIngenieure() {
@@ -1180,7 +1181,8 @@
         <h1 class="essai-q">Votre adresse e-mail</h1>
         <p>Nous vous envoyons un code à 6 chiffres pour démarrer votre essai de ${essaiJours()} jours. C'est ce qui garantit <b>un essai par famille</b>.</p>
         <input type="email" id="em-mail" autocomplete="email" inputmode="email" placeholder="prenom@exemple.fr" value="${esc(email)}" style="width:100%;font-size:1.05rem;padding:12px;border-radius:12px;border:1px solid #ccc">
-        <label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-size:.9rem"><input type="checkbox" id="em-ok" style="margin-top:3px"><span>J'accepte que mon adresse serve uniquement à vérifier cet essai. Elle est conservée sous une forme chiffrée, illisible, et jamais utilisée pour m'écrire.</span></label>
+        <label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-size:.9rem"><input type="checkbox" id="em-ok" style="margin-top:3px"><span>J'accepte que mon adresse serve uniquement à vérifier cet essai. Elle est conservée sous une forme chiffrée, illisible, et jamais utilisée pour m'écrire. <a href="legal.html#confidentialite" target="_blank" rel="noopener">En savoir plus</a></span></label>
+        <p class="petit liens-legaux">${liensLegaux()}</p>
         <button type="button" class="btn plein" id="em-envoi">Recevoir mon code</button>
         <p class="erreur" id="em-err" role="alert"></p>${retour}</div></section>`;
       $app.querySelector('#em-envoi').addEventListener('click', async ev => {

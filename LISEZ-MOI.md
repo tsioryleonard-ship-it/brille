@@ -210,3 +210,7 @@ Tant que les codes sont vides, le bouton d'essai n'apparaît pas.
 - Pendant l'essai, le **parcours d'un mois n'est pas accessible** : une petite carte 🔒 explique qu'il est réservé à l'accès complet. Il reste ouvert pour les familles qui ont un code (atelier ou achat).
 - `legal.html` (conditions et mentions légales) : ajout de l'article « 3 bis. Essai gratuit de 7 jours », de l'adresse e-mail dans les données collectées (consentement, 12 mois maximum, conservée sous forme chiffrée) et de Google dans les prestataires.
 - La phrase « Pour les enfants, ce pétale se dit… » est retirée : le titre du pétale est déjà celui de l'enfant.
+
+## Version 42 : liens vers les conditions et mentions légales
+
+Les liens « Conditions générales · Confidentialité · Mentions légales » sont maintenant visibles sur l'écran d'accueil, sur l'écran e-mail de l'essai gratuit et en bas de l'onglet Plus (avant, ils n'apparaissaient que si l'achat était activé).
