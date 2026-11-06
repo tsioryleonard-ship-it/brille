@@ -105,3 +105,50 @@ Attention : pour un lot de codes « vente », la durée compte à partir de la c
 - « Notre famille » : champ prénom et bouton « Ajouter » rééquilibrés.
 - Bilan : une ligne de visages par enfant (prénom ou « Enfant 2 »…), enregistrée et imprimée avec le bilan.
 - Fichiers modifiés : app.js, jeu.js, jeu.css, style.css, sw.js (etincelle-v25 : l'installation recharge maintenant les fichiers depuis le réseau, plus de vieille copie). Prochaine version du sw : v26.
+
+## Version 26 (5 nov. 2026, nuit)
+- En-tête : le titre « Étincelle » à côté du logo BRILLE, une fois le code saisi.
+- Accueil : « L'aventure BRILLE continue ici », petite phrase pour les familles sans atelier + logo Étincelle, puis le mot de l'ingénieure. Le bloc « Étincelle / La suite des ateliers » est gardé en entête de la page du code.
+- « Notre famille » : nom de famille pour les parents, prénoms pour les enfants.
+- Carte « Cette semaine » retirée de l'accueil (l'onglet du bas reste).
+- Fichiers modifiés : app.js, style.css, index.html, config.json, legal.html, sw.js (etincelle-v26). Prochaine version du sw : v27.
+
+## Version 27 (5 nov. 2026, nuit)
+- « Plus » → bouton « Remettre mes étincelles à zéro » (garde les bilans et notes). « Effacer toutes mes données » remet aussi les étincelles à zéro.
+- Avec le code ingénieure, les étincelles de test ne sont jamais enregistrées (bac à sable) : un téléphone de test ne se « remplit » plus.
+- Fichiers modifiés : app.js, jeu.js, sw.js (etincelle-v27). Prochaine version du sw : v28.
+
+## Version 28 (5 nov. 2026, nuit)
+- Bouton « Installer Étincelle » (Plus) : il répond maintenant même si l'invitation du téléphone arrive après l'ouverture de la page.
+- Fichiers modifiés : app.js, sw.js (etincelle-v28). Prochaine version du sw : v29.
+
+## Version 29 (5 nov. 2026, nuit)
+- Le bouton « Installer Étincelle » (Plus) n'apparaît plus que si le téléphone propose vraiment l'installation (il restait visible à tort). Sinon, les explications iPhone / Android restent affichées dessous.
+- Fichiers modifiés : style.css, sw.js (etincelle-v29). Prochaine version du sw : v30.
+
+## Version 30 (5 nov. 2026, nuit)
+- Parcours du mois : chaque semaine vécue affiche un petit mot (la graine est plantée / la tige pousse / le bourgeon se prépare / la fleur s'ouvre), dans la liste et en message à la validation.
+- L'évolution des bilans semaine par semaine existait déjà (graphique en barres sur chaque pétale, 8 dernières semaines) : inchangée.
+- Fichiers modifiés : app.js, jeu.js, style.css, sw.js (etincelle-v30). Prochaine version du sw : v31.
+
+## Version 31 (5 nov. 2026, nuit)
+- « Cette semaine » : avec « La fleur des enfants », l'onglet montre maintenant le défi pensé pour l'enfant (l'activité « à faire ensemble » du pétale, avec ses étapes, les questions pour en parler et la question de fin de semaine), et plus le défi du parent. Un bouton permet de passer au défi du parent. Case « fait » séparée pour parent et enfant.
+- Fichiers modifiés : app.js, sw.js (etincelle-v31). Prochaine version du sw : v32.
+
+## Version 32 : une seule fleur pour toute la famille
+- Fin du choix « fleur parent / fleur enfant » : une seule fleur de famille. La taille de chaque pétale = la moyenne du dernier bilan du parent et de celui des enfants.
+- « Cette semaine » : un seul défi pour toute la famille (défi + activité à vivre ensemble, étapes, questions pour en parler).
+- Fichiers modifiés : app.js, sw.js (etincelle-v32). Prochaine version du sw : etincelle-v33.
+
+## Version 33 : filigrane plus discret
+- Le filigrane est moins dense (une mention par grand carreau), plus petit et plus léger, avec un message simple : « Accès personnel de [famille] · merci de ne pas partager ». Toujours visible sur les pages.
+- Fichiers modifiés : app.js, sw.js (etincelle-v33). Prochaine version du sw : etincelle-v34.
+
+## Version 34 : textes valables pour tout lieu d'atelier
+- Plus de mention de « centre social » dans les textes visibles par les familles : « Vous n'avez pas suivi d'atelier BRILLE ? Votre aventure BRILLE commence ici. » et formulations équivalentes (écran de code, accès, à propos, aide, mentions légales).
+- Fichiers modifiés : app.js, config.json, legal.html, sw.js (etincelle-v34). Prochaine version du sw : etincelle-v35.
+
+## Version 35
+- Message hors atelier : « Vous n'avez pas suivi d'atelier BRILLE ? Votre aventure commence ici. » (BRILLE une seule fois).
+- Tarif solidaire (legal.html) : « centre social » remplacé par « structure ».
+- Fichiers modifiés : config.json, legal.html, sw.js (etincelle-v35). Prochaine version du sw : etincelle-v36.

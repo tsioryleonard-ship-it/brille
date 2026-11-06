@@ -25,6 +25,7 @@
   const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(memoire)); return true; } catch { return false; } };
   const cle = qui => (qui === 'enfant' ? 'enfant' : 'bilans');
   const bilansDe = (id, qui = 'parent') => ((charger()[cle(qui)] || {})[id] || []).slice().sort((a, b) => a.w.localeCompare(b.w));
+  const bilanFamille = id => { const a = dernierBilan(id, 'parent'), e = dernierBilan(id, 'enfant'), l = [a, e].filter(Boolean); return l.length ? { s: Math.round(l.reduce((t, x) => t + x.s, 0) / l.length) } : null; };
   const dernierBilan = (id, qui = 'parent') => { const l = bilansDe(id, qui); return l.length ? l[l.length - 1] : null; };
 
   /* ---------- La famille : les prénoms des parents et de TOUS les enfants (aucune limite) ---------- */
@@ -62,11 +63,11 @@
     document.body.classList.toggle('protege', actif);
     const ancien = document.getElementById('filigrane'); if (ancien) ancien.remove();
     if (!actif) return;
-    const txt = `Accès : ${D.nom || 'famille accompagnée'} · BRILLE · usage personnel`;
+    const txt = `Accès personnel de ${D.nom || 'la famille'} · merci de ne pas partager`;
     const f = document.createElement('div'); f.id = 'filigrane'; f.setAttribute('aria-hidden', 'true');
     const poser = police => {                          // la police Quicksand est embarquée dans l'image (une image SVG ne voit pas les polices de la page)
       const css = police ? `<style>@font-face{font-family:'QS';src:url(data:font/woff2;base64,${police}) format('woff2');font-weight:600}</style>` : '';
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="240">${css}<text x="30" y="130" transform="rotate(-24 210 120)" font-family="${police ? "'QS', " : ''}Quicksand, sans-serif" font-size="17" font-weight="600" fill="#000" fill-opacity="0.085">${xmlesc(txt)}</text></svg>`;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360">${css}<text x="90" y="200" transform="rotate(-20 320 180)" font-family="${police ? "'QS', " : ''}Quicksand, sans-serif" font-size="14" font-weight="600" fill="#000" fill-opacity="0.06">${xmlesc(txt)}</text></svg>`;
       f.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
     };
     poser('');
@@ -123,7 +124,7 @@
           <button class="btn plein" type="submit" id="valider-code">Entrer</button>
         </form>
         ${!ing && D.config.codeDecouverte ? '<button type="button" class="btn plein gris" id="decouverte" style="margin-top:10px">Découvrir un extrait gratuit</button>' : ''}
-        ${ing ? '' : (achatActif() ? `<p class="petit">Vous ne passez pas par un centre social ? <button type="button" class="lien" id="voir-offres">Obtenir un accès</button></p>` : `<p class="petit">Vous n'avez pas encore de code ? Écrivez à <a href="mailto:${esc(c.email || '')}">${esc(c.email || '')}</a>.</p>`)}
+        ${ing ? '' : (achatActif() ? `<p class="petit">Vous n'avez pas suivi d'atelier ? <button type="button" class="lien" id="voir-offres">Obtenir un accès</button></p>` : `<p class="petit">Vous n'avez pas encore de code ? Écrivez à <a href="mailto:${esc(c.email || '')}">${esc(c.email || '')}</a>.</p>`)}
       </div></section>`;
     $app.querySelector('#t-fam').addEventListener('click', () => ecranCode('', 'fam'));
     $app.querySelector('#t-ing').addEventListener('click', () => ecranCode('', 'ing'));
@@ -155,7 +156,7 @@
       <div class="carte">
         <span class="etiquette">Obtenir un accès</span>
         <h1>Ouvrir Étincelle chez moi</h1>
-        <p>Étincelle est <b>gratuite pour les familles accompagnées par un centre social partenaire</b> : leur code est remis à l'atelier. Si vous ne passez pas par un centre, vous pouvez acheter un accès.</p>
+        <p>Étincelle est <b>gratuite pour les familles accompagnées lors d'un atelier BRILLE</b> : leur code est remis à l'atelier. Si vous n'avez pas suivi d'atelier, vous pouvez acheter un accès.</p>
         <div class="consent">
           <label class="coche"><input type="checkbox" id="ok-cgv"> J'ai lu et j'accepte les conditions générales et la politique de confidentialité.</label>
           <label class="coche"><input type="checkbox" id="ok-retractation"> Je demande l'accès immédiat à Étincelle et je reconnais perdre mon droit de rétractation dès que mon code m'est fourni.</label>
@@ -203,13 +204,12 @@
   const visage = i => `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="${VISAGES[i].c}" stroke="#000" stroke-width="1.8"/><circle cx="14" cy="16" r="1.9" fill="#000"/><circle cx="26" cy="16" r="1.9" fill="#000"/><path d="${VISAGES[i].b}" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/></svg>`;
 
   /* ---------- Fleur interactive (les vraies formes de la fleur QVE, tracées depuis l'image d'origine) ---------- */
-  function fleurSVG(mode) {
-    const qui = mode === 'enfant' ? 'enfant' : 'parent';
+  function fleurSVG() {
     const parts = D.petales.map(p => {
       const f = D.formes[p.id]; if (!f) return '';
-      const b = p.ouvert ? dernierBilan(p.id, qui) : null;
+      const b = p.ouvert ? bilanFamille(p.id) : null;
       const s = b ? 0.9 + 0.03 * b.s : 0.97;
-      const titre = qui === 'enfant' ? p.miroir : p.titre;
+      const titre = p.titre;
       const lab = p.ouvert ? `${titre}${b ? `, dernier bilan ${b.s} sur 5` : ', pas encore de bilan'}` : `${titre}, se découvre en atelier`;
       const t = f.trou, ic = f.icone;
       return `<a href="#/petale/${p.id}" class="petale${p.ouvert ? '' : ' ferme'}" aria-label="${esc(lab)}">
@@ -221,7 +221,7 @@
         </g>
       </a>`;
     }).join('');
-    return `<svg viewBox="30 238 1380 1392" role="group" aria-label="${qui === 'enfant' ? 'La fleur de l\'enfant' : 'La fleur du parent'} : sept pétales à explorer">
+    return `<svg viewBox="30 238 1380 1392" role="group" aria-label="La fleur de la famille : sept pétales à explorer">
       ${parts}
       <image href="centre.png" x="546" y="734" width="352" height="352" style="pointer-events:none"/>
     </svg>`;
@@ -257,15 +257,11 @@
       <p class="ok" id="fam-ok" role="status"></p>
     </details>`;
   }
-  const txtBoutonEnfant = () => (famille().enfants.length > 1 ? 'La fleur des enfants' : 'Sa fleur d\'enfant');
-  const txtLegende = mode => (mode === 'enfant'
-    ? (famille().enfants.length > 1 ? 'Voici la fleur de vos enfants. Touchez un pétale pour le vivre avec eux.' : 'Voici la fleur de votre enfant. Touchez un pétale pour le vivre avec lui.')
-    : 'Touchez un pétale pour l\'explorer. Plus il est grand, mieux vous vous y sentez.');
+  const txtLegende = () => 'Notre fleur de famille. Touchez un pétale pour le vivre ensemble : plus il est grand, mieux la famille s\'y sent.';
   function lierFamille() {
     const zone = $app.querySelector('#carte-famille'); if (!zone) return;
     const maj = () => {
-      const be = $app.querySelector('.bascule [data-mode="enfant"]'); if (be) be.textContent = txtBoutonEnfant();
-      const lg = $app.querySelector('.fleur-carte .legende'); if (lg) lg.textContent = txtLegende(charger().mode === 'enfant' ? 'enfant' : 'parent');
+      const lg = $app.querySelector('.fleur-carte .legende'); if (lg) lg.textContent = txtLegende();
     };
     const redessiner = () => { familleOuverte = true; zone.outerHTML = carteFamille(); maj(); lierFamille(); };
     zone.querySelector('#fam-parents').addEventListener('input', e => { famille().parents = e.target.value.slice(0, 60); sauver(); });
@@ -285,11 +281,10 @@
 
   /* ---------- Vues ---------- */
   function vueAccueil() {
-    const S = charger(), mode = S.mode === 'enfant' ? 'enfant' : 'parent';
     const defi = defiCourant();
     const lignes = D.petales.map(p => {
-      const b = p.ouvert ? dernierBilan(p.id, mode) : null;
-      const titre = mode === 'enfant' ? p.miroir : p.titre, ss = p.ouvert ? (mode === 'enfant' ? p.miroirSous : p.sousTitre) : '🔒 Se découvre en atelier';
+      const b = p.ouvert ? bilanFamille(p.id) : null;
+      const titre = p.titre, ss = p.ouvert ? p.sousTitre : '🔒 Se découvre en atelier';
       return `<li><a class="ligne-petale${p.ouvert ? '' : ' ferme'}" href="#/petale/${p.id}" style="background:${p.couleur}">
         <span class="pastille"><img src="p-${p.id}.png" alt="" width="42" height="42"></span>
         <span class="txt"><strong>${esc(titre)}</strong><small>${esc(ss)}</small></span>
@@ -312,13 +307,9 @@
       <div class="col-gauche">
       ${carteFamille()}
       <div class="fleur-carte">
-        <div class="bascule" role="group" aria-label="Choisir la fleur">
-          <button type="button" data-mode="parent" aria-pressed="${mode === 'parent'}">Ma fleur de parent</button>
-          <button type="button" data-mode="enfant" aria-pressed="${mode === 'enfant'}">${txtBoutonEnfant()}</button>
-        </div>
-        <div class="fleur-bloc">${fleurSVG(mode)}</div>
-        <p class="legende">${txtLegende(mode)}</p>
-        <p class="legende ensemble">🌸 Chacun peut remplir sa fleur, mais le plus beau, c'est de vivre l'aventure ensemble : c'est comme ça que le lien se crée.</p>
+        <div class="fleur-bloc">${fleurSVG()}</div>
+        <p class="legende">${txtLegende()}</p>
+        <p class="legende ensemble">🌸 Une seule fleur pour toute la famille : parents et enfants la font grandir ensemble, c'est comme ça que le lien se crée.</p>
       </div>
       </div>
 
@@ -332,9 +323,6 @@
     </section>`;
   }
   function lierAccueil() {
-    $app.querySelectorAll('.bascule button').forEach(b => b.addEventListener('click', () => {
-      charger().mode = b.dataset.mode; sauver(); rendre();
-    }));
     lierFamille();
   }
 
@@ -373,7 +361,7 @@
         <p>Chez BRILLE, le lien passe avant tout. Ce pétale se découvre en atelier, avec d'autres parents et avec votre enfant : c'est là qu'il prend tout son sens. Étincelle vous aidera ensuite à le prolonger à la maison.</p>
         <p>Vous l'avez déjà vécu en atelier et il n'est pas encore ouvert ? Écrivez-nous, nous l'ajouterons à votre accès.</p>
         <a class="btn plein" href="mailto:${esc(c.email || '')}?subject=${encodeURIComponent('Étincelle : ouvrir un pétale')}">Écrire à BRILLE</a>
-        ${achatActif() ? `<p style="margin-top:18px">Vous ne passez pas par un centre social ? Vous pouvez ouvrir ce pétale ou la fleur complète.</p><a class="btn discret plein" href="#/acces">Voir les accès</a>` : ''}
+        ${achatActif() ? `<p style="margin-top:18px">Vous n'avez pas suivi d'atelier ? Vous pouvez ouvrir ce pétale ou la fleur complète.</p><a class="btn discret plein" href="#/acces">Voir les accès</a>` : ''}
       </div>
     </section>`;
   }
@@ -396,7 +384,7 @@
         <div class="icone"><img src="p-${p.id}.png" alt=""></div>
         <h1>${esc(p.titre)}</h1>
         <p class="ss">${esc(p.sousTitre)}</p>
-        <p class="miroir">Côté enfant, ce pétale s'appelle : « ${esc(p.miroir)} » (${esc(p.miroirSous.toLowerCase())})</p>
+        <p class="miroir">Pour les enfants, ce pétale se dit : « ${esc(p.miroir)} » (${esc(p.miroirSous.toLowerCase())}). À explorer tous ensemble.</p>
       </div>
 
       ${e ? `<div class="carte ensemble teinte" style="background:${p.couleur}">
@@ -723,28 +711,36 @@
     const n = D.defis.length; if (!n) return vueIntrouvable();
     const base = indexDefi(), idx = indexDemande(param);
     const d = D.defis[idx], p = petale(d.petale);
-    const fait = !!charger().defisFaits[d.id];
-    return `<section class="vue">
-      <h1><span class="surligne" style="--hl:var(--vert)">Cette semaine</span></h1>
-      <div class="grille2"><div>
-      <div class="defi" style="background:${p?.couleur || 'var(--jaune)'}">
-        <span class="etiquette">${idx === base ? 'Le défi de la semaine' : `Défi ${idx + 1} sur ${n}`}${p ? ` · ${esc(p.titre)}` : ''}</span>
+    const plusieurs = famille().enfants.length > 1, cleFait = d.id, ens = p && p.ensemble;
+    const fait = !!charger().defisFaits[cleFait];
+    const blocDefi = `<div class="defi" style="background:${p?.couleur || 'var(--jaune)'}">
+        <span class="etiquette">${idx === base ? 'Le défi de la semaine' : `Défi ${idx + 1} sur ${n}`}${p ? ` · ${esc(p.titre)}` : ''} · pour toute la famille</span>
         <h2>${esc(d.titre)}</h2>
         <p class="duree">⏱ ${esc(d.duree)}</p>
         <p style="margin:0">${esc(d.consigne)}</p>
         ${d.plus ? `<p class="plus"><b>Pour aller plus loin :</b> ${esc(d.plus)}</p>` : ''}
-        <label class="coche"><input type="checkbox" id="fait" ${fait ? 'checked' : ''}> J'ai essayé ce défi</label>
-      </div>
+        ${ens ? `<hr style="border:0;border-top:2px dashed rgba(0,0,0,.25);margin:14px 0">
+        <span class="etiquette">À vivre ensemble, ${plusieurs ? 'parents et enfants' : 'parent et enfant'}</span>
+        <h3 style="margin:.3em 0">${esc(ens.titre)}</h3>
+        <p class="duree">⏱ ${esc(ens.duree)}${ens.materiel ? ' · ' + esc(ens.materiel) : ''}</p>
+        <ol class="etapes">${ens.etapes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
+        <div class="parler"><b>Pour en parler ensuite</b><ul>${ens.enParler.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+        ${p.questionEnfant ? `<p class="plus"><b>À la fin de la semaine, chacun se demande :</b> « ${esc(p.questionEnfant)} »</p>` : ''}` : ''}
+        <label class="coche"><input type="checkbox" id="fait" data-cle="${esc(cleFait)}" ${fait ? 'checked' : ''}> Nous l'avons vécu en famille</label>
+      </div>`;
+    return `<section class="vue">
+      <h1><span class="surligne" style="--hl:var(--vert)">Cette semaine</span></h1>
+      <div class="grille2"><div>
+      ${blocDefi}
       </div><div>
       <div class="nav-defis">
         <a class="btn discret" href="#/semaine/${(idx - 1 + n) % n}">← Précédent</a>
         ${idx !== base ? '<a class="btn discret" href="#/semaine">Cette semaine</a>' : ''}
         <a class="btn discret" href="#/semaine/${(idx + 1) % n}">Suivant →</a>
       </div>
-      ${p && p.ensemble ? `<a class="carte teinte" href="#/petale/${p.id}" style="display:block;text-decoration:none;background:${p.couleur}">
-        <span class="etiquette">À faire ensemble</span>
-        <h3 style="margin-bottom:.2em">${esc(p.ensemble.titre)}</h3>
-        <p style="margin:0">${esc(p.ensemble.duree)} · parent et enfant. Touchez pour voir les étapes.</p></a>` : ''}
+      ${ens ? `<a class="carte teinte" href="#/petale/${p.id}" style="display:block;text-decoration:none;background:${p.couleur}">
+        <span class="etiquette">Le pétale « ${esc(p.titre)} »</span>
+        <p style="margin:0">Faire le bilan de la famille : le parent, puis chaque enfant. Touchez pour y aller.</p></a>` : ''}
       <p class="petit">Un seul défi à la fois suffit. Si ce n'est pas le bon moment, passez au suivant, sans culpabilité.</p>
       </div></div>
     </section>`;
@@ -752,7 +748,8 @@
   function lierSemaine(param) {
     const c = $app.querySelector('#fait'); if (!c) return;
     const idx = indexDemande(param);
-    c.addEventListener('change', () => { const S = charger(); if (c.checked) S.defisFaits[D.defis[idx].id] = iso(new Date()); else delete S.defisFaits[D.defis[idx].id]; sauver(); });
+    const cle = c.dataset.cle || D.defis[idx].id;
+    c.addEventListener('change', () => { const S = charger(); if (c.checked) S.defisFaits[cle] = iso(new Date()); else delete S.defisFaits[cle]; sauver(); });
   }
 
   /* ----- Plus ----- */
@@ -784,7 +781,7 @@
       </details>
 
       <details class="carte"><summary>Besoin d'un soutien ?</summary>
-        <p>Vous n'avez pas à tout porter seul·e. Votre référent famille du centre social peut vous écouter et vous orienter. En cas de besoin immédiat :</p>
+        <p>Vous n'avez pas à tout porter seul·e. Un professionnel de la structure qui vous accueille (référent famille, animateur, enseignant) peut vous écouter et vous orienter. En cas de besoin immédiat :</p>
         <ul class="numeros">
           <li><span>Enfant en danger ou inquiétude pour un enfant</span><b>119</b></li>
           <li><span>Prévention du suicide, écoute 24h/24</span><b>3114</b></li>
@@ -805,9 +802,9 @@
       </details>
 
       <details class="carte"><summary>À propos d'Étincelle</summary>
-        <p>Étincelle est la suite à la maison des ateliers proposés en centre social par <b>BRILLE</b>. La qualité de vie de l'enfant (QVE) a d'abord été pensée pour l'enfant : c'est elle qui guide tout.</p>
+        <p>Étincelle est la suite à la maison des ateliers proposés par <b>BRILLE</b>. La qualité de vie de l'enfant (QVE) a d'abord été pensée pour l'enfant : c'est elle qui guide tout.</p>
         <p>Quand vous revenez de l'atelier Main tendue, Étincelle vous aide à continuer à la maison : faire, avec votre enfant, quelque chose en lien avec sa QVE, un moment à deux ou en famille, à votre rythme.</p>
-        <p>La fleur des parents répond en miroir à la fleur de l'enfant, car le parent joue un rôle essentiel dans la qualité de vie de son enfant. Mais le plus important, c'est de vivre l'aventure ensemble : c'est comme ça que le lien se crée.</p>
+        <p>Étincelle est un outil pour toute la famille : parents et enfants, quel que soit leur nombre, font grandir la même fleur. Le plus important, c'est de vivre l'aventure ensemble : c'est comme ça que le lien se crée.</p>
         <p class="petit">Étincelle accompagne le bien-être familial. Elle ne remplace pas l'avis d'un médecin ou d'un professionnel de la santé ou du soutien psychologique.</p>
       </details>
 
