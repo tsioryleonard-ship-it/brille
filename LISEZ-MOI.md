@@ -30,13 +30,13 @@ Si vous modifiez `index.html`, `app.js` ou `style.css`, changez aussi le numéro
 
 Les pictogrammes des pétales (`p-*.png`) sont extraits de votre fleur : vérifiez les droits d'usage de ces illustrations, notamment si elles viennent d'une banque d'images qui demande de citer l'auteur.
 
-
 ## Accès par code famille
+
 - Chaque pétale est chiffré dans `contenu.enc.json` : une famille n'ouvre que les pétales vécus en atelier. Les codes sont gérés avec le fichier PRIVÉ `gestion-des-acces.html` (à garder sur votre ordinateur, jamais sur GitHub).
 - Ne publiez JAMAIS `petales.json`, `defis.json` ni le carnet des familles.
 
-
 ## Accès payant (familles hors centre)
+
 La vente est **désactivée** tant que `config.json` contient `"actif": false` dans le bloc `achat`.
 
 **Mise en place (une seule fois)** : suivez le guide « Encaisser les accès Étincelle avec Stripe ».
@@ -55,15 +55,15 @@ La vente est **désactivée** tant que `config.json` contient `"actif": false` d
 - Un code peut être partagé : les conditions l'interdisent. En cas d'abus, retirez-le et republiez.
 - Remboursement : dans Stripe, puis « Retirer » le code dans « Gérer les familles » et republiez.
 
-
 ## Version jeu (sons, étincelles, missions)
+
 - Nouveaux fichiers à publier avec les autres : `jeu.js` et `jeu.css`. `index.html` et `sw.js` ont été mis à jour (`sw.js` est passé à `etincelle-v18`).
 - Le jeu ne modifie ni les codes d'accès ni les contenus chiffrés : il s'ajoute par-dessus ce que l'application affiche.
 - Les points, niveaux et badges restent dans le téléphone de la famille (clé `brille-etincelle-jeu`).
 - Le dossier `_avant-jeu` contient les anciens `index.html` et `sw.js` : ne le publiez pas, vous pouvez le supprimer quand vous êtes sûre de garder cette version.
 
-
 ## Protection des contenus (ajoutée le 30 oct.)
+
 - Filigrane : sur chaque page, le nom de l'accès (« Accès : … · BRILLE · usage personnel ») apparaît en transparence pour les familles, pas pour votre accès ingénieure. Le nom vient de « Gérer les familles » : il apparaît après une nouvelle publication de `acces.json` et `contenu.enc.json`.
 - Copier-coller, clic droit et impression sont bloqués pour les familles (une capture d'écran reste possible).
 - « Conditions d'utilisation » dans l'onglet Plus, et « Tous droits réservés » en pied de page.
@@ -71,13 +71,14 @@ La vente est **désactivée** tant que `config.json` contient `"actif": false` d
 - Version du service worker : `etincelle-v21`. La prochaine sera `etincelle-v22`.
 
 ## Fin d'accès automatique (v20)
+
 Dans « Gérer les familles », choisissez une durée à la création du code (sans limite, 12 mois, 5 ans) ou modifiez la date « Fin d'accès » d'une famille, puis « Préparer les fichiers » et déposez-les sur GitHub. À la date, le code cesse d'ouvrir l'application. Ton accès ingénieure n'expire jamais.
 Attention : pour un lot de codes « vente », la durée compte à partir de la création du lot.
 
 **Ne déposez plus d'ancien zip par-dessus : cette version contient les jeux.**
 
-
 ## Parcours d'un mois par pétale (v22)
+
 - Chaque pétale propose un parcours de 4 semaines (une mission à vivre à deux par semaine, suivi dans le téléphone) et un « rituel qu'on garde » à la fin.
 - Le contenu est dans `parcours-mensuels-PRIVE.json` : fichier PRIVÉ, à garder sur votre ordinateur, jamais sur GitHub.
 - Pour l'ajouter : ouvrez l'application avec votre accès ingénieure, onglet Plus, « Gérer les familles », carte « Ajouter les parcours d'un mois », choisissez le fichier. Puis « Préparer les fichiers à publier » et déposez `acces.json` et `contenu.enc.json` sur GitHub avec les fichiers de ce dossier (`app.js`, `style.css`, `sw.js`). Les codes existants continuent de fonctionner.
@@ -87,8 +88,8 @@ Attention : pour un lot de codes « vente », la durée compte à partir de la c
 - Parcours : une semaine ne s'ouvre que lorsque la précédente a été vécue. Chaque semaine a son bouton « Lancer la mission » (pas à pas) ; la fin du mois déclenche une grande fête (pluie de pétales, médaille, badge) et une carte souvenir avec les prénoms (facultatif). Publiez aussi `jeu.css`.
 - Un pétale dont le parcours d'un mois est terminé reçoit une médaille 🏅 et un contour doré sur la fleur d'accueil, et une médaille dans la liste des pétales.
 
-
 ## Version 23 (5 nov. 2026) : accueil, famille, bilan imprimable
+
 - **Où est la version de référence** : le dossier « Étincelle – version finale » sur Google Drive. C'est lui qu'on met à jour, depuis n'importe quel ordinateur, puis qu'on publie sur GitHub.
 - Accueil : signature « Rindra Tsiory · Fondatrice de BRILLE » sous le mot de l'ingénieure ; bannière « L'aventure BRILLE commence maintenant ! » (le texte explicatif a été retiré).
 - Message secondaire pour les familles qui n'ont pas suivi d'atelier : `messageHorsAtelier` dans `config.json` (modifiable sans coder).
@@ -99,6 +100,7 @@ Attention : pour un lot de codes « vente », la durée compte à partir de la c
 - Les fichiers PRIVÉS (`gestion-des-acces.html`, `petales.json`, `defis.json`, `parcours-mensuels-PRIVE.json`, carnet des familles) ne sont jamais sur GitHub : gardez-les dans le dossier Drive PRIVÉ.
 
 ## Version 24 (5 nov. 2026, soir)
+
 - Mot de l'ingénieure : guillemet seul retiré.
 - Tableau « Niveau Graine » : couleurs BRILLE pastel (plus de dégradé), placé sous la fleur.
 - Accueil : texte élargi jusqu'au dessin de la famille.
@@ -107,6 +109,7 @@ Attention : pour un lot de codes « vente », la durée compte à partir de la c
 - Fichiers modifiés : app.js, jeu.js, jeu.css, style.css, sw.js (etincelle-v25 : l'installation recharge maintenant les fichiers depuis le réseau, plus de vieille copie). Prochaine version du sw : v26.
 
 ## Version 26 (5 nov. 2026, nuit)
+
 - En-tête : le titre « Étincelle » à côté du logo BRILLE, une fois le code saisi.
 - Accueil : « L'aventure BRILLE continue ici », petite phrase pour les familles sans atelier + logo Étincelle, puis le mot de l'ingénieure. Le bloc « Étincelle / La suite des ateliers » est gardé en entête de la page du code.
 - « Notre famille » : nom de famille pour les parents, prénoms pour les enfants.
@@ -114,41 +117,76 @@ Attention : pour un lot de codes « vente », la durée compte à partir de la c
 - Fichiers modifiés : app.js, style.css, index.html, config.json, legal.html, sw.js (etincelle-v26). Prochaine version du sw : v27.
 
 ## Version 27 (5 nov. 2026, nuit)
+
 - « Plus » → bouton « Remettre mes étincelles à zéro » (garde les bilans et notes). « Effacer toutes mes données » remet aussi les étincelles à zéro.
 - Avec le code ingénieure, les étincelles de test ne sont jamais enregistrées (bac à sable) : un téléphone de test ne se « remplit » plus.
 - Fichiers modifiés : app.js, jeu.js, sw.js (etincelle-v27). Prochaine version du sw : v28.
 
 ## Version 28 (5 nov. 2026, nuit)
+
 - Bouton « Installer Étincelle » (Plus) : il répond maintenant même si l'invitation du téléphone arrive après l'ouverture de la page.
 - Fichiers modifiés : app.js, sw.js (etincelle-v28). Prochaine version du sw : v29.
 
 ## Version 29 (5 nov. 2026, nuit)
+
 - Le bouton « Installer Étincelle » (Plus) n'apparaît plus que si le téléphone propose vraiment l'installation (il restait visible à tort). Sinon, les explications iPhone / Android restent affichées dessous.
 - Fichiers modifiés : style.css, sw.js (etincelle-v29). Prochaine version du sw : v30.
 
 ## Version 30 (5 nov. 2026, nuit)
+
 - Parcours du mois : chaque semaine vécue affiche un petit mot (la graine est plantée / la tige pousse / le bourgeon se prépare / la fleur s'ouvre), dans la liste et en message à la validation.
 - L'évolution des bilans semaine par semaine existait déjà (graphique en barres sur chaque pétale, 8 dernières semaines) : inchangée.
 - Fichiers modifiés : app.js, jeu.js, style.css, sw.js (etincelle-v30). Prochaine version du sw : v31.
 
 ## Version 31 (5 nov. 2026, nuit)
+
 - « Cette semaine » : avec « La fleur des enfants », l'onglet montre maintenant le défi pensé pour l'enfant (l'activité « à faire ensemble » du pétale, avec ses étapes, les questions pour en parler et la question de fin de semaine), et plus le défi du parent. Un bouton permet de passer au défi du parent. Case « fait » séparée pour parent et enfant.
 - Fichiers modifiés : app.js, sw.js (etincelle-v31). Prochaine version du sw : v32.
 
 ## Version 32 : une seule fleur pour toute la famille
+
 - Fin du choix « fleur parent / fleur enfant » : une seule fleur de famille. La taille de chaque pétale = la moyenne du dernier bilan du parent et de celui des enfants.
 - « Cette semaine » : un seul défi pour toute la famille (défi + activité à vivre ensemble, étapes, questions pour en parler).
 - Fichiers modifiés : app.js, sw.js (etincelle-v32). Prochaine version du sw : etincelle-v33.
 
 ## Version 33 : filigrane plus discret
+
 - Le filigrane est moins dense (une mention par grand carreau), plus petit et plus léger, avec un message simple : « Accès personnel de [famille] · merci de ne pas partager ». Toujours visible sur les pages.
 - Fichiers modifiés : app.js, sw.js (etincelle-v33). Prochaine version du sw : etincelle-v34.
 
 ## Version 34 : textes valables pour tout lieu d'atelier
+
 - Plus de mention de « centre social » dans les textes visibles par les familles : « Vous n'avez pas suivi d'atelier BRILLE ? Votre aventure BRILLE commence ici. » et formulations équivalentes (écran de code, accès, à propos, aide, mentions légales).
 - Fichiers modifiés : app.js, config.json, legal.html, sw.js (etincelle-v34). Prochaine version du sw : etincelle-v35.
 
 ## Version 35
+
 - Message hors atelier : « Vous n'avez pas suivi d'atelier BRILLE ? Votre aventure commence ici. » (BRILLE une seule fois).
 - Tarif solidaire (legal.html) : « centre social » remplacé par « structure ».
 - Fichiers modifiés : config.json, legal.html, sw.js (etincelle-v35). Prochaine version du sw : etincelle-v36.
+
+## Version 36
+
+- Page « Plus » (grand écran) : la carte « Conditions d'utilisation » n'est plus collée aux cartes du dessus.
+- Fichiers modifiés : style.css, sw.js (etincelle-v36). Prochaine version du sw : etincelle-v37.
+
+## Version 37 (6 nov. 2026) : pionniers, essai d'une semaine, reprise libre
+
+### Ce qui change
+- **Pionniers** : le mot d'accueil (`config.json`, `messageAccueil`) dit « vous êtes des pionniers BRILLE ». Sur chaque pétale, une carte « Je transmets » (3 idées + bouton pour envoyer un petit mot à un proche). Dans « Plus », une carte « Pionniers BRILLE ». Le message partagé contient le lien de l'application SANS code : le proche peut tester une semaine.
+- **Essai gratuit d'une semaine** pour les familles sans atelier : bouton « Tester gratuitement une semaine » sur l'écran du code, 3 questions, un pétale conseillé. La semaine démarre à la première ouverture et s'arrête toute seule. Un pétale à la fois, un essai par pétale et par téléphone. Questions modifiables dans `config.json` (`essai.questions`).
+- **Reprise libre** : si une famille n'a rien validé depuis 8 jours dans un parcours, un mot « On reprend là où on s'était arrêtés » s'affiche (aucun retard, rien à rattraper). L'ordre des semaines reste le même.
+
+### À faire UNE SEULE FOIS pour activer l'essai
+1. Ouvrir l'application avec votre code ingénieure, Plus, « Gérer les familles ».
+2. Carte « Codes d'essai gratuit » : « Créer les codes d'essai ». Le bloc des 7 codes est copié.
+3. Dans `config.json` (GitHub, crayon), coller ce bloc à la place du bloc `"essai"` des codes (garder `"questions"`).
+4. « Préparer les fichiers à publier » : déposer `acces.json` et `contenu.enc.json` sur GitHub, avec `app.js`, `config.json` et `sw.js`.
+
+Tant que les codes sont vides, le bouton d'essai n'apparaît pas.
+
+### À savoir
+- Les codes d'essai sont lisibles dans `config.json` (le site est public) : quelqu'un qui efface les données de son téléphone peut refaire un essai. Cela ne donne qu'un pétale, une semaine.
+- Les pétales d'essai restent protégés (filigrane « Essai BRILLE », pas de copier-coller).
+- Défis réécrits (`defis.json`, fichier PRIVÉ) : plus courts, ludiques, « Et si… ? ». À recharger dans `gestion-des-acces.html`, puis republier `acces.json` et `contenu.enc.json`.
+- Fichiers modifiés : `app.js`, `config.json`, `sw.js` (etincelle-v37). Prochaine version du sw : etincelle-v38.
