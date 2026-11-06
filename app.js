@@ -52,6 +52,21 @@
     ACCES = { acces, contenuEnc };
   }
   const codeMemorise = () => { try { return localStorage.getItem(CLE_CODE) || ''; } catch { return ''; } };
+
+  /* ---------- Essai gratuit d'une semaine (automatique, aucune publication à chaque essai) ----------
+     Un code d'essai par pétale (créés une seule fois, voir « Gérer les familles »). La semaine démarre à la première
+     ouverture, sur le téléphone de la famille, et se termine toute seule. */
+  const CLE_ESSAI = 'brille-etincelle-essai';
+  const essaiCfg = () => D.config.essai || {};
+  const essaiJours = () => Math.max(1, parseInt(essaiCfg().jours, 10) || 7);
+  const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const essaiCodes = () => { const o = {}; Object.entries(essaiCfg().codes || {}).forEach(([k, c]) => { if (normCode(c)) o[k] = String(c).trim(); }); return o; };
+  const essaiDispo = () => essaiCfg().actif !== false && Object.keys(essaiCodes()).length > 0;
+  const essaiPour = code => { const n = normCode(code); const t = Object.entries(essaiCodes()).find(([, c]) => normCode(c) === n); return t ? t[0] : ''; };
+  const lireEssais = () => { try { return JSON.parse(localStorage.getItem(CLE_ESSAI) || '{}') || {}; } catch { return {}; } };
+  const ecrireEssais = E => { try { localStorage.setItem(CLE_ESSAI, JSON.stringify(E)); } catch { } };
+  const joursRestants = fin => Math.max(0, Math.round((new Date(fin + 'T00:00:00') - jour(new Date())) / 86400000) + 1);
+  const titreEnfant = id => { const v = (D.vitrine || []).find(x => x.id === id); return v ? (v.miroir || v.titre) : id; };
   function composer(ouverts) {                        // ouverts : liste d'identifiants de pétales ouverts
     D.petales = D.vitrine.map(v => Object.assign({}, v, D.details[v.id] || {}, { ouvert: ouverts.includes(v.id) && !!D.details[v.id] }));
     D.defis = D.petales.filter(p => p.ouvert).flatMap(p => p.defis || []).sort((a, b) => a.id.localeCompare(b.id));
@@ -84,8 +99,10 @@
   async function deverrouiller(code, exigerAdmin) {    // ouvre le contenu autorisé par ce code
     const r = await Acces.ouvrir(code, ACCES.acces, ACCES.contenuEnc);
     if (exigerAdmin && !r.admin) throw new Error('admin');
-    if (r.fin && !r.admin && iso(new Date()) > r.fin) { const e = new Error('expire'); e.fin = r.fin; throw e; }
-    document.body.dataset.admin = r.admin ? '1' : ''; D.details = r.details; D.admin = r.admin; D.nom = r.nom; D.fin = r.admin ? '' : r.fin; D.apercu = null;
+    const ess = r.admin ? '' : essaiPour(code);          // code d'essai : la semaine démarre à la première ouverture
+    if (ess) { const E = lireEssais(); if (!E[ess]) { E[ess] = iso(new Date()); ecrireEssais(E); } r.fin = plusJours(E[ess], essaiJours() - 1); }
+    if (r.fin && !r.admin && iso(new Date()) > r.fin) { const e = new Error('expire'); e.fin = r.fin; e.essai = !!ess; throw e; }
+    document.body.dataset.admin = r.admin ? '1' : ''; D.details = r.details; D.admin = r.admin; D.nom = ess ? 'Essai BRILLE' : r.nom; D.fin = r.admin ? '' : r.fin; D.essai = ess; D.apercu = null;
     appliquerProtection();
     composer(Object.keys(r.details));
     try { localStorage.setItem(CLE_CODE, code); } catch { }
@@ -93,12 +110,13 @@
   }
   const dateLongue = d => { const [a, m, j] = d.split('-').map(Number); return `${String(j).padStart(2, '0')}/${String(m).padStart(2, '0')}/${a}`; };
   const messageAcces = x => x && x.message === 'expire'
-    ? `Votre accès s'est terminé le ${dateLongue(x.fin)}. Pour le renouveler, écrivez à ${(D.config.contact || {}).email || 'BRILLE'}.`
+    ? (x.essai ? `Votre semaine d'essai s'est terminée le ${dateLongue(x.fin)}. Merci d'avoir testé Étincelle ! Pour continuer ce pétale, ${achatActif() ? 'touchez « Obtenir un accès » ci-dessous' : 'écrivez à ' + ((D.config.contact || {}).email || 'BRILLE')}.`
+      : `Votre accès s'est terminé le ${dateLongue(x.fin)}. Pour le renouveler, écrivez à ${(D.config.contact || {}).email || 'BRILLE'}.`)
     : '';
   function verrouiller() {
     try { localStorage.removeItem(CLE_CODE); } catch { }
     document.body.dataset.admin = '';
-    D.petales = []; D.defis = []; D.details = {}; D.admin = false; D.apercu = null;
+    D.petales = []; D.defis = []; D.details = {}; D.admin = false; D.essai = ''; D.apercu = null;
     appliquerProtection();
     ecranCode();
   }
@@ -123,7 +141,8 @@
           <p class="erreur" id="erreur-code" role="alert">${esc(message || '')}</p>
           <button class="btn plein" type="submit" id="valider-code">Entrer</button>
         </form>
-        ${!ing && D.config.codeDecouverte ? '<button type="button" class="btn plein gris" id="decouverte" style="margin-top:10px">Découvrir un extrait gratuit</button>' : ''}
+        ${!ing && essaiDispo() ? `<button type="button" class="btn plein" id="essai" style="margin-top:10px">🌱 Tester gratuitement ${essaiJours() === 7 ? 'une semaine' : essaiJours() + ' jours'}</button><p class="petit" style="margin:6px 0 0">Répondez à 3 questions : nous vous conseillons un pétale à essayer, sans paiement ni engagement.</p>` : ''}
+        ${!ing && !essaiDispo() && D.config.codeDecouverte ? '<button type="button" class="btn plein gris" id="decouverte" style="margin-top:10px">Découvrir un extrait gratuit</button>' : ''}
         ${ing ? '' : (achatActif() ? `<p class="petit">Vous n'avez pas suivi d'atelier ? <button type="button" class="lien" id="voir-offres">Obtenir un accès</button></p>` : `<p class="petit">Vous n'avez pas encore de code ? Écrivez à <a href="mailto:${esc(c.email || '')}">${esc(c.email || '')}</a>.</p>`)}
       </div></section>`;
     $app.querySelector('#t-fam').addEventListener('click', () => ecranCode('', 'fam'));
@@ -137,6 +156,7 @@
       try { await deverrouiller(code, ing); document.body.classList.remove('verrouille'); premiere = true; rendre(); }
       catch (x) { if (x.message !== 'admin' && x.message !== 'code' && x.message !== 'expire') console.error(x); err.textContent = x.message === 'expire' ? messageAcces(x) : x.message === 'admin' ? 'Ce code n\'ouvre pas l\'espace ingénieure.' : 'Ce code n\'est pas reconnu. Vérifiez-le, ou contactez BRILLE.'; bt.disabled = false; bt.textContent = 'Entrer'; }
     });
+    const es = $app.querySelector('#essai'); if (es) es.addEventListener('click', () => ecranEssai());
     const dec = $app.querySelector('#decouverte');
     if (dec) dec.addEventListener('click', async () => { try { await deverrouiller(D.config.codeDecouverte); document.body.classList.remove('verrouille'); premiere = true; rendre(); } catch { err.textContent = 'L\'extrait gratuit n\'est pas disponible pour le moment.'; } });
     champ.addEventListener('input', () => {
@@ -398,6 +418,14 @@
 
       ${p.parcours ? `<div class="carte parcours teinte" id="parcours" style="background:${p.couleur}">${parcoursHtml(p)}</div>` : ''}
 
+      ${D.essai ? '' : `<div class="carte transmettre">
+        <span class="etiquette">Je transmets</span>
+        <h2>Ce que j'ai reçu, je le partage</h2>
+        <p>Vous avez vécu ce pétale en atelier : vous êtes un pionnier BRILLE. Ce qui compte, c'est ce que vous en faites ensuite, autour de vous.</p>
+        <ul class="transmettre-idees"><li>Racontez à un frère, une sœur ou un grand-parent ce que vous avez préféré.</li><li>Laissez votre enfant expliquer ce pétale à un ami, avec ses mots à lui.</li><li>Gardez un petit rituel en famille et invitez quelqu'un à le vivre avec vous.</li></ul>
+        <button type="button" class="btn" data-partager="${esc(p.id)}">💌 Envoyer un petit mot à un proche</button>
+      </div>`}
+
       </div><div>
       <div class="carte" id="bilan">
         <h2>Notre bilan de la semaine</h2>
@@ -476,7 +504,10 @@
       <textarea id="pc-garde" maxlength="300" placeholder="Écrivez-le avec votre enfant…">${esc(pc.garde)}</textarea>
       ${fini ? `<label for="pc-noms" class="aide">Le nom de famille et les prénoms des enfants, pour la carte souvenir</label><input type="text" id="pc-noms" maxlength="240" value="${esc(nomsCarte(pc))}" placeholder="Ex. Famille Martin : Léo et Inès">` : ''}
       <button type="button" class="btn" id="pc-enreg">Garder</button><p class="ok" id="pc-ok" role="status"></p></div>` : '';
-    return `${entete}${cadre}${barre}<p class="petit">${faites} semaine${faites > 1 ? 's' : ''} sur 4 · commencé le ${dateCourte(pc.debut)}</p>${sem}${souvenir}${rituel}`;
+    const dernier = Object.values(pc.sem).concat([pc.debut]).filter(Boolean).sort().pop();
+    const ecart = dernier ? Math.round((new Date(iso(new Date()) + 'T00:00:00') - new Date(dernier + 'T00:00:00')) / JOUR) : 0;
+    const reprise = (faites < 4 && ecart >= 8) ? `<div class="reprise" role="status"><b>🌱 On reprend là où on s'était arrêtés.</b><br>La semaine ${cur} vous attend. Rien à rattraper, aucun retard : votre étincelle est toujours là, vous la rallumez quand vous voulez.</div>` : '';
+    return `${entete}${cadre}${barre}${reprise}<p class="petit">${faites} semaine${faites > 1 ? 's' : ''} sur 4 · commencé le ${dateCourte(pc.debut)}</p>${sem}${souvenir}${rituel}`;
   }
   function lierParcours(id) {
     const zone = $app.querySelector('#parcours'); if (!zone) return;
@@ -768,7 +799,9 @@
       <h1><span class="surligne" style="--hl:var(--vert)">Plus</span></h1>
       <div class="grille-cartes">
       ${D.admin ? vueIngenieure() : ''}
-      ${!D.admin && D.fin ? `<div class="carte"><span class="etiquette">Mon accès</span><p style="margin:0">Votre accès est valable jusqu'au <b>${dateLongue(D.fin)}</b>. Pour le renouveler, écrivez à <a href="mailto:${esc((D.config.contact || {}).email || '')}">${esc((D.config.contact || {}).email || 'BRILLE')}</a>.</p></div>` : ''}
+      ${D.essai && D.fin ? `<div class="carte"><span class="etiquette">Mon essai gratuit</span><p style="margin:0">Votre essai dure jusqu'au <b>${dateLongue(D.fin)}</b> (${joursRestants(D.fin) <= 1 ? 'dernier jour' : joursRestants(D.fin) + ' jours restants'}). Ce que vous notez reste dans votre téléphone. Il vous a plu ? ${achatActif() ? 'Retrouvez les accès ci-dessous.' : `Écrivez à <a href="mailto:${esc((D.config.contact || {}).email || '')}">${esc((D.config.contact || {}).email || 'BRILLE')}</a> pour continuer.`}</p></div>` : ''}
+      ${!D.admin && !D.essai && D.petales.some(x => x.ouvert) ? `<div class="carte transmettre"><span class="etiquette">🔥 Pionniers BRILLE</span><h2>À vous de transmettre</h2><p style="margin:0 0 10px">Vous avez vécu l'atelier : à votre tour, partagez ce que vous avez appris et reçu avec votre famille et vos proches. Votre accès reste personnel et limité aux pétales que vous avez vécus. Ceux que vous inspirez pourront, eux, ${essaiDispo() ? 'tester gratuitement une semaine' : 'découvrir BRILLE'}.</p><button type="button" class="btn plein" data-partager="">💌 Partager ce que j'ai vécu</button></div>` : ''}
+      ${!D.admin && !D.essai && D.fin ? `<div class="carte"><span class="etiquette">Mon accès</span><p style="margin:0">Votre accès est valable jusqu'au <b>${dateLongue(D.fin)}</b>. Pour le renouveler, écrivez à <a href="mailto:${esc((D.config.contact || {}).email || '')}">${esc((D.config.contact || {}).email || 'BRILLE')}</a>.</p></div>` : ''}
       ${achatActif() ? `<details class="carte"><summary>Ouvrir d'autres pétales</summary>
         <p>Vous voulez prolonger d'autres thèmes à la maison ? Découvrez les accès disponibles.</p>
         <a class="btn plein" href="#/acces">Voir les accès</a>
@@ -939,6 +972,10 @@
       <div class="carte"><h2>Ajouter les parcours d'un mois</h2>
         <p class="petit">Choisissez le fichier <b>parcours-mensuels-PRIVE.json</b> (sur votre ordinateur, jamais sur GitHub). Les parcours sont ajoutés aux pétales, puis chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
         <input type="file" id="f-parcours" accept=".json"><p class="erreur" id="st-parcours" role="status"></p></div>
+      <div class="carte"><h2>Codes d'essai gratuit</h2>
+        <p class="petit">Une seule fois : crée 7 codes d'essai (un par pétale). Ensuite, les familles qui n'ont pas suivi d'atelier testent un pétale pendant ${essaiJours()} jours, tout seul, sans rien à faire de ton côté. Le bloc copié est à coller dans <b>config.json</b> (ligne <code>"codes"</code>), puis publie les fichiers.</p>
+        <button type="button" class="btn plein" id="creer-essai">Créer les codes d'essai</button>
+        <p class="erreur" id="st-essai" role="status"></p></div>
       <div class="carte"><h2>Publier les changements</h2>
         <p>Après chaque ajout ou retrait, téléchargez les deux fichiers, puis déposez-les sur GitHub (Add file → Upload files → Commit changes). Les familles les prennent en compte dans les minutes qui suivent.</p>
         <button type="button" class="btn plein" id="fabriquer">Préparer les fichiers à publier</button>
@@ -967,6 +1004,20 @@
       if (dr) { const d = new Date(); d.setFullYear(d.getFullYear() + (dr === '5a' ? 5 : 1)); crees.forEach(f => { f.fin = iso(d); }); }
       if ($app.querySelector('#lot-vente').checked) crees.forEach(f => { f.vente = true; });
       ecrireCarnet(carnet); rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = (n === 1 ? 'Code créé : ' + crees[0].code : n + ' codes créés') + '. Pensez à publier (bouton « Préparer les fichiers »).'; }
+    });
+    const cE = $app.querySelector('#creer-essai');
+    if (cE) cE.addEventListener('click', async () => {
+      const codes = {};
+      (D.vitrine || []).forEach(v => {
+        let f = carnet.familles.find(x => x.actif && x.essai === v.id);
+        if (!f) { f = Acces.ajouterFamille(carnet, 'Essai · ' + titreEnfant(v.id), [v.id]); f.essai = v.id; f.fin = ''; }
+        codes[v.id] = f.code;
+      });
+      ecrireCarnet(carnet);
+      const bloc = JSON.stringify({ actif: true, jours: essaiJours(), codes }, null, 2);
+      const e = $app.querySelector('#st-essai');
+      try { await navigator.clipboard.writeText(bloc); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Les 7 codes sont créés et le bloc est copié. Colle-le dans config.json (à la place de « essai »), puis « Préparer les fichiers » et publie.'; } }
+      catch { prompt('Copiez ce bloc pour config.json :', bloc); }
     });
     const prochain = $app.querySelector('#prochain');
     if (prochain) prochain.addEventListener('click', async () => {
@@ -1030,6 +1081,74 @@
     return '<section class="vue"><h1>Page introuvable</h1><p>Cette page n\'existe pas.</p><a class="btn" href="#/">Retour à la fleur</a></section>';
   }
 
+  /* ---------- Essai gratuit : questionnaire, bandeau, partage ---------- */
+  const bandeauEssai = () => {
+    if (!D.essai || D.admin || !D.fin) return '';
+    const n = joursRestants(D.fin);
+    return `<div class="essai-bandeau" role="status">🌱 Essai gratuit · ${n <= 1 ? 'dernier jour' : n + ' jours restants'}. <a href="#/plus">En savoir plus</a></div>`;
+  };
+  function ecranEssai(etape, scores) {
+    etape = etape || 0; scores = scores || {};
+    document.body.classList.add('verrouille');
+    const Q = essaiCfg().questions || [], codes = essaiCodes();
+    const E = lireEssais();
+    const retour = `<button type="button" class="btn discret" id="es-retour" style="margin-top:12px">← Retour</button>`;
+    const lierRetour = () => { const r = $app.querySelector('#es-retour'); if (r) r.addEventListener('click', () => etape > 0 ? ecranEssai(etape - 1, scores) : ecranCode()); };
+    window.scrollTo(0, 0);
+    if (etape < Q.length) {
+      const q = Q[etape];
+      $app.innerHTML = `<section class="vue acces"><div class="carte"><span class="etiquette">Essai gratuit · question ${etape + 1} sur ${Q.length}</span>
+        <h1 class="essai-q">${esc(q.q)}</h1>
+        <div class="essai-choix">${q.choix.map((c, i) => `<button type="button" class="btn essai-c" data-i="${i}">${esc(c.t)}</button>`).join('')}</div>
+        <p class="petit">Rien n'est envoyé : vos réponses restent dans votre téléphone.</p>${retour}</div></section>`;
+      $app.querySelectorAll('.essai-c').forEach(b => b.addEventListener('click', () => {
+        const c = q.choix[+b.dataset.i], sc = Object.assign({}, scores);
+        if (c.petale) sc[c.petale] = (sc[c.petale] || 0) + (q.poids || 1);
+        ecranEssai(etape + 1, sc);
+      }));
+      lierRetour(); return;
+    }
+    const dispo = Object.keys(codes);
+    const reco = dispo.slice().sort((a, b) => (scores[b] || 0) - (scores[a] || 0))[0];
+    const carteP = (id, grand) => {
+      const v = (D.vitrine || []).find(x => x.id === id); if (!v) return '';
+      const debut = E[id], fin = debut ? plusJours(debut, essaiJours() - 1) : '', fini = fin && iso(new Date()) > fin;
+      const lib = fini ? 'Essai terminé' : debut ? `Reprendre (${joursRestants(fin)} j)` : `Essayer ${essaiJours()} jours`;
+      return `<div class="essai-p" style="--c:${esc(v.couleur)}"><img src="p-${esc(id)}.png" alt=""><div><b>${esc(v.miroir || v.titre)}</b><br><small>${esc(v.miroirSous || '')}</small></div>
+        <button type="button" class="btn ${grand ? 'plein' : ''} essai-go" data-id="${esc(id)}" ${fini ? 'disabled' : ''}>${lib}</button></div>`;
+    };
+    $app.innerHTML = `<section class="vue acces"><div class="carte"><span class="etiquette">Votre pétale conseillé</span>
+      <h1 class="essai-q">On vous propose de commencer par là</h1>
+      ${carteP(reco, true)}
+      <p class="petit">Votre essai de ${essaiJours()} jours démarre à la première ouverture. Pas de paiement, pas d'engagement : à la fin, il s'arrête tout seul.</p>
+      ${dispo.length > 1 ? `<details class="essai-autres"><summary>Choisir un autre pétale</summary>${dispo.filter(x => x !== reco).map(x => carteP(x, false)).join('')}</details>` : ''}
+      <p class="erreur" id="es-err" role="alert"></p>${retour}</div></section>`;
+    $app.querySelectorAll('.essai-go').forEach(b => b.addEventListener('click', async () => {
+      const err = $app.querySelector('#es-err'); b.disabled = true;
+      try { await deverrouiller(codes[b.dataset.id]); document.body.classList.remove('verrouille'); location.hash = '#/petale/' + b.dataset.id; premiere = true; rendre(); }
+      catch (x) { if (err) err.textContent = messageAcces(x) || 'L\'essai n\'est pas disponible pour le moment.'; b.disabled = false; }
+    }));
+    lierRetour();
+  }
+  const lienApp = () => location.origin + location.pathname.replace(/index\.html$/, '');
+  document.addEventListener('click', async e => {
+    const b = e.target && e.target.closest && e.target.closest('[data-partager]'); if (!b) return;
+    const id = b.dataset.partager, nomP = id ? titreEnfant(id) : '';
+    const c = D.config.contact || {};
+    const txt = `Je viens de vivre ${nomP ? '« ' + nomP + ' » ' : 'un atelier '}avec BRILLE et ça m'a fait du bien, à moi et à ma famille. ${essaiDispo() ? 'Tu peux tester gratuitement pendant une semaine : ' + lienApp() : 'Si ça te tente, écris à ' + (c.email || 'BRILLE') + '.'}`;
+    try { if (navigator.share) { await navigator.share({ text: txt }); return; } } catch (x) { if (x && x.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(txt); b.textContent = '✅ Message copié, collez-le dans un SMS ou WhatsApp'; } catch { prompt('Copiez ce petit mot :', txt); }
+  });
+  (() => {
+    const st = document.createElement('style');
+    st.textContent = `.essai-bandeau{background:#cbe1b6;color:#2b2b2b;text-align:center;padding:8px 14px;border-radius:14px;margin:0 0 12px;font-weight:600}.essai-bandeau a{color:inherit}
+.essai-q{font-size:1.35rem;line-height:1.3;margin:8px 0 14px}.essai-choix{display:grid;gap:10px;margin-bottom:10px}.essai-c{text-align:left;white-space:normal;height:auto;padding:12px 16px}
+.essai-p{display:grid;grid-template-columns:48px 1fr;gap:6px 12px;align-items:center;background:var(--c,#f8f4b8);border-radius:18px;padding:12px;margin:8px 0}.essai-p img{width:48px;height:48px;object-fit:contain}.essai-p .btn{grid-column:1/-1}
+.essai-autres{margin:10px 0}.reprise{background:#fdd5a5;color:#2b2b2b;border-radius:16px;padding:12px 14px;margin:10px 0}
+.transmettre-idees{margin:6px 0 12px;padding-left:20px}.transmettre-idees li{margin:4px 0}`;
+    document.head.appendChild(st);
+  })();
+
   /* ---------- Routeur ---------- */
   let premiere = true;
   function rendre() {
@@ -1043,7 +1162,7 @@
     else if (r === 'acces') { html = achatActif() ? htmlAchat('fleur') : vueIntrouvable(); tab = 'plus'; apres = () => { if (achatActif()) lierAchat('fleur'); }; titre = 'Obtenir un accès · Étincelle'; }
     else if (r === 'plus') { html = vuePlus(); tab = 'plus'; apres = lierPlus; titre = 'Plus · Étincelle'; }
     else { html = vueIntrouvable(); tab = ''; }
-    $app.innerHTML = html;
+    $app.innerHTML = bandeauEssai() + html;
     document.title = titre;
     document.querySelectorAll('.tabbar a').forEach(a => { if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     apres();
