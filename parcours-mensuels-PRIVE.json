@@ -1,0 +1,443 @@
+{
+ "organisation": {
+  "titre": "Le tableau de la maison",
+  "intro": "Pendant un mois, vous construisez ensemble une organisation qui vous ressemble : un peu plus de responsabilités pour votre enfant, un peu moins de charge pour vous. Une petite étape par semaine.",
+  "semaines": [
+   {
+    "titre": "J'observe notre journée",
+    "mission": "Regarder comment la journée se passe vraiment, sans rien changer.",
+    "etapes": [
+     "Dessinez ensemble 3 moments de la journée (matin, retour de l'école, soir) sur une feuille.",
+     "Pour chaque moment, votre enfant colore ce qu'il fait déjà seul.",
+     "Vous notez, de votre côté, ce que vous faites à sa place par habitude ou par manque de temps."
+    ],
+    "enParler": [
+     "Qu'est-ce que tu fais déjà tout seul et dont tu es fier ?",
+     "Qu'est-ce que tu aimerais savoir faire seul bientôt ?"
+    ]
+   },
+   {
+    "titre": "Une responsabilité à lui",
+    "mission": "Choisir une seule responsabilité, petite et claire, qui devient la sienne.",
+    "etapes": [
+     "Votre enfant choisit une tâche (mettre la table, préparer son cartable, nourrir l'animal).",
+     "Vous décidez ensemble quand et comment elle se fait, puis vous l'affichez.",
+     "Pendant toute la semaine, vous ne reprenez pas derrière lui : vous laissez faire, même imparfaitement."
+    ],
+    "enParler": [
+     "Comment ça s'est passé pour toi cette semaine ?",
+     "Qu'est-ce qui t'a aidé à ne pas oublier ?"
+    ]
+   },
+   {
+    "titre": "On ajuste",
+    "mission": "Repérer ce qui coince et changer un seul détail.",
+    "etapes": [
+     "Regardez ensemble : qu'est-ce qui a bien marché, qu'est-ce qui a été compliqué ?",
+     "Changez un détail : l'heure, un repère visuel, un minuteur, un coup de main au début.",
+     "Si votre enfant est prêt, ajoutez une deuxième petite responsabilité."
+    ],
+    "enParler": [
+     "Qu'est-ce que je peux faire pour t'aider sans le faire à ta place ?",
+     "Qu'est-ce qui te donnerait envie de continuer ?"
+    ]
+   },
+   {
+    "titre": "On célèbre et on fait le point",
+    "mission": "Fêter ce qui a avancé et dessiner le tableau de la maison.",
+    "etapes": [
+     "Faites la liste de tout ce que votre enfant fait seul ou avec un peu d'aide, aujourd'hui.",
+     "Dessinez ensemble « notre tableau de la maison » : qui fait quoi, quand.",
+     "Choisissez une petite façon de fêter ça (un goûter, un dessin, un moment en famille)."
+    ],
+    "enParler": [
+     "De quoi es-tu le plus fier(e) ce mois-ci ?",
+     "Quelle nouvelle responsabilité aimerais-tu essayer le mois prochain ?"
+    ]
+   }
+  ],
+  "garde": {
+   "titre": "Le point du dimanche",
+   "idee": "5 minutes, chaque dimanche, devant le tableau de la maison : on regarde ce qui a marché, on ajuste une chose, on choisit la responsabilité de la semaine.",
+   "invite": "Notre rituel : quand, où, et ce qu'on y fait"
+  }
+ },
+ "emotions": {
+  "titre": "La météo de nos émotions",
+  "intro": "Pendant un mois, vous apprenez ensemble à mettre des mots sur ce que chacun ressent, et à trouver ce qui apaise. Sans chercher à tout expliquer : on nomme, on partage, on essaie.",
+  "semaines": [
+   {
+    "titre": "La météo du soir",
+    "mission": "Nommer une émotion chaque soir, chacun son tour.",
+    "etapes": [
+     "Dessinez ensemble une grande carte des émotions (joie, colère, tristesse, peur, fierté, fatigue…).",
+     "Chaque soir, chacun pose une pastille sur l'émotion qui a le plus compté dans sa journée.",
+     "Personne n'a à expliquer pourquoi. Vous commencez, pour montrer l'exemple."
+    ],
+    "enParler": [
+     "Quelle émotion était la plus forte aujourd'hui ?",
+     "Où est-ce que tu la sentais dans ton corps ?"
+    ]
+   },
+   {
+    "titre": "Je dis ce que je ressens",
+    "mission": "Mettre un mot sur son émotion avant de réagir.",
+    "etapes": [
+     "Cette semaine, quand une émotion monte chez vous, nommez-la à voix haute (« je suis agacé(e) »).",
+     "Quand votre enfant a une émotion forte, nommez ce que vous voyez (« je vois que tu es en colère »), sans conseil.",
+     "Le soir, racontez-vous une fois où le mot a aidé."
+    ],
+    "enParler": [
+     "Est-ce que ça t'aide quand je dis ce que je vois ?",
+     "Quel mot décrit le mieux ce que tu ressens en ce moment ?"
+    ]
+   },
+   {
+    "titre": "Notre boîte à calme",
+    "mission": "Fabriquer ensemble une boîte avec ce qui aide chacun à se calmer.",
+    "etapes": [
+     "Listez ensemble ce qui apaise (respirer comme une bougie, dessiner, bouger, un câlin, de la musique).",
+     "Écrivez ou dessinez chaque idée sur une carte et mettez-les dans une boîte.",
+     "Chacun ajoute une carte qui lui est propre."
+    ],
+    "enParler": [
+     "Quelle carte te ferait du bien en ce moment ?",
+     "Qu'est-ce qui m'aide, moi, quand je suis énervé(e) ?"
+    ]
+   },
+   {
+    "titre": "On l'essaie pour de vrai",
+    "mission": "Utiliser la boîte à calme un jour où ça chauffe, et choisir un signal commun.",
+    "etapes": [
+     "Choisissez ensemble un petit signal pour dire « j'ai besoin d'un moment » (un geste, un mot).",
+     "Un jour d'émotion forte, piochez une carte plutôt que d'élever la voix.",
+     "Racontez-vous ensuite ce qui a marché, et ce que vous changeriez."
+    ],
+    "enParler": [
+     "Qu'est-ce qui a le mieux marché ?",
+     "Comment je peux t'aider quand tu as fait le signal ?"
+    ]
+   }
+  ],
+  "garde": {
+   "titre": "La météo du soir",
+   "idee": "2 minutes, chaque soir ou quelques soirs par semaine : une pastille sur la carte, un mot sur ce qu'on a ressenti. La boîte à calme reste accessible, et on y ajoute une carte quand on trouve une nouvelle idée.",
+   "invite": "Notre rituel : à quel moment, et avec quelle carte ou quel signal"
+  }
+ },
+ "apprentissages": {
+  "titre": "La curiosité, un jour après l'autre",
+  "intro": "Pendant un mois, vous nourrissez l'envie d'apprendre : par la curiosité, pas par la pression. Vous cherchez ce qui donne du sens, ce qui aide à comprendre et ce qui encourage.",
+  "semaines": [
+   {
+    "titre": "Ce qui me donne envie d'apprendre",
+    "mission": "Découvrir ce qui motive votre enfant et ce qui le décourage.",
+    "etapes": [
+     "Chacun raconte une chose apprise récemment, qui lui a plu (à l'école ou ailleurs).",
+     "Votre enfant dit une chose qui lui est difficile, sans que vous cherchiez à la régler tout de suite.",
+     "Vous racontez aussi un apprentissage qui vous a posé problème, enfant ou adulte."
+    ],
+    "enParler": [
+     "Qu'est-ce que tu as envie de comprendre en ce moment ?",
+     "Qu'est-ce qui t'aide quand tu bloques ?"
+    ]
+   },
+   {
+    "titre": "La question curieuse",
+    "mission": "Remplacer « tu as eu quoi ? » par une vraie question de curiosité.",
+    "etapes": [
+     "Chaque jour, posez une question ouverte sur la journée (« qu'as-tu découvert aujourd'hui ? »).",
+     "Écoutez la réponse sans corriger ni évaluer.",
+     "Notez trois questions qui ont fait parler votre enfant."
+    ],
+    "enParler": [
+     "Quelle question tu as préférée cette semaine ?",
+     "Qu'est-ce que tu aimerais me demander, à moi ?"
+    ]
+   },
+   {
+    "titre": "Notre moment devoirs",
+    "mission": "Installer un moment devoirs qui se passe mieux, avec un rôle clair pour le parent.",
+    "etapes": [
+     "Choisissez ensemble où, quand et combien de temps (15 à 20 minutes avec une pause).",
+     "Décidez de votre rôle : à côté, disponible, ou à distance, selon ce dont il a besoin.",
+     "Au lieu de donner la réponse, demandez : « qu'est-ce que tu as déjà essayé ? »"
+    ],
+    "enParler": [
+     "Qu'est-ce qui t'aide le plus quand je suis là ?",
+     "Qu'est-ce qui te dérange pendant les devoirs ?"
+    ]
+   },
+   {
+    "titre": "Mon truc pour comprendre",
+    "mission": "Garder les astuces qui marchent dans un petit carnet.",
+    "etapes": [
+     "Votre enfant liste les trucs qui l'aident à comprendre (dessiner, expliquer à quelqu'un, bouger, faire un schéma).",
+     "Il choisit les deux qui marchent le mieux et les écrit dans un carnet.",
+     "Vous écrivez sur une page un encouragement vrai pour lui."
+    ],
+    "enParler": [
+     "Quel truc t'a le plus servi ce mois-ci ?",
+     "De quoi es-tu fier(e) dans ta façon d'apprendre ?"
+    ]
+   }
+  ],
+  "garde": {
+   "titre": "La question curieuse du soir",
+   "idee": "Chaque soir, une question de curiosité à la place des questions de contrôle, et le carnet « mes trucs pour comprendre » qu'on complète au fil de l'année.",
+   "invite": "Notre rituel : le moment, et la question qu'on aime poser"
+  }
+ },
+ "liens": {
+  "titre": "Le temps rien que nous",
+  "intro": "Pendant un mois, vous renforcez le lien par l'écoute et la parole : un moment en famille, de vraies questions, des phrases pour dire ce qui est difficile.",
+  "semaines": [
+   {
+    "titre": "Dix minutes rien que nous",
+    "mission": "Offrir chaque jour un court moment ensemble, sans écran.",
+    "etapes": [
+     "Choisissez un moment fixe dans la journée, de 10 minutes.",
+     "Votre enfant choisit ce que vous faites ensemble (jeu, dessin, discussion, promenade).",
+     "Pas d'écran, pas de leçon : juste le plaisir d'être ensemble."
+    ],
+    "enParler": [
+     "Quel moment as-tu préféré cette semaine ?",
+     "Qu'est-ce que tu aimerais faire avec moi la semaine prochaine ?"
+    ]
+   },
+   {
+    "titre": "Je parle, tu écoutes",
+    "mission": "S'écouter à tour de rôle, sans interrompre ni conseiller.",
+    "etapes": [
+     "Chacun son tour, une personne parle 3 minutes et les autres écoutent sans interrompre.",
+     "Une personne qui écoute reformule en une phrase (« si je comprends bien… »).",
+     "On échange les rôles, puis chacun dit ce qu'il a ressenti d'être écouté."
+    ],
+    "enParler": [
+     "Qu'est-ce que ça fait d'être écouté jusqu'au bout ?",
+     "Qu'est-ce que tu voudrais que je comprenne mieux de toi ?"
+    ]
+   },
+   {
+    "titre": "Dire ce qui est difficile",
+    "mission": "S'entraîner à dire une chose difficile avec une phrase qui aide.",
+    "etapes": [
+     "Choisissez ensemble 3 phrases utiles (« stop, je n'aime pas ça », « peux-tu m'aider ? », « je suis désolé(e) »).",
+     "Entraînez-vous à les dire dans de petites situations inventées.",
+     "Dans la semaine, utilisez-en une pour de vrai et racontez-vous comment ça s'est passé."
+    ],
+    "enParler": [
+     "Quelle phrase te semble la plus facile à dire ?",
+     "Quand aurais-tu aimé l'utiliser ?"
+    ]
+   },
+   {
+    "titre": "Un mot doux",
+    "mission": "Écrire ou dessiner un mot pour dire ce qu'on apprécie chez les autres.",
+    "etapes": [
+     "Chacun écrit ou dessine un mot doux pour quelqu'un de la famille : ce qu'il apprécie, ce qu'il a vu de beau.",
+     "Vous les offrez au cours d'un moment en famille.",
+     "Vous gardez les mots dans une boîte ou un cahier."
+    ],
+    "enParler": [
+     "Qu'est-ce que ça t'a fait de recevoir ce mot ?",
+     "Quel moment de ce mois veux-tu garder en souvenir ?"
+    ]
+   }
+  ],
+  "garde": {
+   "titre": "Le temps rien que nous",
+   "idee": "Un moment en famille, sans écran, une à plusieurs fois par semaine, avec un mot doux de temps en temps. Les mots s'accumulent dans la boîte et deviennent un souvenir.",
+   "invite": "Notre rituel : quand, et ce qu'on aime y faire"
+  }
+ },
+ "droits": {
+  "titre": "La charte de notre famille",
+  "intro": "Pendant un mois, vous construisez ensemble un cadre clair : ce qui est non négociable, ce qui peut se discuter, et ce que votre enfant peut proposer. Un cadre qui rassure et qui laisse une vraie place à la parole de l'enfant.",
+  "semaines": [
+   {
+    "titre": "Nos règles, aujourd'hui",
+    "mission": "Faire le point sur les règles de la maison, sans rien changer encore.",
+    "etapes": [
+     "Listez ensemble 5 règles qui existent déjà (coucher, écrans, rangement, politesse, sécurité).",
+     "Pour chacune, votre enfant dit si elle l'aide, si elle l'embête, ou s'il ne la comprend pas.",
+     "Vous dites à voix haute pourquoi chacune compte pour vous."
+    ],
+    "enParler": [
+     "Quelle règle t'aide le plus ?",
+     "Quelle règle aimerais-tu mieux comprendre ?"
+    ]
+   },
+   {
+    "titre": "Ce qui ne bouge pas, ce qui se discute",
+    "mission": "Trier les règles en trois : non négociable, négociable, à construire ensemble.",
+    "etapes": [
+     "Dessinez 3 colonnes et placez chaque règle dans celle qui convient.",
+     "Gardez les « non négociable » courtes (sécurité, respect).",
+     "Choisissez une règle à construire ensemble."
+    ],
+    "enParler": [
+     "Quelle règle te semble juste ?",
+     "Qu'est-ce que tu proposerais pour celle que nous allons construire ?"
+    ]
+   },
+   {
+    "titre": "Le conseil de famille",
+    "mission": "Tenir un premier conseil de famille de 10 minutes.",
+    "etapes": [
+     "Choisissez un moment calme, avec un ordre du jour d'une seule règle.",
+     "Chacun donne son avis à tour de rôle, sans interrompre.",
+     "Vous décidez ensemble de l'essai d'une nouvelle règle pour une semaine."
+    ],
+    "enParler": [
+     "Est-ce que tu t'es senti(e) écouté(e) ?",
+     "Qu'est-ce qui rend une règle plus facile à respecter ?"
+    ]
+   },
+   {
+    "titre": "Notre charte",
+    "mission": "Écrire la charte de la famille et la signer.",
+    "etapes": [
+     "Choisissez 4 à 6 règles qui comptent le plus pour vous, écrites avec des mots d'enfant.",
+     "Ajoutez un droit pour chacun (être écouté, jouer et se reposer, dire non à un câlin, demander de l'aide).",
+     "Chacun signe, et vous affichez la charte."
+    ],
+    "enParler": [
+     "Quel droit est le plus important pour toi ?",
+     "Que fait-on si quelqu'un oublie une règle ?"
+    ]
+   }
+  ],
+  "garde": {
+   "titre": "Le conseil de famille du mois",
+   "idee": "Une fois par mois, 10 minutes autour de la charte : on regarde ce qui marche, on ajuste une règle, chacun peut proposer un changement.",
+   "invite": "Notre rituel : le jour du conseil de famille, et comment on le mène"
+  }
+ },
+ "equilibre": {
+  "titre": "Notre batterie de famille",
+  "intro": "Pendant un mois, vous prenez soin de votre énergie à tous : repérer ce qui recharge, ce qui vide, et alléger ce qui peut l'être. Sans chercher la norme, à votre rythme.",
+  "semaines": [
+   {
+    "titre": "Ma batterie du jour",
+    "mission": "Colorier chaque soir sa batterie, de 1 à 5.",
+    "etapes": [
+     "Dessinez ensemble une batterie à 5 niveaux.",
+     "Chaque soir, chacun colore son niveau de la journée, sans commentaire.",
+     "Notez à côté ce qui a le plus compté (une bonne nuit, une course contre la montre…)."
+    ],
+    "enParler": [
+     "Qu'est-ce qui a rechargé ta batterie aujourd'hui ?",
+     "Qu'est-ce qui l'a vidée ?"
+    ]
+   },
+   {
+    "titre": "Ce qui recharge",
+    "mission": "Choisir un petit moment qui recharge, pour chacun et pour toute la famille.",
+    "etapes": [
+     "Listez ce qui fait du bien : bouger dehors, un moment calme, voir un copain, jouer.",
+     "Chacun choisit une chose à faire cette semaine, et une à faire ensemble.",
+     "Vous la mettez dans l'agenda comme un vrai rendez-vous."
+    ],
+    "enParler": [
+     "Qu'est-ce qui te fait le plus de bien ?",
+     "Qu'est-ce qui m'a fait du bien à moi cette semaine ?"
+    ]
+   },
+   {
+    "titre": "On allège",
+    "mission": "Retirer ou déléguer une chose qui pèse.",
+    "etapes": [
+     "Repérez une chose qui vide la batterie de la famille (matin pressé, soirée chargée, écrans).",
+     "Choisissez une façon de l'alléger (se préparer la veille, décaler une activité, demander de l'aide).",
+     "Essayez toute la semaine, et regardez ensemble l'effet sur les batteries."
+    ],
+    "enParler": [
+     "Qu'est-ce qui a changé pour toi ?",
+     "Que pourrait-on alléger encore ?"
+    ]
+   },
+   {
+    "titre": "Le rituel du soir",
+    "mission": "Installer un petit rituel du soir qui apaise et fait dormir.",
+    "etapes": [
+     "Choisissez une courte suite de gestes (lumière douce, histoire, câlin, quelques mots sur la journée).",
+     "Pas d'écran dans les 30 dernières minutes avant le coucher, si c'est possible chez vous.",
+     "Faites-le chaque soir de la semaine, même quand la journée a été longue."
+    ],
+    "enParler": [
+     "Quel moment du rituel préfères-tu ?",
+     "Qu'est-ce qui t'aide à t'endormir ?"
+    ]
+   }
+  ],
+  "garde": {
+   "titre": "La batterie du dimanche",
+   "idee": "Le dimanche, 5 minutes : chacun colore sa batterie de la semaine, on repère ce qui a rechargé, on choisit une chose à garder et une chose à alléger.",
+   "invite": "Notre rituel : quand, et ce qu'on y regarde"
+  }
+ },
+ "briller": {
+  "titre": "Le pot des victoires",
+  "intro": "Pendant un mois, vous repérez et célébrez vos forces et vos réussites, même petites. L'idée : regarder ce qui va bien, pour vous et pour votre enfant.",
+  "semaines": [
+   {
+    "titre": "Nos forces",
+    "mission": "Repérer ses forces et celles des autres.",
+    "etapes": [
+     "Chacun écrit ou dessine 3 choses qu'il sait bien faire.",
+     "Chacun ajoute une force qu'il voit chez les autres.",
+     "Vous découvrez ce que les autres ont écrit sur vous, avec un grand sourire."
+    ],
+    "enParler": [
+     "Quelle force aimerais-tu que je remarque plus souvent ?",
+     "Dans quelle situation ta force t'a-t-elle aidé(e) ?"
+    ]
+   },
+   {
+    "titre": "Le compliment vrai",
+    "mission": "Chaque jour, un compliment précis et sincère.",
+    "etapes": [
+     "Chaque jour, dites à quelqu'un de la famille un compliment sur ce qu'il a fait, pas sur ce qu'il est (« j'ai vu que tu as aidé ton frère »).",
+     "Écrivez-le sur un petit papier.",
+     "Gardez les papiers pour la fin de la semaine."
+    ],
+    "enParler": [
+     "Quel compliment t'a fait le plus plaisir ?",
+     "Quel compliment aimerais-tu donner à quelqu'un ?"
+    ]
+   },
+   {
+    "titre": "Un défi à ma mesure",
+    "mission": "Choisir un petit défi pour montrer une force.",
+    "etapes": [
+     "Votre enfant choisit un défi réaliste (montrer un dessin, apprendre quelque chose à quelqu'un, aider).",
+     "Vous choisissez aussi le vôtre, de parent.",
+     "Vous vous encouragez pendant la semaine, sans comparer."
+    ],
+    "enParler": [
+     "Comment t'es-tu senti(e) en le faisant ?",
+     "Qu'est-ce que ça t'apprend sur toi ?"
+    ]
+   },
+   {
+    "titre": "La fête des victoires",
+    "mission": "Relire tout ce qui a été réussi et le fêter.",
+    "etapes": [
+     "Relisez les papiers de compliments et les victoires du mois.",
+     "Choisissez les 3 plus belles et dessinez-en une étoile.",
+     "Fêtez-les ensemble (un goûter, un jeu, une sortie courte)."
+    ],
+    "enParler": [
+     "De quoi es-tu le plus fier(e) ?",
+     "Qu'est-ce que tu veux réussir le mois prochain ?"
+    ]
+   }
+  ],
+  "garde": {
+   "titre": "Le pot des victoires",
+   "idee": "Un bocal ou une boîte où l'on glisse chaque semaine un papier avec une victoire ou un compliment. On l'ouvre une fois par mois pour tout relire.",
+   "invite": "Notre rituel : où est le pot, et quand on l'ouvre"
+  }
+ }
+}

@@ -1,0 +1,2502 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gestion des accès Étincelle (privé)</title>
+<style>
+ body{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:900px;margin:0 auto;padding:20px;color:#262026;line-height:1.5;background:#fbfcf9}
+ h1{font-size:1.5rem} h2{font-size:1.15rem;margin-top:28px;border-bottom:2px solid #cbe1b6;padding-bottom:4px}
+ .box{background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.07);margin:12px 0}
+ button{font:inherit;padding:8px 16px;border-radius:999px;border:0;background:#cbe1b6;cursor:pointer;margin:2px}
+ button.rouge{background:#f5abaf} button.gris{background:#eee}
+ input[type=text]{font:inherit;padding:7px 10px;border:1px solid #ccc;border-radius:10px}
+ table{width:100%;border-collapse:collapse} td,th{padding:6px 8px;border-bottom:1px solid #eee;text-align:left}
+ code{font-size:1.1rem;letter-spacing:.08em;background:#f2f7ec;padding:2px 8px;border-radius:8px}
+ .chip{display:inline-block;margin:2px 6px 2px 0;font-size:.85rem;white-space:nowrap}
+ .retire{opacity:.45;text-decoration:line-through}
+ .info{background:#fff8e1;border-left:4px solid #f49f4c;padding:10px 14px;border-radius:8px}
+ #qr{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:9}
+ #qr .c{background:#fff;border-radius:18px;padding:22px;text-align:center;max-width:340px}
+ #qr svg{width:260px;height:260px}
+ #msg{position:sticky;bottom:10px;background:#262026;color:#fff;padding:10px 16px;border-radius:12px;display:none}
+</style></head><body>
+<h1>Gestion des accès Étincelle <small>(fichier privé, à ne jamais publier)</small></h1>
+<p class="info">Ce fichier reste sur votre ordinateur : double-cliquez dessus pour l'ouvrir dans votre navigateur. Le <b>carnet</b> (fichier .json téléchargé) contient les codes et la clé : gardez-le précieusement, hors de GitHub.</p>
+
+<h2>1. Le carnet des familles</h2>
+<div class="box">
+ <p>Carnet existant : <input type="file" id="f-carnet" accept=".json"> <button class="gris" id="b-nouveau">Ou commencer un nouveau carnet</button></p>
+ <p id="etat-carnet"><i>Aucun carnet chargé.</i></p>
+</div>
+<div class="box" id="zone-fam" hidden>
+ <p><b>Ajouter une famille ou un groupe d'atelier</b> (un seul code pour tout un groupe, c'est le plus simple) : <input type="text" id="nom" placeholder="Nom / repère (ex. Famille Martin, atelier mars)"></p>
+ <p>Pétales vécus en atelier : <span id="choix-ajout"></span></p>
+ <p><button id="b-ajout">Créer son code</button> <button class="gris" id="b-admin">Créer mon code ingénieure (tous les pétales)</button></p>
+ <table><thead><tr><th>Famille / groupe</th><th>Code</th><th>Pétales ouverts</th><th></th></tr></thead><tbody id="liste"></tbody></table>
+</div>
+
+<h2>2. Le contenu</h2>
+<div class="box">
+ <p id="etat-contenu"></p>
+ <p>Remplacer les pétales : <input type="file" id="f-petales" accept=".json"><br>Remplacer les défis : <input type="file" id="f-defis" accept=".json"></p>
+</div>
+
+<h2>3. Fabriquer les fichiers à publier</h2>
+<div class="box">
+ <p>Cliquez, puis déposez <b>acces.json</b>, <b>contenu.enc.json</b> et <b>vitrine.json</b> dans votre dépôt GitHub (Add file → Upload files). Téléchargez aussi le carnet à jour.</p>
+ <button id="b-fab">Fabriquer les fichiers à publier</button>
+ <button class="gris" id="b-carnet">Télécharger le carnet à jour</button>
+</div>
+<div id="qr"><div class="c"><h3 id="qr-nom"></h3><div id="qr-img"></div><p>Scannez pour ouvrir Étincelle<br><code id="qr-code"></code></p><button id="qr-fermer">Fermer</button> <button class="gris" onclick="window.print()">Imprimer</button></div></div>
+<div id="msg"></div>
+
+<script>
+//---------------------------------------------------------------------
+//
+// QR Code Generator for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//  http://www.opensource.org/licenses/mit-license.php
+//
+// The word 'QR Code' is registered trademark of
+// DENSO WAVE INCORPORATED
+//  http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+
+var qrcode = function() {
+
+  //---------------------------------------------------------------------
+  // qrcode
+  //---------------------------------------------------------------------
+
+  /**
+   * qrcode
+   * @param typeNumber 1 to 40
+   * @param errorCorrectionLevel 'L','M','Q','H'
+   */
+  var qrcode = function(typeNumber, errorCorrectionLevel) {
+
+    var PAD0 = 0xEC;
+    var PAD1 = 0x11;
+
+    var _typeNumber = typeNumber;
+    var _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
+    var _modules = null;
+    var _moduleCount = 0;
+    var _dataCache = null;
+    var _dataList = [];
+
+    var _this = {};
+
+    var makeImpl = function(test, maskPattern) {
+
+      _moduleCount = _typeNumber * 4 + 17;
+      _modules = function(moduleCount) {
+        var modules = new Array(moduleCount);
+        for (var row = 0; row < moduleCount; row += 1) {
+          modules[row] = new Array(moduleCount);
+          for (var col = 0; col < moduleCount; col += 1) {
+            modules[row][col] = null;
+          }
+        }
+        return modules;
+      }(_moduleCount);
+
+      setupPositionProbePattern(0, 0);
+      setupPositionProbePattern(_moduleCount - 7, 0);
+      setupPositionProbePattern(0, _moduleCount - 7);
+      setupPositionAdjustPattern();
+      setupTimingPattern();
+      setupTypeInfo(test, maskPattern);
+
+      if (_typeNumber >= 7) {
+        setupTypeNumber(test);
+      }
+
+      if (_dataCache == null) {
+        _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
+      }
+
+      mapData(_dataCache, maskPattern);
+    };
+
+    var setupPositionProbePattern = function(row, col) {
+
+      for (var r = -1; r <= 7; r += 1) {
+
+        if (row + r <= -1 || _moduleCount <= row + r) continue;
+
+        for (var c = -1; c <= 7; c += 1) {
+
+          if (col + c <= -1 || _moduleCount <= col + c) continue;
+
+          if ( (0 <= r && r <= 6 && (c == 0 || c == 6) )
+              || (0 <= c && c <= 6 && (r == 0 || r == 6) )
+              || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+            _modules[row + r][col + c] = true;
+          } else {
+            _modules[row + r][col + c] = false;
+          }
+        }
+      }
+    };
+
+    var getBestMaskPattern = function() {
+
+      var minLostPoint = 0;
+      var pattern = 0;
+
+      for (var i = 0; i < 8; i += 1) {
+
+        makeImpl(true, i);
+
+        var lostPoint = QRUtil.getLostPoint(_this);
+
+        if (i == 0 || minLostPoint > lostPoint) {
+          minLostPoint = lostPoint;
+          pattern = i;
+        }
+      }
+
+      return pattern;
+    };
+
+    var setupTimingPattern = function() {
+
+      for (var r = 8; r < _moduleCount - 8; r += 1) {
+        if (_modules[r][6] != null) {
+          continue;
+        }
+        _modules[r][6] = (r % 2 == 0);
+      }
+
+      for (var c = 8; c < _moduleCount - 8; c += 1) {
+        if (_modules[6][c] != null) {
+          continue;
+        }
+        _modules[6][c] = (c % 2 == 0);
+      }
+    };
+
+    var setupPositionAdjustPattern = function() {
+
+      var pos = QRUtil.getPatternPosition(_typeNumber);
+
+      for (var i = 0; i < pos.length; i += 1) {
+
+        for (var j = 0; j < pos.length; j += 1) {
+
+          var row = pos[i];
+          var col = pos[j];
+
+          if (_modules[row][col] != null) {
+            continue;
+          }
+
+          for (var r = -2; r <= 2; r += 1) {
+
+            for (var c = -2; c <= 2; c += 1) {
+
+              if (r == -2 || r == 2 || c == -2 || c == 2
+                  || (r == 0 && c == 0) ) {
+                _modules[row + r][col + c] = true;
+              } else {
+                _modules[row + r][col + c] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var setupTypeNumber = function(test) {
+
+      var bits = QRUtil.getBCHTypeNumber(_typeNumber);
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+      }
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+      }
+    };
+
+    var setupTypeInfo = function(test, maskPattern) {
+
+      var data = (_errorCorrectionLevel << 3) | maskPattern;
+      var bits = QRUtil.getBCHTypeInfo(data);
+
+      // vertical
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 6) {
+          _modules[i][8] = mod;
+        } else if (i < 8) {
+          _modules[i + 1][8] = mod;
+        } else {
+          _modules[_moduleCount - 15 + i][8] = mod;
+        }
+      }
+
+      // horizontal
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 8) {
+          _modules[8][_moduleCount - i - 1] = mod;
+        } else if (i < 9) {
+          _modules[8][15 - i - 1 + 1] = mod;
+        } else {
+          _modules[8][15 - i - 1] = mod;
+        }
+      }
+
+      // fixed module
+      _modules[_moduleCount - 8][8] = (!test);
+    };
+
+    var mapData = function(data, maskPattern) {
+
+      var inc = -1;
+      var row = _moduleCount - 1;
+      var bitIndex = 7;
+      var byteIndex = 0;
+      var maskFunc = QRUtil.getMaskFunction(maskPattern);
+
+      for (var col = _moduleCount - 1; col > 0; col -= 2) {
+
+        if (col == 6) col -= 1;
+
+        while (true) {
+
+          for (var c = 0; c < 2; c += 1) {
+
+            if (_modules[row][col - c] == null) {
+
+              var dark = false;
+
+              if (byteIndex < data.length) {
+                dark = ( ( (data[byteIndex] >>> bitIndex) & 1) == 1);
+              }
+
+              var mask = maskFunc(row, col - c);
+
+              if (mask) {
+                dark = !dark;
+              }
+
+              _modules[row][col - c] = dark;
+              bitIndex -= 1;
+
+              if (bitIndex == -1) {
+                byteIndex += 1;
+                bitIndex = 7;
+              }
+            }
+          }
+
+          row += inc;
+
+          if (row < 0 || _moduleCount <= row) {
+            row -= inc;
+            inc = -inc;
+            break;
+          }
+        }
+      }
+    };
+
+    var createBytes = function(buffer, rsBlocks) {
+
+      var offset = 0;
+
+      var maxDcCount = 0;
+      var maxEcCount = 0;
+
+      var dcdata = new Array(rsBlocks.length);
+      var ecdata = new Array(rsBlocks.length);
+
+      for (var r = 0; r < rsBlocks.length; r += 1) {
+
+        var dcCount = rsBlocks[r].dataCount;
+        var ecCount = rsBlocks[r].totalCount - dcCount;
+
+        maxDcCount = Math.max(maxDcCount, dcCount);
+        maxEcCount = Math.max(maxEcCount, ecCount);
+
+        dcdata[r] = new Array(dcCount);
+
+        for (var i = 0; i < dcdata[r].length; i += 1) {
+          dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+        }
+        offset += dcCount;
+
+        var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+        var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for (var i = 0; i < ecdata[r].length; i += 1) {
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0)? modPoly.getAt(modIndex) : 0;
+        }
+      }
+
+      var totalCodeCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalCodeCount += rsBlocks[i].totalCount;
+      }
+
+      var data = new Array(totalCodeCount);
+      var index = 0;
+
+      for (var i = 0; i < maxDcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < dcdata[r].length) {
+            data[index] = dcdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      for (var i = 0; i < maxEcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < ecdata[r].length) {
+            data[index] = ecdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      return data;
+    };
+
+    var createData = function(typeNumber, errorCorrectionLevel, dataList) {
+
+      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
+
+      var buffer = qrBitBuffer();
+
+      for (var i = 0; i < dataList.length; i += 1) {
+        var data = dataList[i];
+        buffer.put(data.getMode(), 4);
+        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+        data.write(buffer);
+      }
+
+      // calc num max data.
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalDataCount += rsBlocks[i].dataCount;
+      }
+
+      if (buffer.getLengthInBits() > totalDataCount * 8) {
+        throw 'code length overflow. ('
+          + buffer.getLengthInBits()
+          + '>'
+          + totalDataCount * 8
+          + ')';
+      }
+
+      // end code
+      if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+        buffer.put(0, 4);
+      }
+
+      // padding
+      while (buffer.getLengthInBits() % 8 != 0) {
+        buffer.putBit(false);
+      }
+
+      // padding
+      while (true) {
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD0, 8);
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD1, 8);
+      }
+
+      return createBytes(buffer, rsBlocks);
+    };
+
+    _this.addData = function(data, mode) {
+
+      mode = mode || 'Byte';
+
+      var newData = null;
+
+      switch(mode) {
+      case 'Numeric' :
+        newData = qrNumber(data);
+        break;
+      case 'Alphanumeric' :
+        newData = qrAlphaNum(data);
+        break;
+      case 'Byte' :
+        newData = qr8BitByte(data);
+        break;
+      case 'Kanji' :
+        newData = qrKanji(data);
+        break;
+      default :
+        throw 'mode:' + mode;
+      }
+
+      _dataList.push(newData);
+      _dataCache = null;
+    };
+
+    _this.isDark = function(row, col) {
+      if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
+        throw row + ',' + col;
+      }
+      return _modules[row][col];
+    };
+
+    _this.getModuleCount = function() {
+      return _moduleCount;
+    };
+
+    _this.make = function() {
+      if (_typeNumber < 1) {
+        var typeNumber = 1;
+
+        for (; typeNumber < 40; typeNumber++) {
+          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, _errorCorrectionLevel);
+          var buffer = qrBitBuffer();
+
+          for (var i = 0; i < _dataList.length; i++) {
+            var data = _dataList[i];
+            buffer.put(data.getMode(), 4);
+            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+            data.write(buffer);
+          }
+
+          var totalDataCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) {
+            totalDataCount += rsBlocks[i].dataCount;
+          }
+
+          if (buffer.getLengthInBits() <= totalDataCount * 8) {
+            break;
+          }
+        }
+
+        _typeNumber = typeNumber;
+      }
+
+      makeImpl(false, getBestMaskPattern() );
+    };
+
+    _this.createTableTag = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var qrHtml = '';
+
+      qrHtml += '<table style="';
+      qrHtml += ' border-width: 0px; border-style: none;';
+      qrHtml += ' border-collapse: collapse;';
+      qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
+      qrHtml += '">';
+      qrHtml += '<tbody>';
+
+      for (var r = 0; r < _this.getModuleCount(); r += 1) {
+
+        qrHtml += '<tr>';
+
+        for (var c = 0; c < _this.getModuleCount(); c += 1) {
+          qrHtml += '<td style="';
+          qrHtml += ' border-width: 0px; border-style: none;';
+          qrHtml += ' border-collapse: collapse;';
+          qrHtml += ' padding: 0px; margin: 0px;';
+          qrHtml += ' width: ' + cellSize + 'px;';
+          qrHtml += ' height: ' + cellSize + 'px;';
+          qrHtml += ' background-color: ';
+          qrHtml += _this.isDark(r, c)? '#000000' : '#ffffff';
+          qrHtml += ';';
+          qrHtml += '"/>';
+        }
+
+        qrHtml += '</tr>';
+      }
+
+      qrHtml += '</tbody>';
+      qrHtml += '</table>';
+
+      return qrHtml;
+    };
+
+    _this.createSvgTag = function(cellSize, margin, alt, title) {
+
+      var opts = {};
+      if (typeof arguments[0] == 'object') {
+        // Called by options.
+        opts = arguments[0];
+        // overwrite cellSize and margin.
+        cellSize = opts.cellSize;
+        margin = opts.margin;
+        alt = opts.alt;
+        title = opts.title;
+      }
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      // Compose alt property surrogate
+      alt = (typeof alt === 'string') ? {text: alt} : alt || {};
+      alt.text = alt.text || null;
+      alt.id = (alt.text) ? alt.id || 'qrcode-description' : null;
+
+      // Compose title property surrogate
+      title = (typeof title === 'string') ? {text: title} : title || {};
+      title.text = title.text || null;
+      title.id = (title.text) ? title.id || 'qrcode-title' : null;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var c, mc, r, mr, qrSvg='', rect;
+
+      rect = 'l' + cellSize + ',0 0,' + cellSize +
+        ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
+
+      qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
+      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
+      qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
+      qrSvg += ' preserveAspectRatio="xMinYMin meet"';
+      qrSvg += (title.text || alt.text) ? ' role="img" aria-labelledby="' +
+          escapeXml([title.id, alt.id].join(' ').trim() ) + '"' : '';
+      qrSvg += '>';
+      qrSvg += (title.text) ? '<title id="' + escapeXml(title.id) + '">' +
+          escapeXml(title.text) + '</title>' : '';
+      qrSvg += (alt.text) ? '<description id="' + escapeXml(alt.id) + '">' +
+          escapeXml(alt.text) + '</description>' : '';
+      qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
+      qrSvg += '<path d="';
+
+      for (r = 0; r < _this.getModuleCount(); r += 1) {
+        mr = r * cellSize + margin;
+        for (c = 0; c < _this.getModuleCount(); c += 1) {
+          if (_this.isDark(r, c) ) {
+            mc = c*cellSize+margin;
+            qrSvg += 'M' + mc + ',' + mr + rect;
+          }
+        }
+      }
+
+      qrSvg += '" stroke="transparent" fill="black"/>';
+      qrSvg += '</svg>';
+
+      return qrSvg;
+    };
+
+    _this.createDataURL = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      return createDataURL(size, size, function(x, y) {
+        if (min <= x && x < max && min <= y && y < max) {
+          var c = Math.floor( (x - min) / cellSize);
+          var r = Math.floor( (y - min) / cellSize);
+          return _this.isDark(r, c)? 0 : 1;
+        } else {
+          return 1;
+        }
+      } );
+    };
+
+    _this.createImgTag = function(cellSize, margin, alt) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+
+      var img = '';
+      img += '<img';
+      img += '\u0020src="';
+      img += _this.createDataURL(cellSize, margin);
+      img += '"';
+      img += '\u0020width="';
+      img += size;
+      img += '"';
+      img += '\u0020height="';
+      img += size;
+      img += '"';
+      if (alt) {
+        img += '\u0020alt="';
+        img += escapeXml(alt);
+        img += '"';
+      }
+      img += '/>';
+
+      return img;
+    };
+
+    var escapeXml = function(s) {
+      var escaped = '';
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charAt(i);
+        switch(c) {
+        case '<': escaped += '&lt;'; break;
+        case '>': escaped += '&gt;'; break;
+        case '&': escaped += '&amp;'; break;
+        case '"': escaped += '&quot;'; break;
+        default : escaped += c; break;
+        }
+      }
+      return escaped;
+    };
+
+    var _createHalfASCII = function(margin) {
+      var cellSize = 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r1, r2, p;
+
+      var blocks = {
+        '██': '█',
+        '█ ': '▀',
+        ' █': '▄',
+        '  ': ' '
+      };
+
+      var blocksLastLineNoMargin = {
+        '██': '▀',
+        '█ ': '▀',
+        ' █': ' ',
+        '  ': ' '
+      };
+
+      var ascii = '';
+      for (y = 0; y < size; y += 2) {
+        r1 = Math.floor((y - min) / cellSize);
+        r2 = Math.floor((y + 1 - min) / cellSize);
+        for (x = 0; x < size; x += 1) {
+          p = '█';
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
+            p = ' ';
+          }
+
+          if (min <= x && x < max && min <= y+1 && y+1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
+            p += ' ';
+          }
+          else {
+            p += '█';
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
+        }
+
+        ascii += '\n';
+      }
+
+      if (size % 2 && margin > 0) {
+        return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.createASCII = function(cellSize, margin) {
+      cellSize = cellSize || 1;
+
+      if (cellSize < 2) {
+        return _createHalfASCII(margin);
+      }
+
+      cellSize -= 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r, p;
+
+      var white = Array(cellSize+1).join('██');
+      var black = Array(cellSize+1).join('  ');
+
+      var ascii = '';
+      var line = '';
+      for (y = 0; y < size; y += 1) {
+        r = Math.floor( (y - min) / cellSize);
+        line = '';
+        for (x = 0; x < size; x += 1) {
+          p = 1;
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
+            p = 0;
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          line += p ? white : black;
+        }
+
+        for (r = 0; r < cellSize; r += 1) {
+          ascii += line + '\n';
+        }
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.renderTo2dContext = function(context, cellSize) {
+      cellSize = cellSize || 2;
+      var length = _this.getModuleCount();
+      for (var row = 0; row < length; row++) {
+        for (var col = 0; col < length; col++) {
+          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
+          context.fillRect(row * cellSize, col * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrcode.stringToBytes
+  //---------------------------------------------------------------------
+
+  qrcode.stringToBytesFuncs = {
+    'default' : function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        bytes.push(c & 0xff);
+      }
+      return bytes;
+    }
+  };
+
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['default'];
+
+  //---------------------------------------------------------------------
+  // qrcode.createStringToBytes
+  //---------------------------------------------------------------------
+
+  /**
+   * @param unicodeData base64 string of byte array.
+   * [16bit Unicode],[16bit Bytes], ...
+   * @param numChars
+   */
+  qrcode.createStringToBytes = function(unicodeData, numChars) {
+
+    // create conversion map.
+
+    var unicodeMap = function() {
+
+      var bin = base64DecodeInputStream(unicodeData);
+      var read = function() {
+        var b = bin.read();
+        if (b == -1) throw 'eof';
+        return b;
+      };
+
+      var count = 0;
+      var unicodeMap = {};
+      while (true) {
+        var b0 = bin.read();
+        if (b0 == -1) break;
+        var b1 = read();
+        var b2 = read();
+        var b3 = read();
+        var k = String.fromCharCode( (b0 << 8) | b1);
+        var v = (b2 << 8) | b3;
+        unicodeMap[k] = v;
+        count += 1;
+      }
+      if (count != numChars) {
+        throw count + ' != ' + numChars;
+      }
+
+      return unicodeMap;
+    }();
+
+    var unknownChar = '?'.charCodeAt(0);
+
+    return function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        if (c < 128) {
+          bytes.push(c);
+        } else {
+          var b = unicodeMap[s.charAt(i)];
+          if (typeof b == 'number') {
+            if ( (b & 0xff) == b) {
+              // 1byte
+              bytes.push(b);
+            } else {
+              // 2bytes
+              bytes.push(b >>> 8);
+              bytes.push(b & 0xff);
+            }
+          } else {
+            bytes.push(unknownChar);
+          }
+        }
+      }
+      return bytes;
+    };
+  };
+
+  //---------------------------------------------------------------------
+  // QRMode
+  //---------------------------------------------------------------------
+
+  var QRMode = {
+    MODE_NUMBER :    1 << 0,
+    MODE_ALPHA_NUM : 1 << 1,
+    MODE_8BIT_BYTE : 1 << 2,
+    MODE_KANJI :     1 << 3
+  };
+
+  //---------------------------------------------------------------------
+  // QRErrorCorrectionLevel
+  //---------------------------------------------------------------------
+
+  var QRErrorCorrectionLevel = {
+    L : 1,
+    M : 0,
+    Q : 3,
+    H : 2
+  };
+
+  //---------------------------------------------------------------------
+  // QRMaskPattern
+  //---------------------------------------------------------------------
+
+  var QRMaskPattern = {
+    PATTERN000 : 0,
+    PATTERN001 : 1,
+    PATTERN010 : 2,
+    PATTERN011 : 3,
+    PATTERN100 : 4,
+    PATTERN101 : 5,
+    PATTERN110 : 6,
+    PATTERN111 : 7
+  };
+
+  //---------------------------------------------------------------------
+  // QRUtil
+  //---------------------------------------------------------------------
+
+  var QRUtil = function() {
+
+    var PATTERN_POSITION_TABLE = [
+      [],
+      [6, 18],
+      [6, 22],
+      [6, 26],
+      [6, 30],
+      [6, 34],
+      [6, 22, 38],
+      [6, 24, 42],
+      [6, 26, 46],
+      [6, 28, 50],
+      [6, 30, 54],
+      [6, 32, 58],
+      [6, 34, 62],
+      [6, 26, 46, 66],
+      [6, 26, 48, 70],
+      [6, 26, 50, 74],
+      [6, 30, 54, 78],
+      [6, 30, 56, 82],
+      [6, 30, 58, 86],
+      [6, 34, 62, 90],
+      [6, 28, 50, 72, 94],
+      [6, 26, 50, 74, 98],
+      [6, 30, 54, 78, 102],
+      [6, 28, 54, 80, 106],
+      [6, 32, 58, 84, 110],
+      [6, 30, 58, 86, 114],
+      [6, 34, 62, 90, 118],
+      [6, 26, 50, 74, 98, 122],
+      [6, 30, 54, 78, 102, 126],
+      [6, 26, 52, 78, 104, 130],
+      [6, 30, 56, 82, 108, 134],
+      [6, 34, 60, 86, 112, 138],
+      [6, 30, 58, 86, 114, 142],
+      [6, 34, 62, 90, 118, 146],
+      [6, 30, 54, 78, 102, 126, 150],
+      [6, 24, 50, 76, 102, 128, 154],
+      [6, 28, 54, 80, 106, 132, 158],
+      [6, 32, 58, 84, 110, 136, 162],
+      [6, 26, 54, 82, 110, 138, 166],
+      [6, 30, 58, 86, 114, 142, 170]
+    ];
+    var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
+    var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
+    var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
+
+    var _this = {};
+
+    var getBCHDigit = function(data) {
+      var digit = 0;
+      while (data != 0) {
+        digit += 1;
+        data >>>= 1;
+      }
+      return digit;
+    };
+
+    _this.getBCHTypeInfo = function(data) {
+      var d = data << 10;
+      while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15) ) );
+      }
+      return ( (data << 10) | d) ^ G15_MASK;
+    };
+
+    _this.getBCHTypeNumber = function(data) {
+      var d = data << 12;
+      while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18) ) );
+      }
+      return (data << 12) | d;
+    };
+
+    _this.getPatternPosition = function(typeNumber) {
+      return PATTERN_POSITION_TABLE[typeNumber - 1];
+    };
+
+    _this.getMaskFunction = function(maskPattern) {
+
+      switch (maskPattern) {
+
+      case QRMaskPattern.PATTERN000 :
+        return function(i, j) { return (i + j) % 2 == 0; };
+      case QRMaskPattern.PATTERN001 :
+        return function(i, j) { return i % 2 == 0; };
+      case QRMaskPattern.PATTERN010 :
+        return function(i, j) { return j % 3 == 0; };
+      case QRMaskPattern.PATTERN011 :
+        return function(i, j) { return (i + j) % 3 == 0; };
+      case QRMaskPattern.PATTERN100 :
+        return function(i, j) { return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 == 0; };
+      case QRMaskPattern.PATTERN101 :
+        return function(i, j) { return (i * j) % 2 + (i * j) % 3 == 0; };
+      case QRMaskPattern.PATTERN110 :
+        return function(i, j) { return ( (i * j) % 2 + (i * j) % 3) % 2 == 0; };
+      case QRMaskPattern.PATTERN111 :
+        return function(i, j) { return ( (i * j) % 3 + (i + j) % 2) % 2 == 0; };
+
+      default :
+        throw 'bad maskPattern:' + maskPattern;
+      }
+    };
+
+    _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
+      var a = qrPolynomial([1], 0);
+      for (var i = 0; i < errorCorrectLength; i += 1) {
+        a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0) );
+      }
+      return a;
+    };
+
+    _this.getLengthInBits = function(mode, type) {
+
+      if (1 <= type && type < 10) {
+
+        // 1 - 9
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 10;
+        case QRMode.MODE_ALPHA_NUM : return 9;
+        case QRMode.MODE_8BIT_BYTE : return 8;
+        case QRMode.MODE_KANJI     : return 8;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 27) {
+
+        // 10 - 26
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 12;
+        case QRMode.MODE_ALPHA_NUM : return 11;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 10;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 41) {
+
+        // 27 - 40
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 14;
+        case QRMode.MODE_ALPHA_NUM : return 13;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 12;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else {
+        throw 'type:' + type;
+      }
+    };
+
+    _this.getLostPoint = function(qrcode) {
+
+      var moduleCount = qrcode.getModuleCount();
+
+      var lostPoint = 0;
+
+      // LEVEL1
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount; col += 1) {
+
+          var sameCount = 0;
+          var dark = qrcode.isDark(row, col);
+
+          for (var r = -1; r <= 1; r += 1) {
+
+            if (row + r < 0 || moduleCount <= row + r) {
+              continue;
+            }
+
+            for (var c = -1; c <= 1; c += 1) {
+
+              if (col + c < 0 || moduleCount <= col + c) {
+                continue;
+              }
+
+              if (r == 0 && c == 0) {
+                continue;
+              }
+
+              if (dark == qrcode.isDark(row + r, col + c) ) {
+                sameCount += 1;
+              }
+            }
+          }
+
+          if (sameCount > 5) {
+            lostPoint += (3 + sameCount - 5);
+          }
+        }
+      };
+
+      // LEVEL2
+
+      for (var row = 0; row < moduleCount - 1; row += 1) {
+        for (var col = 0; col < moduleCount - 1; col += 1) {
+          var count = 0;
+          if (qrcode.isDark(row, col) ) count += 1;
+          if (qrcode.isDark(row + 1, col) ) count += 1;
+          if (qrcode.isDark(row, col + 1) ) count += 1;
+          if (qrcode.isDark(row + 1, col + 1) ) count += 1;
+          if (count == 0 || count == 4) {
+            lostPoint += 3;
+          }
+        }
+      }
+
+      // LEVEL3
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount - 6; col += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row, col + 1)
+              &&  qrcode.isDark(row, col + 2)
+              &&  qrcode.isDark(row, col + 3)
+              &&  qrcode.isDark(row, col + 4)
+              && !qrcode.isDark(row, col + 5)
+              &&  qrcode.isDark(row, col + 6) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount - 6; row += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row + 1, col)
+              &&  qrcode.isDark(row + 2, col)
+              &&  qrcode.isDark(row + 3, col)
+              &&  qrcode.isDark(row + 4, col)
+              && !qrcode.isDark(row + 5, col)
+              &&  qrcode.isDark(row + 6, col) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      // LEVEL4
+
+      var darkCount = 0;
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount; row += 1) {
+          if (qrcode.isDark(row, col) ) {
+            darkCount += 1;
+          }
+        }
+      }
+
+      var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+      lostPoint += ratio * 10;
+
+      return lostPoint;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // QRMath
+  //---------------------------------------------------------------------
+
+  var QRMath = function() {
+
+    var EXP_TABLE = new Array(256);
+    var LOG_TABLE = new Array(256);
+
+    // initialize tables
+    for (var i = 0; i < 8; i += 1) {
+      EXP_TABLE[i] = 1 << i;
+    }
+    for (var i = 8; i < 256; i += 1) {
+      EXP_TABLE[i] = EXP_TABLE[i - 4]
+        ^ EXP_TABLE[i - 5]
+        ^ EXP_TABLE[i - 6]
+        ^ EXP_TABLE[i - 8];
+    }
+    for (var i = 0; i < 255; i += 1) {
+      LOG_TABLE[EXP_TABLE[i] ] = i;
+    }
+
+    var _this = {};
+
+    _this.glog = function(n) {
+
+      if (n < 1) {
+        throw 'glog(' + n + ')';
+      }
+
+      return LOG_TABLE[n];
+    };
+
+    _this.gexp = function(n) {
+
+      while (n < 0) {
+        n += 255;
+      }
+
+      while (n >= 256) {
+        n -= 255;
+      }
+
+      return EXP_TABLE[n];
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrPolynomial
+  //---------------------------------------------------------------------
+
+  function qrPolynomial(num, shift) {
+
+    if (typeof num.length == 'undefined') {
+      throw num.length + '/' + shift;
+    }
+
+    var _num = function() {
+      var offset = 0;
+      while (offset < num.length && num[offset] == 0) {
+        offset += 1;
+      }
+      var _num = new Array(num.length - offset + shift);
+      for (var i = 0; i < num.length - offset; i += 1) {
+        _num[i] = num[i + offset];
+      }
+      return _num;
+    }();
+
+    var _this = {};
+
+    _this.getAt = function(index) {
+      return _num[index];
+    };
+
+    _this.getLength = function() {
+      return _num.length;
+    };
+
+    _this.multiply = function(e) {
+
+      var num = new Array(_this.getLength() + e.getLength() - 1);
+
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        for (var j = 0; j < e.getLength(); j += 1) {
+          num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i) ) + QRMath.glog(e.getAt(j) ) );
+        }
+      }
+
+      return qrPolynomial(num, 0);
+    };
+
+    _this.mod = function(e) {
+
+      if (_this.getLength() - e.getLength() < 0) {
+        return _this;
+      }
+
+      var ratio = QRMath.glog(_this.getAt(0) ) - QRMath.glog(e.getAt(0) );
+
+      var num = new Array(_this.getLength() );
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        num[i] = _this.getAt(i);
+      }
+
+      for (var i = 0; i < e.getLength(); i += 1) {
+        num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i) ) + ratio);
+      }
+
+      // recursive call
+      return qrPolynomial(num, 0).mod(e);
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // QRRSBlock
+  //---------------------------------------------------------------------
+
+  var QRRSBlock = function() {
+
+    var RS_BLOCK_TABLE = [
+
+      // L
+      // M
+      // Q
+      // H
+
+      // 1
+      [1, 26, 19],
+      [1, 26, 16],
+      [1, 26, 13],
+      [1, 26, 9],
+
+      // 2
+      [1, 44, 34],
+      [1, 44, 28],
+      [1, 44, 22],
+      [1, 44, 16],
+
+      // 3
+      [1, 70, 55],
+      [1, 70, 44],
+      [2, 35, 17],
+      [2, 35, 13],
+
+      // 4
+      [1, 100, 80],
+      [2, 50, 32],
+      [2, 50, 24],
+      [4, 25, 9],
+
+      // 5
+      [1, 134, 108],
+      [2, 67, 43],
+      [2, 33, 15, 2, 34, 16],
+      [2, 33, 11, 2, 34, 12],
+
+      // 6
+      [2, 86, 68],
+      [4, 43, 27],
+      [4, 43, 19],
+      [4, 43, 15],
+
+      // 7
+      [2, 98, 78],
+      [4, 49, 31],
+      [2, 32, 14, 4, 33, 15],
+      [4, 39, 13, 1, 40, 14],
+
+      // 8
+      [2, 121, 97],
+      [2, 60, 38, 2, 61, 39],
+      [4, 40, 18, 2, 41, 19],
+      [4, 40, 14, 2, 41, 15],
+
+      // 9
+      [2, 146, 116],
+      [3, 58, 36, 2, 59, 37],
+      [4, 36, 16, 4, 37, 17],
+      [4, 36, 12, 4, 37, 13],
+
+      // 10
+      [2, 86, 68, 2, 87, 69],
+      [4, 69, 43, 1, 70, 44],
+      [6, 43, 19, 2, 44, 20],
+      [6, 43, 15, 2, 44, 16],
+
+      // 11
+      [4, 101, 81],
+      [1, 80, 50, 4, 81, 51],
+      [4, 50, 22, 4, 51, 23],
+      [3, 36, 12, 8, 37, 13],
+
+      // 12
+      [2, 116, 92, 2, 117, 93],
+      [6, 58, 36, 2, 59, 37],
+      [4, 46, 20, 6, 47, 21],
+      [7, 42, 14, 4, 43, 15],
+
+      // 13
+      [4, 133, 107],
+      [8, 59, 37, 1, 60, 38],
+      [8, 44, 20, 4, 45, 21],
+      [12, 33, 11, 4, 34, 12],
+
+      // 14
+      [3, 145, 115, 1, 146, 116],
+      [4, 64, 40, 5, 65, 41],
+      [11, 36, 16, 5, 37, 17],
+      [11, 36, 12, 5, 37, 13],
+
+      // 15
+      [5, 109, 87, 1, 110, 88],
+      [5, 65, 41, 5, 66, 42],
+      [5, 54, 24, 7, 55, 25],
+      [11, 36, 12, 7, 37, 13],
+
+      // 16
+      [5, 122, 98, 1, 123, 99],
+      [7, 73, 45, 3, 74, 46],
+      [15, 43, 19, 2, 44, 20],
+      [3, 45, 15, 13, 46, 16],
+
+      // 17
+      [1, 135, 107, 5, 136, 108],
+      [10, 74, 46, 1, 75, 47],
+      [1, 50, 22, 15, 51, 23],
+      [2, 42, 14, 17, 43, 15],
+
+      // 18
+      [5, 150, 120, 1, 151, 121],
+      [9, 69, 43, 4, 70, 44],
+      [17, 50, 22, 1, 51, 23],
+      [2, 42, 14, 19, 43, 15],
+
+      // 19
+      [3, 141, 113, 4, 142, 114],
+      [3, 70, 44, 11, 71, 45],
+      [17, 47, 21, 4, 48, 22],
+      [9, 39, 13, 16, 40, 14],
+
+      // 20
+      [3, 135, 107, 5, 136, 108],
+      [3, 67, 41, 13, 68, 42],
+      [15, 54, 24, 5, 55, 25],
+      [15, 43, 15, 10, 44, 16],
+
+      // 21
+      [4, 144, 116, 4, 145, 117],
+      [17, 68, 42],
+      [17, 50, 22, 6, 51, 23],
+      [19, 46, 16, 6, 47, 17],
+
+      // 22
+      [2, 139, 111, 7, 140, 112],
+      [17, 74, 46],
+      [7, 54, 24, 16, 55, 25],
+      [34, 37, 13],
+
+      // 23
+      [4, 151, 121, 5, 152, 122],
+      [4, 75, 47, 14, 76, 48],
+      [11, 54, 24, 14, 55, 25],
+      [16, 45, 15, 14, 46, 16],
+
+      // 24
+      [6, 147, 117, 4, 148, 118],
+      [6, 73, 45, 14, 74, 46],
+      [11, 54, 24, 16, 55, 25],
+      [30, 46, 16, 2, 47, 17],
+
+      // 25
+      [8, 132, 106, 4, 133, 107],
+      [8, 75, 47, 13, 76, 48],
+      [7, 54, 24, 22, 55, 25],
+      [22, 45, 15, 13, 46, 16],
+
+      // 26
+      [10, 142, 114, 2, 143, 115],
+      [19, 74, 46, 4, 75, 47],
+      [28, 50, 22, 6, 51, 23],
+      [33, 46, 16, 4, 47, 17],
+
+      // 27
+      [8, 152, 122, 4, 153, 123],
+      [22, 73, 45, 3, 74, 46],
+      [8, 53, 23, 26, 54, 24],
+      [12, 45, 15, 28, 46, 16],
+
+      // 28
+      [3, 147, 117, 10, 148, 118],
+      [3, 73, 45, 23, 74, 46],
+      [4, 54, 24, 31, 55, 25],
+      [11, 45, 15, 31, 46, 16],
+
+      // 29
+      [7, 146, 116, 7, 147, 117],
+      [21, 73, 45, 7, 74, 46],
+      [1, 53, 23, 37, 54, 24],
+      [19, 45, 15, 26, 46, 16],
+
+      // 30
+      [5, 145, 115, 10, 146, 116],
+      [19, 75, 47, 10, 76, 48],
+      [15, 54, 24, 25, 55, 25],
+      [23, 45, 15, 25, 46, 16],
+
+      // 31
+      [13, 145, 115, 3, 146, 116],
+      [2, 74, 46, 29, 75, 47],
+      [42, 54, 24, 1, 55, 25],
+      [23, 45, 15, 28, 46, 16],
+
+      // 32
+      [17, 145, 115],
+      [10, 74, 46, 23, 75, 47],
+      [10, 54, 24, 35, 55, 25],
+      [19, 45, 15, 35, 46, 16],
+
+      // 33
+      [17, 145, 115, 1, 146, 116],
+      [14, 74, 46, 21, 75, 47],
+      [29, 54, 24, 19, 55, 25],
+      [11, 45, 15, 46, 46, 16],
+
+      // 34
+      [13, 145, 115, 6, 146, 116],
+      [14, 74, 46, 23, 75, 47],
+      [44, 54, 24, 7, 55, 25],
+      [59, 46, 16, 1, 47, 17],
+
+      // 35
+      [12, 151, 121, 7, 152, 122],
+      [12, 75, 47, 26, 76, 48],
+      [39, 54, 24, 14, 55, 25],
+      [22, 45, 15, 41, 46, 16],
+
+      // 36
+      [6, 151, 121, 14, 152, 122],
+      [6, 75, 47, 34, 76, 48],
+      [46, 54, 24, 10, 55, 25],
+      [2, 45, 15, 64, 46, 16],
+
+      // 37
+      [17, 152, 122, 4, 153, 123],
+      [29, 74, 46, 14, 75, 47],
+      [49, 54, 24, 10, 55, 25],
+      [24, 45, 15, 46, 46, 16],
+
+      // 38
+      [4, 152, 122, 18, 153, 123],
+      [13, 74, 46, 32, 75, 47],
+      [48, 54, 24, 14, 55, 25],
+      [42, 45, 15, 32, 46, 16],
+
+      // 39
+      [20, 147, 117, 4, 148, 118],
+      [40, 75, 47, 7, 76, 48],
+      [43, 54, 24, 22, 55, 25],
+      [10, 45, 15, 67, 46, 16],
+
+      // 40
+      [19, 148, 118, 6, 149, 119],
+      [18, 75, 47, 31, 76, 48],
+      [34, 54, 24, 34, 55, 25],
+      [20, 45, 15, 61, 46, 16]
+    ];
+
+    var qrRSBlock = function(totalCount, dataCount) {
+      var _this = {};
+      _this.totalCount = totalCount;
+      _this.dataCount = dataCount;
+      return _this;
+    };
+
+    var _this = {};
+
+    var getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
+
+      switch(errorCorrectionLevel) {
+      case QRErrorCorrectionLevel.L :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+      case QRErrorCorrectionLevel.M :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+      case QRErrorCorrectionLevel.Q :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+      case QRErrorCorrectionLevel.H :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+      default :
+        return undefined;
+      }
+    };
+
+    _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
+
+      var rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
+
+      if (typeof rsBlock == 'undefined') {
+        throw 'bad rs block @ typeNumber:' + typeNumber +
+            '/errorCorrectionLevel:' + errorCorrectionLevel;
+      }
+
+      var length = rsBlock.length / 3;
+
+      var list = [];
+
+      for (var i = 0; i < length; i += 1) {
+
+        var count = rsBlock[i * 3 + 0];
+        var totalCount = rsBlock[i * 3 + 1];
+        var dataCount = rsBlock[i * 3 + 2];
+
+        for (var j = 0; j < count; j += 1) {
+          list.push(qrRSBlock(totalCount, dataCount) );
+        }
+      }
+
+      return list;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrBitBuffer
+  //---------------------------------------------------------------------
+
+  var qrBitBuffer = function() {
+
+    var _buffer = [];
+    var _length = 0;
+
+    var _this = {};
+
+    _this.getBuffer = function() {
+      return _buffer;
+    };
+
+    _this.getAt = function(index) {
+      var bufIndex = Math.floor(index / 8);
+      return ( (_buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+    };
+
+    _this.put = function(num, length) {
+      for (var i = 0; i < length; i += 1) {
+        _this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+      }
+    };
+
+    _this.getLengthInBits = function() {
+      return _length;
+    };
+
+    _this.putBit = function(bit) {
+
+      var bufIndex = Math.floor(_length / 8);
+      if (_buffer.length <= bufIndex) {
+        _buffer.push(0);
+      }
+
+      if (bit) {
+        _buffer[bufIndex] |= (0x80 >>> (_length % 8) );
+      }
+
+      _length += 1;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrNumber
+  //---------------------------------------------------------------------
+
+  var qrNumber = function(data) {
+
+    var _mode = QRMode.MODE_NUMBER;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _data;
+
+      var i = 0;
+
+      while (i + 2 < data.length) {
+        buffer.put(strToNum(data.substring(i, i + 3) ), 10);
+        i += 3;
+      }
+
+      if (i < data.length) {
+        if (data.length - i == 1) {
+          buffer.put(strToNum(data.substring(i, i + 1) ), 4);
+        } else if (data.length - i == 2) {
+          buffer.put(strToNum(data.substring(i, i + 2) ), 7);
+        }
+      }
+    };
+
+    var strToNum = function(s) {
+      var num = 0;
+      for (var i = 0; i < s.length; i += 1) {
+        num = num * 10 + chatToNum(s.charAt(i) );
+      }
+      return num;
+    };
+
+    var chatToNum = function(c) {
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      }
+      throw 'illegal char :' + c;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrAlphaNum
+  //---------------------------------------------------------------------
+
+  var qrAlphaNum = function(data) {
+
+    var _mode = QRMode.MODE_ALPHA_NUM;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var s = _data;
+
+      var i = 0;
+
+      while (i + 1 < s.length) {
+        buffer.put(
+          getCode(s.charAt(i) ) * 45 +
+          getCode(s.charAt(i + 1) ), 11);
+        i += 2;
+      }
+
+      if (i < s.length) {
+        buffer.put(getCode(s.charAt(i) ), 6);
+      }
+    };
+
+    var getCode = function(c) {
+
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      } else if ('A' <= c && c <= 'Z') {
+        return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+      } else {
+        switch (c) {
+        case ' ' : return 36;
+        case '$' : return 37;
+        case '%' : return 38;
+        case '*' : return 39;
+        case '+' : return 40;
+        case '-' : return 41;
+        case '.' : return 42;
+        case '/' : return 43;
+        case ':' : return 44;
+        default :
+          throw 'illegal char :' + c;
+        }
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qr8BitByte
+  //---------------------------------------------------------------------
+
+  var qr8BitByte = function(data) {
+
+    var _mode = QRMode.MODE_8BIT_BYTE;
+    var _data = data;
+    var _bytes = qrcode.stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _bytes.length;
+    };
+
+    _this.write = function(buffer) {
+      for (var i = 0; i < _bytes.length; i += 1) {
+        buffer.put(_bytes[i], 8);
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrKanji
+  //---------------------------------------------------------------------
+
+  var qrKanji = function(data) {
+
+    var _mode = QRMode.MODE_KANJI;
+    var _data = data;
+
+    var stringToBytes = qrcode.stringToBytesFuncs['SJIS'];
+    if (!stringToBytes) {
+      throw 'sjis not supported.';
+    }
+    !function(c, code) {
+      // self test for sjis support.
+      var test = stringToBytes(c);
+      if (test.length != 2 || ( (test[0] << 8) | test[1]) != code) {
+        throw 'sjis not supported.';
+      }
+    }('\u53cb', 0x9746);
+
+    var _bytes = stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return ~~(_bytes.length / 2);
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _bytes;
+
+      var i = 0;
+
+      while (i + 1 < data.length) {
+
+        var c = ( (0xff & data[i]) << 8) | (0xff & data[i + 1]);
+
+        if (0x8140 <= c && c <= 0x9FFC) {
+          c -= 0x8140;
+        } else if (0xE040 <= c && c <= 0xEBBF) {
+          c -= 0xC140;
+        } else {
+          throw 'illegal char at ' + (i + 1) + '/' + c;
+        }
+
+        c = ( (c >>> 8) & 0xff) * 0xC0 + (c & 0xff);
+
+        buffer.put(c, 13);
+
+        i += 2;
+      }
+
+      if (i < data.length) {
+        throw 'illegal char at ' + (i + 1);
+      }
+    };
+
+    return _this;
+  };
+
+  //=====================================================================
+  // GIF Support etc.
+  //
+
+  //---------------------------------------------------------------------
+  // byteArrayOutputStream
+  //---------------------------------------------------------------------
+
+  var byteArrayOutputStream = function() {
+
+    var _bytes = [];
+
+    var _this = {};
+
+    _this.writeByte = function(b) {
+      _bytes.push(b & 0xff);
+    };
+
+    _this.writeShort = function(i) {
+      _this.writeByte(i);
+      _this.writeByte(i >>> 8);
+    };
+
+    _this.writeBytes = function(b, off, len) {
+      off = off || 0;
+      len = len || b.length;
+      for (var i = 0; i < len; i += 1) {
+        _this.writeByte(b[i + off]);
+      }
+    };
+
+    _this.writeString = function(s) {
+      for (var i = 0; i < s.length; i += 1) {
+        _this.writeByte(s.charCodeAt(i) );
+      }
+    };
+
+    _this.toByteArray = function() {
+      return _bytes;
+    };
+
+    _this.toString = function() {
+      var s = '';
+      s += '[';
+      for (var i = 0; i < _bytes.length; i += 1) {
+        if (i > 0) {
+          s += ',';
+        }
+        s += _bytes[i];
+      }
+      s += ']';
+      return s;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64EncodeOutputStream
+  //---------------------------------------------------------------------
+
+  var base64EncodeOutputStream = function() {
+
+    var _buffer = 0;
+    var _buflen = 0;
+    var _length = 0;
+    var _base64 = '';
+
+    var _this = {};
+
+    var writeEncoded = function(b) {
+      _base64 += String.fromCharCode(encode(b & 0x3f) );
+    };
+
+    var encode = function(n) {
+      if (n < 0) {
+        // error.
+      } else if (n < 26) {
+        return 0x41 + n;
+      } else if (n < 52) {
+        return 0x61 + (n - 26);
+      } else if (n < 62) {
+        return 0x30 + (n - 52);
+      } else if (n == 62) {
+        return 0x2b;
+      } else if (n == 63) {
+        return 0x2f;
+      }
+      throw 'n:' + n;
+    };
+
+    _this.writeByte = function(n) {
+
+      _buffer = (_buffer << 8) | (n & 0xff);
+      _buflen += 8;
+      _length += 1;
+
+      while (_buflen >= 6) {
+        writeEncoded(_buffer >>> (_buflen - 6) );
+        _buflen -= 6;
+      }
+    };
+
+    _this.flush = function() {
+
+      if (_buflen > 0) {
+        writeEncoded(_buffer << (6 - _buflen) );
+        _buffer = 0;
+        _buflen = 0;
+      }
+
+      if (_length % 3 != 0) {
+        // padding
+        var padlen = 3 - _length % 3;
+        for (var i = 0; i < padlen; i += 1) {
+          _base64 += '=';
+        }
+      }
+    };
+
+    _this.toString = function() {
+      return _base64;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64DecodeInputStream
+  //---------------------------------------------------------------------
+
+  var base64DecodeInputStream = function(str) {
+
+    var _str = str;
+    var _pos = 0;
+    var _buffer = 0;
+    var _buflen = 0;
+
+    var _this = {};
+
+    _this.read = function() {
+
+      while (_buflen < 8) {
+
+        if (_pos >= _str.length) {
+          if (_buflen == 0) {
+            return -1;
+          }
+          throw 'unexpected end of file./' + _buflen;
+        }
+
+        var c = _str.charAt(_pos);
+        _pos += 1;
+
+        if (c == '=') {
+          _buflen = 0;
+          return -1;
+        } else if (c.match(/^\s$/) ) {
+          // ignore if whitespace.
+          continue;
+        }
+
+        _buffer = (_buffer << 6) | decode(c.charCodeAt(0) );
+        _buflen += 6;
+      }
+
+      var n = (_buffer >>> (_buflen - 8) ) & 0xff;
+      _buflen -= 8;
+      return n;
+    };
+
+    var decode = function(c) {
+      if (0x41 <= c && c <= 0x5a) {
+        return c - 0x41;
+      } else if (0x61 <= c && c <= 0x7a) {
+        return c - 0x61 + 26;
+      } else if (0x30 <= c && c <= 0x39) {
+        return c - 0x30 + 52;
+      } else if (c == 0x2b) {
+        return 62;
+      } else if (c == 0x2f) {
+        return 63;
+      } else {
+        throw 'c:' + c;
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // gifImage (B/W)
+  //---------------------------------------------------------------------
+
+  var gifImage = function(width, height) {
+
+    var _width = width;
+    var _height = height;
+    var _data = new Array(width * height);
+
+    var _this = {};
+
+    _this.setPixel = function(x, y, pixel) {
+      _data[y * _width + x] = pixel;
+    };
+
+    _this.write = function(out) {
+
+      //---------------------------------
+      // GIF Signature
+
+      out.writeString('GIF87a');
+
+      //---------------------------------
+      // Screen Descriptor
+
+      out.writeShort(_width);
+      out.writeShort(_height);
+
+      out.writeByte(0x80); // 2bit
+      out.writeByte(0);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Global Color Map
+
+      // black
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+
+      // white
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+
+      //---------------------------------
+      // Image Descriptor
+
+      out.writeString(',');
+      out.writeShort(0);
+      out.writeShort(0);
+      out.writeShort(_width);
+      out.writeShort(_height);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Local Color Map
+
+      //---------------------------------
+      // Raster Data
+
+      var lzwMinCodeSize = 2;
+      var raster = getLZWRaster(lzwMinCodeSize);
+
+      out.writeByte(lzwMinCodeSize);
+
+      var offset = 0;
+
+      while (raster.length - offset > 255) {
+        out.writeByte(255);
+        out.writeBytes(raster, offset, 255);
+        offset += 255;
+      }
+
+      out.writeByte(raster.length - offset);
+      out.writeBytes(raster, offset, raster.length - offset);
+      out.writeByte(0x00);
+
+      //---------------------------------
+      // GIF Terminator
+      out.writeString(';');
+    };
+
+    var bitOutputStream = function(out) {
+
+      var _out = out;
+      var _bitLength = 0;
+      var _bitBuffer = 0;
+
+      var _this = {};
+
+      _this.write = function(data, length) {
+
+        if ( (data >>> length) != 0) {
+          throw 'length over';
+        }
+
+        while (_bitLength + length >= 8) {
+          _out.writeByte(0xff & ( (data << _bitLength) | _bitBuffer) );
+          length -= (8 - _bitLength);
+          data >>>= (8 - _bitLength);
+          _bitBuffer = 0;
+          _bitLength = 0;
+        }
+
+        _bitBuffer = (data << _bitLength) | _bitBuffer;
+        _bitLength = _bitLength + length;
+      };
+
+      _this.flush = function() {
+        if (_bitLength > 0) {
+          _out.writeByte(_bitBuffer);
+        }
+      };
+
+      return _this;
+    };
+
+    var getLZWRaster = function(lzwMinCodeSize) {
+
+      var clearCode = 1 << lzwMinCodeSize;
+      var endCode = (1 << lzwMinCodeSize) + 1;
+      var bitLength = lzwMinCodeSize + 1;
+
+      // Setup LZWTable
+      var table = lzwTable();
+
+      for (var i = 0; i < clearCode; i += 1) {
+        table.add(String.fromCharCode(i) );
+      }
+      table.add(String.fromCharCode(clearCode) );
+      table.add(String.fromCharCode(endCode) );
+
+      var byteOut = byteArrayOutputStream();
+      var bitOut = bitOutputStream(byteOut);
+
+      // clear code
+      bitOut.write(clearCode, bitLength);
+
+      var dataIndex = 0;
+
+      var s = String.fromCharCode(_data[dataIndex]);
+      dataIndex += 1;
+
+      while (dataIndex < _data.length) {
+
+        var c = String.fromCharCode(_data[dataIndex]);
+        dataIndex += 1;
+
+        if (table.contains(s + c) ) {
+
+          s = s + c;
+
+        } else {
+
+          bitOut.write(table.indexOf(s), bitLength);
+
+          if (table.size() < 0xfff) {
+
+            if (table.size() == (1 << bitLength) ) {
+              bitLength += 1;
+            }
+
+            table.add(s + c);
+          }
+
+          s = c;
+        }
+      }
+
+      bitOut.write(table.indexOf(s), bitLength);
+
+      // end code
+      bitOut.write(endCode, bitLength);
+
+      bitOut.flush();
+
+      return byteOut.toByteArray();
+    };
+
+    var lzwTable = function() {
+
+      var _map = {};
+      var _size = 0;
+
+      var _this = {};
+
+      _this.add = function(key) {
+        if (_this.contains(key) ) {
+          throw 'dup key:' + key;
+        }
+        _map[key] = _size;
+        _size += 1;
+      };
+
+      _this.size = function() {
+        return _size;
+      };
+
+      _this.indexOf = function(key) {
+        return _map[key];
+      };
+
+      _this.contains = function(key) {
+        return typeof _map[key] != 'undefined';
+      };
+
+      return _this;
+    };
+
+    return _this;
+  };
+
+  var createDataURL = function(width, height, getPixel) {
+    var gif = gifImage(width, height);
+    for (var y = 0; y < height; y += 1) {
+      for (var x = 0; x < width; x += 1) {
+        gif.setPixel(x, y, getPixel(x, y) );
+      }
+    }
+
+    var b = byteArrayOutputStream();
+    gif.write(b);
+
+    var base64 = base64EncodeOutputStream();
+    var bytes = b.toByteArray();
+    for (var i = 0; i < bytes.length; i += 1) {
+      base64.writeByte(bytes[i]);
+    }
+    base64.flush();
+
+    return 'data:image/gif;base64,' + base64;
+  };
+
+  //---------------------------------------------------------------------
+  // returns qrcode function.
+
+  return qrcode;
+}();
+
+// multibyte support
+!function() {
+
+  qrcode.stringToBytesFuncs['UTF-8'] = function(s) {
+    // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
+    function toUTF8Array(str) {
+      var utf8 = [];
+      for (var i=0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+          utf8.push(0xc0 | (charcode >> 6),
+              0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+          utf8.push(0xe0 | (charcode >> 12),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+          i++;
+          // UTF-16 encodes 0x10000-0x10FFFF by
+          // subtracting 0x10000 and splitting the
+          // 20 bits of 0x0-0xFFFFF into two halves
+          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+            | (str.charCodeAt(i) & 0x3ff));
+          utf8.push(0xf0 | (charcode >>18),
+              0x80 | ((charcode>>12) & 0x3f),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+      }
+      return utf8;
+    }
+    return toUTF8Array(s);
+  };
+
+}();
+
+(function (factory) {
+  if (typeof define === 'function' && define.amd) {
+      define([], factory);
+  } else if (typeof exports === 'object') {
+      module.exports = factory();
+  }
+}(function () {
+    return qrcode;
+}));
+
+</script>
+<script>
+/* Étincelle · BRILLE — accès par code famille.
+   Le contenu (pétales, défis) est chiffré (AES-256-GCM). Chaque famille reçoit un code personnel
+   qui ouvre la clé du contenu (clé dérivée du code avec PBKDF2, 300 000 tours).
+   Rien n'est vérifié sur un serveur : sans le bon code, le contenu reste illisible. */
+(function (g) {
+  'use strict';
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';           // sans 0/O/1/I pour éviter les confusions
+  const ITER = 300000;
+
+  const b64 = u8 => { let s = ''; u8.forEach(b => s += String.fromCharCode(b)); return btoa(s); };
+  const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const hex = u8 => Array.from(u8).map(b => b.toString(16).padStart(2, '0')).join('');
+  const norm = code => String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const alea = n => crypto.getRandomValues(new Uint8Array(n));
+
+  async function deriver(code, salt, iter) {
+    const base = await crypto.subtle.importKey('raw', enc.encode(norm(code)), 'PBKDF2', false, ['deriveBits']);
+    const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: unb64(salt), iterations: iter }, base, 384));
+    const wk = await crypto.subtle.importKey('raw', bits.slice(0, 32), 'AES-GCM', false, ['encrypt', 'decrypt']);
+    return { wk, id: hex(bits.slice(32, 48)) };
+  }
+  const cleAES = (raw, usages) => crypto.subtle.importKey('raw', raw, 'AES-GCM', false, usages);
+
+  function nouveauCode(long) {                                     // ex. K7M2-9QXH (ou K7M2-9QXH-4TBN pour l'accès ingénieure)
+    const n = long ? 12 : 8, r = alea(n); let s = '';
+    for (let i = 0; i < n; i++) { s += ALPHABET[r[i] % 32]; if (i % 4 === 3 && i < n - 1) s += '-'; }
+    return s;
+  }
+  function nouveauCarnet(ids) {
+    const cles = {}; (ids || []).forEach(id => cles[id] = b64(alea(32)));
+    return { v: 2, salt: b64(alea(16)), iter: ITER, cles, familles: [] };
+  }
+  function ajouterFamille(carnet, nom, petales, admin) {
+    let code; do { code = nouveauCode(admin); } while (carnet.familles.some(f => f.code === code));
+    const f = { nom: nom || 'Famille', code, actif: true, petales: (petales || []).slice(), ajout: new Date().toISOString().slice(0, 10) };
+    if (admin) f.admin = true;
+    carnet.familles.push(f); return f;
+  }
+  /* À faire quand on retire une famille ou un pétale à une famille : les anciennes clés ne servent plus. */
+  function renouvelerCles(carnet, ids) {
+    (ids || Object.keys(carnet.cles)).forEach(id => carnet.cles[id] = b64(alea(32)));
+  }
+
+  /* Fabrique les fichiers à publier :
+     acces.json (pour chaque famille, les clés des seuls pétales qui lui sont ouverts, protégées par son code)
+     contenu.enc.json (le détail de chaque pétale, chiffré avec sa propre clé).
+     contenu = { details: { idPetale: {...} } } */
+  async function fabriquer(carnet, contenu) {
+    const familles = [];
+    for (const f of carnet.familles.filter(x => x.actif && x.petales && x.petales.length)) {
+      const { wk, id } = await deriver(f.code, carnet.salt, carnet.iter);
+      const cles = {}; f.petales.forEach(p => { if (carnet.cles[p]) cles[p] = carnet.cles[p]; });
+      if (f.admin) cles._admin = '1';
+      cles._nom = f.nom || '';
+      if (f.fin && !f.admin) cles._fin = f.fin;
+      const iv = alea(12);
+      const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wk, enc.encode(JSON.stringify(cles))));
+      familles.push({ id, iv: b64(iv), k: b64(ct) });
+    }
+    familles.sort(() => Math.random() - .5);                       // l'ordre ne révèle rien
+    const petales = {};
+    for (const id of Object.keys(contenu.details)) {
+      if (!carnet.cles[id]) continue;
+      const iv = alea(12);
+      const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await cleAES(unb64(carnet.cles[id]), ['encrypt']), enc.encode(JSON.stringify(contenu.details[id]))));
+      petales[id] = { iv: b64(iv), data: b64(ct) };
+    }
+    return { acces: { v: 2, salt: carnet.salt, iter: carnet.iter, familles }, contenuEnc: { v: 2, petales } };
+  }
+
+  /* Ouvre les pétales autorisés pour ce code. Lève une erreur si le code n'est pas (ou plus) valide. */
+  async function ouvrir(code, acces, contenuEnc) {
+    const { wk, id } = await deriver(code, acces.salt, acces.iter);
+    const e = acces.familles.find(f => f.id === id);
+    if (!e) throw new Error('code');
+    const cles = JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(e.iv) }, wk, unb64(e.k))));
+    const details = {};
+    for (const p of Object.keys(cles)) {
+      if (p[0] === '_') continue;
+      const c = contenuEnc.petales[p]; if (!c) continue;
+      try { details[p] = JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(c.iv) }, await cleAES(unb64(cles[p]), ['decrypt']), unb64(c.data)))); } catch { }
+    }
+    if (!Object.keys(details).length) throw new Error('vide');
+    return { details, admin: cles._admin === '1', nom: cles._nom || '', fin: cles._fin || '' };
+  }
+
+  g.Acces = { nouveauCode, nouveauCarnet, ajouterFamille, renouvelerCles, fabriquer, ouvrir, norm };
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+</script>
+<script>
+let carnet=null, contenu={"vitrine": [{"id": "emotions", "couleur": "#f5abaf", "titre": "Mes émotions apprivoisées", "sousTitre": "Côté parent : accueillir, comprendre, apaiser", "miroir": "Mes émotions apprivoisées", "miroirSous": "Nommer, exprimer, réguler"}, {"id": "apprentissages", "couleur": "#b8aed7", "titre": "Le sens de mes apprentissages", "sousTitre": "Côté parent : encourager, soutenir, relativiser", "miroir": "Le sens de mes apprentissages", "miroirSous": "Curiosité, école, motivation"}, {"id": "liens", "couleur": "#f8f4b8", "titre": "Mes liens et ma parole", "sousTitre": "Côté parent : écouter, parler, se relier", "miroir": "Mes liens et ma parole", "miroirSous": "Relations, communication"}, {"id": "droits", "couleur": "#a4c2e7", "titre": "Ma place et mes droits", "sousTitre": "Côté parent : un cadre clair, des limites bienveillantes", "miroir": "Ma place et mes droits", "miroirSous": "Cadre familial, devoirs, CIDE"}, {"id": "equilibre", "couleur": "#ebc6e0", "titre": "Mon équilibre et mon énergie", "sousTitre": "Côté parent : me ressourcer, alléger ma charge", "miroir": "Mon équilibre et mon énergie", "miroirSous": "Bien-être global"}, {"id": "briller", "couleur": "#f49f4c", "titre": "Ce qui me fait briller", "sousTitre": "Côté parent : mes forces de parent, mes victoires", "miroir": "Ce qui me fait briller", "miroirSous": "Talents, forces, victoires"}, {"id": "organisation", "couleur": "#cbe1b6", "titre": "Mon organisation et mon autonomie", "sousTitre": "Côté parent : routines, temps, responsabilités partagées", "miroir": "Mon organisation et mon autonomie", "miroirSous": "Espace, temps, responsabilités"}], "details": {"emotions": {"intro": "Les parents aussi ressentent de la fatigue, de l'agacement, de la culpabilité, de la joie. Les reconnaître sans se juger est la première façon d'aider son enfant à apprivoiser les siennes : il apprend en nous regardant faire.", "question": "Cette semaine, j'ai réussi à accueillir mes émotions de parent…", "questionEnfant": "Cette semaine, j'ai réussi à dire ce que je ressentais…", "pratiques": ["Nommer ce que je ressens à voix haute, simplement : « Là, je suis agacé·e, j'ai besoin de souffler une minute. »", "Faire 3 grandes respirations avant de répondre quand la tension monte.", "En fin de journée, raconter une émotion vécue dans la journée, et inviter mon enfant à en raconter une aussi."], "phrase": "« Ce que tu ressens est important, et ce que je ressens aussi. On va trouver comment s'en occuper ensemble. »", "ensemble": {"titre": "Le thermomètre des émotions", "duree": "15 min", "materiel": "Une feuille, des crayons de couleur", "etapes": ["Dessinez ensemble un grand thermomètre : en bas « tout calme », en haut « très très fort ».", "Chacun choisit une situation de la semaine qui lui a fait ressentir une émotion (colère, peur, joie…) et la place sur le thermomètre.", "Parlez de ce que vous avez senti dans votre corps : ventre noué, chaleur, cœur qui bat vite…", "Inventez ensemble un « outil pour redescendre » (respirer comme un ballon qui se dégonfle, serrer un coussin, boire de l'eau, aller dans un coin calme) et dessinez-le à côté."], "enParler": ["Quelle émotion est la plus difficile à vivre pour toi ?", "Et moi, comment j'ai fait quand c'était trop fort ?"]}, "defis": [{"id": "d02", "petale": "emotions", "titre": "La météo de la famille", "duree": "2 min", "consigne": "Et si, ce soir, chacun donnait sa météo du jour ? ☀️ soleil, ☁️ nuages, ⛈️ orage… avec une seule phrase pour dire pourquoi. Le plus jeune commence !", "plus": "Bonus : devinez la météo de l'autre avant qu'il la dise."}, {"id": "d09", "petale": "emotions", "titre": "Le ballon qui se dégonfle", "duree": "1 min", "consigne": "Et si, quand ça chauffe, on gonflait un énorme ballon imaginaire (on inspire par le nez), puis on le dégonflait doucement (on souffle par la bouche) ? Trois fois, ensemble.", "plus": "L'enfant peut dire « ballon ! » quand il pense qu'on en a besoin, vous aussi."}], "parcours": {"titre": "La météo de nos émotions", "intro": "Pendant un mois, vous apprenez ensemble à mettre des mots sur ce que chacun ressent, et à trouver ce qui apaise. Sans chercher à tout expliquer : on nomme, on partage, on essaie.", "semaines": [{"titre": "La météo du soir", "mission": "Nommer une émotion chaque soir, chacun son tour.", "etapes": ["Dessinez ensemble une grande carte des émotions (joie, colère, tristesse, peur, fierté, fatigue…).", "Chaque soir, chacun pose une pastille sur l'émotion qui a le plus compté dans sa journée.", "Personne n'a à expliquer pourquoi. Vous commencez, pour montrer l'exemple."], "enParler": ["Quelle émotion était la plus forte aujourd'hui ?", "Où est-ce que tu la sentais dans ton corps ?"]}, {"titre": "Je dis ce que je ressens", "mission": "Mettre un mot sur son émotion avant de réagir.", "etapes": ["Cette semaine, quand une émotion monte chez vous, nommez-la à voix haute (« je suis agacé(e) »).", "Quand votre enfant a une émotion forte, nommez ce que vous voyez (« je vois que tu es en colère »), sans conseil.", "Le soir, racontez-vous une fois où le mot a aidé."], "enParler": ["Est-ce que ça t'aide quand je dis ce que je vois ?", "Quel mot décrit le mieux ce que tu ressens en ce moment ?"]}, {"titre": "Notre boîte à calme", "mission": "Fabriquer ensemble une boîte avec ce qui aide chacun à se calmer.", "etapes": ["Listez ensemble ce qui apaise (respirer comme une bougie, dessiner, bouger, un câlin, de la musique).", "Écrivez ou dessinez chaque idée sur une carte et mettez-les dans une boîte.", "Chacun ajoute une carte qui lui est propre."], "enParler": ["Quelle carte te ferait du bien en ce moment ?", "Qu'est-ce qui m'aide, moi, quand je suis énervé(e) ?"]}, {"titre": "On l'essaie pour de vrai", "mission": "Utiliser la boîte à calme un jour où ça chauffe, et choisir un signal commun.", "etapes": ["Choisissez ensemble un petit signal pour dire « j'ai besoin d'un moment » (un geste, un mot).", "Un jour d'émotion forte, piochez une carte plutôt que d'élever la voix.", "Racontez-vous ensuite ce qui a marché, et ce que vous changeriez."], "enParler": ["Qu'est-ce qui a le mieux marché ?", "Comment je peux t'aider quand tu as fait le signal ?"]}], "garde": {"titre": "La météo du soir", "idee": "2 minutes, chaque soir ou quelques soirs par semaine : une pastille sur la carte, un mot sur ce qu'on a ressenti. La boîte à calme reste accessible, et on y ajoute une carte quand on trouve une nouvelle idée.", "invite": "Notre rituel : à quel moment, et avec quelle carte ou quel signal"}}}, "apprentissages": {"intro": "Notre regard sur l'école et sur les devoirs influence la confiance de l'enfant. Valoriser l'effort, la curiosité et les progrès, plutôt que seulement les notes, nourrit l'envie d'apprendre.", "question": "Cette semaine, j'ai pu soutenir la curiosité de mon enfant sans mettre la pression…", "questionEnfant": "Cette semaine, j'ai eu envie d'apprendre et de découvrir des choses…", "pratiques": ["Remplacer « Qu'as-tu eu comme note ? » par « Qu'as-tu appris d'intéressant aujourd'hui ? ».", "Féliciter un effort précis : « J'ai vu que tu as recommencé trois fois, tu n'as pas lâché. »", "Demander à mon enfant de m'expliquer quelque chose qu'il a appris, comme si j'étais l'élève."], "phrase": "« Tu n'as pas besoin d'être parfait·e pour apprendre. Ce qui compte, c'est que tu essaies. »", "ensemble": {"titre": "Le quiz du spécialiste", "duree": "15 min", "materiel": "Papier et crayon (facultatif)", "etapes": ["L'enfant choisit un sujet qu'il connaît bien et qui lui plaît : un animal, un jeu, un sport, une chanson.", "Il prépare trois questions pour vous, comme un maître du jeu.", "Vous répondez, et vous avez le droit de vous tromper !", "À votre tour : posez une question dont vous ne connaissez pas la réponse et cherchez-la ensemble, dans un livre ou en faisant une recherche ensemble."], "enParler": ["Qu'est-ce qui te donne envie d'apprendre ?", "Qu'est-ce qu'on a découvert aujourd'hui tous les deux ?"]}, "defis": [{"id": "d05", "petale": "apprentissages", "titre": "La question surprise", "duree": "2 min", "consigne": "Et si, au retour de l'école, on demandait : « Quelle est la chose la plus drôle ou la plus surprenante que tu as apprise aujourd'hui ? » Les grands répondent aussi !", "plus": "Si la réponse est « rien », racontez d'abord quelque chose que vous avez appris vous-même."}, {"id": "d13", "petale": "apprentissages", "titre": "Le professeur, c'est toi", "duree": "10 min", "consigne": "Et si l'enfant devenait le professeur ? Il vous apprend quelque chose qu'il aime ou qu'il vient d'apprendre. Vous êtes l'élève curieux, et vous avez le droit de vous tromper.", "plus": "Remerciez le professeur pour sa leçon."}], "parcours": {"titre": "La curiosité, un jour après l'autre", "intro": "Pendant un mois, vous nourrissez l'envie d'apprendre : par la curiosité, pas par la pression. Vous cherchez ce qui donne du sens, ce qui aide à comprendre et ce qui encourage.", "semaines": [{"titre": "Ce qui me donne envie d'apprendre", "mission": "Découvrir ce qui motive votre enfant et ce qui le décourage.", "etapes": ["Chacun raconte une chose apprise récemment, qui lui a plu (à l'école ou ailleurs).", "Votre enfant dit une chose qui lui est difficile, sans que vous cherchiez à la régler tout de suite.", "Vous racontez aussi un apprentissage qui vous a posé problème, enfant ou adulte."], "enParler": ["Qu'est-ce que tu as envie de comprendre en ce moment ?", "Qu'est-ce qui t'aide quand tu bloques ?"]}, {"titre": "La question curieuse", "mission": "Remplacer « tu as eu quoi ? » par une vraie question de curiosité.", "etapes": ["Chaque jour, posez une question ouverte sur la journée (« qu'as-tu découvert aujourd'hui ? »).", "Écoutez la réponse sans corriger ni évaluer.", "Notez trois questions qui ont fait parler votre enfant."], "enParler": ["Quelle question tu as préférée cette semaine ?", "Qu'est-ce que tu aimerais me demander, à moi ?"]}, {"titre": "Notre moment devoirs", "mission": "Installer un moment devoirs qui se passe mieux, avec un rôle clair pour le parent.", "etapes": ["Choisissez ensemble où, quand et combien de temps (15 à 20 minutes avec une pause).", "Décidez de votre rôle : à côté, disponible, ou à distance, selon ce dont il a besoin.", "Au lieu de donner la réponse, demandez : « qu'est-ce que tu as déjà essayé ? »"], "enParler": ["Qu'est-ce qui t'aide le plus quand je suis là ?", "Qu'est-ce qui te dérange pendant les devoirs ?"]}, {"titre": "Mon truc pour comprendre", "mission": "Garder les astuces qui marchent dans un petit carnet.", "etapes": ["Votre enfant liste les trucs qui l'aident à comprendre (dessiner, expliquer à quelqu'un, bouger, faire un schéma).", "Il choisit les deux qui marchent le mieux et les écrit dans un carnet.", "Vous écrivez sur une page un encouragement vrai pour lui."], "enParler": ["Quel truc t'a le plus servi ce mois-ci ?", "De quoi es-tu fier(e) dans ta façon d'apprendre ?"]}], "garde": {"titre": "La question curieuse du soir", "idee": "Chaque soir, une question de curiosité à la place des questions de contrôle, et le carnet « mes trucs pour comprendre » qu'on complète au fil de l'année.", "invite": "Notre rituel : le moment, et la question qu'on aime poser"}}}, "liens": {"intro": "La qualité de la relation passe par des petits moments d'attention et par des mots qui relient plutôt que des mots qui blessent. Écouter vraiment, c'est déjà dire à l'enfant qu'il compte.", "question": "Cette semaine, j'ai pris le temps d'écouter et de parler avec mon enfant…", "questionEnfant": "Cette semaine, j'ai pu parler et être écouté·e par ma famille…", "pratiques": ["Offrir 10 minutes d'attention complète, sans écran, sur ce que mon enfant a envie de faire.", "Reformuler avant de répondre : « Si je comprends bien, tu es déçu·e parce que… »", "Dire « je » plutôt que « tu » : « Je suis inquiet·ète » plutôt que « Tu n'écoutes jamais »."], "phrase": "« Raconte-moi. Je t'écoute, et je ne vais pas te couper la parole. »", "ensemble": {"titre": "Le micro magique", "duree": "10 min", "materiel": "Un objet qui sert de micro (cuillère en bois, stylo…)", "etapes": ["Choisissez un sujet léger : la meilleure chose de la journée, un souvenir drôle, un rêve.", "Celui qui tient le micro parle deux minutes. L'autre écoute sans couper et sans donner de conseil.", "Celui qui écoute résume en une phrase : « Si j'ai bien compris… ».", "Échangez le micro et recommencez."], "enParler": ["Qu'est-ce que ça fait d'être écouté sans être coupé ?", "Quel moment de ta journée aimerais-tu me raconter plus souvent ?"]}, "defis": [{"id": "d01", "petale": "liens", "titre": "Dix minutes, c'est toi le chef", "duree": "10 min", "consigne": "Et si, pendant 10 minutes, l'enfant choisissait à quoi on joue ou ce qu'on fait ? Sans écran : vous suivez, il guide. S'il y a plusieurs enfants, chacun son tour (ou chacun 5 minutes).", "plus": "Pour finir, chacun dit en un seul mot ce qu'il a préféré."}, {"id": "d08", "petale": "liens", "titre": "Le jeu du perroquet", "duree": "2 min", "consigne": "Et si, pendant un repas, on jouait au perroquet ? Avant de répondre, on répète avec ses propres mots ce que l'autre vient de dire : « Si j'ai bien compris… ». Les fous rires sont permis.", "plus": "Observez si on s'est senti plus écouté."}], "parcours": {"titre": "Le temps rien que nous", "intro": "Pendant un mois, vous renforcez le lien par l'écoute et la parole : un moment en famille, de vraies questions, des phrases pour dire ce qui est difficile.", "semaines": [{"titre": "Dix minutes rien que nous", "mission": "Offrir chaque jour un court moment ensemble, sans écran.", "etapes": ["Choisissez un moment fixe dans la journée, de 10 minutes.", "Votre enfant choisit ce que vous faites ensemble (jeu, dessin, discussion, promenade).", "Pas d'écran, pas de leçon : juste le plaisir d'être ensemble."], "enParler": ["Quel moment as-tu préféré cette semaine ?", "Qu'est-ce que tu aimerais faire avec moi la semaine prochaine ?"]}, {"titre": "Je parle, tu écoutes", "mission": "S'écouter à tour de rôle, sans interrompre ni conseiller.", "etapes": ["Chacun son tour, une personne parle 3 minutes et les autres écoutent sans interrompre.", "Une personne qui écoute reformule en une phrase (« si je comprends bien… »).", "On échange les rôles, puis chacun dit ce qu'il a ressenti d'être écouté."], "enParler": ["Qu'est-ce que ça fait d'être écouté jusqu'au bout ?", "Qu'est-ce que tu voudrais que je comprenne mieux de toi ?"]}, {"titre": "Dire ce qui est difficile", "mission": "S'entraîner à dire une chose difficile avec une phrase qui aide.", "etapes": ["Choisissez ensemble 3 phrases utiles (« stop, je n'aime pas ça », « peux-tu m'aider ? », « je suis désolé(e) »).", "Entraînez-vous à les dire dans de petites situations inventées.", "Dans la semaine, utilisez-en une pour de vrai et racontez-vous comment ça s'est passé."], "enParler": ["Quelle phrase te semble la plus facile à dire ?", "Quand aurais-tu aimé l'utiliser ?"]}, {"titre": "Un mot doux", "mission": "Écrire ou dessiner un mot pour dire ce qu'on apprécie chez les autres.", "etapes": ["Chacun écrit ou dessine un mot doux pour quelqu'un de la famille : ce qu'il apprécie, ce qu'il a vu de beau.", "Vous les offrez au cours d'un moment en famille.", "Vous gardez les mots dans une boîte ou un cahier."], "enParler": ["Qu'est-ce que ça t'a fait de recevoir ce mot ?", "Quel moment de ce mois veux-tu garder en souvenir ?"]}], "garde": {"titre": "Le temps rien que nous", "idee": "Un moment en famille, sans écran, une à plusieurs fois par semaine, avec un mot doux de temps en temps. Les mots s'accumulent dans la boîte et deviennent un souvenir.", "invite": "Notre rituel : quand, et ce qu'on aime y faire"}}}, "droits": {"intro": "Un cadre rassure l'enfant : des règles claires, expliquées, tenues avec calme. Et l'enfant a aussi des droits, par exemple celui d'être écouté sur ce qui le concerne (Convention internationale des droits de l'enfant, article 12). Cadre et écoute vont ensemble.", "question": "Cette semaine, j'ai tenu un cadre clair tout en écoutant mon enfant…", "questionEnfant": "Cette semaine, je me suis senti·e écouté·e et j'ai compris les règles de la maison…", "pratiques": ["Choisir deux ou trois règles essentielles pour la maison, et les expliquer avec des mots simples.", "Inviter mon enfant à donner son avis sur une règle ou une organisation familiale.", "Quand une règle n'est pas respectée, proposer une conséquence logique, dite calmement, plutôt qu'une punition sous l'émotion."], "phrase": "« La règle, c'est celle-ci, et voilà pourquoi. Et toi, qu'en penses-tu ? »", "ensemble": {"titre": "Notre charte de famille", "duree": "20 min", "materiel": "Une grande feuille, des feutres", "etapes": ["Chacun propose une règle qui aide la famille à bien vivre ensemble (par exemple : on frappe avant d'entrer).", "Chacun dit aussi un droit qui compte pour lui : être écouté, avoir du temps pour jouer, pouvoir dire non à un câlin…", "Choisissez ensemble trois règles et deux droits à garder, et écrivez-les.", "Signez ou dessinez vos empreintes en bas, puis affichez la charte à un endroit visible."], "enParler": ["Y a-t-il une règle que tu trouves injuste ? Pourquoi ?", "Qu'est-ce qui t'aiderait à la respecter ?"]}, "defis": [{"id": "d06", "petale": "droits", "titre": "Une règle, une idée", "duree": "10 min", "consigne": "Et si on choisissait une règle de la maison et qu'on cherchait ensemble comment la rendre plus facile, ou plus drôle, à respecter ? Chacun a droit à la parole.", "plus": "Si une bonne idée en ressort, on change la règle et on l'essaie."}, {"id": "d12", "petale": "droits", "titre": "On décide ensemble", "duree": "10 min", "consigne": "Et si on décidait ensemble du menu du week-end ou d'une petite sortie ? Chacun propose une idée, on écoute tout le monde, puis on choisit.", "plus": "Expliquez ce qui reste de la responsabilité des parents, avec calme et simplicité."}], "parcours": {"titre": "La charte de notre famille", "intro": "Pendant un mois, vous construisez ensemble un cadre clair : ce qui est non négociable, ce qui peut se discuter, et ce que votre enfant peut proposer. Un cadre qui rassure et qui laisse une vraie place à la parole de l'enfant.", "semaines": [{"titre": "Nos règles, aujourd'hui", "mission": "Faire le point sur les règles de la maison, sans rien changer encore.", "etapes": ["Listez ensemble 5 règles qui existent déjà (coucher, écrans, rangement, politesse, sécurité).", "Pour chacune, votre enfant dit si elle l'aide, si elle l'embête, ou s'il ne la comprend pas.", "Vous dites à voix haute pourquoi chacune compte pour vous."], "enParler": ["Quelle règle t'aide le plus ?", "Quelle règle aimerais-tu mieux comprendre ?"]}, {"titre": "Ce qui ne bouge pas, ce qui se discute", "mission": "Trier les règles en trois : non négociable, négociable, à construire ensemble.", "etapes": ["Dessinez 3 colonnes et placez chaque règle dans celle qui convient.", "Gardez les « non négociable » courtes (sécurité, respect).", "Choisissez une règle à construire ensemble."], "enParler": ["Quelle règle te semble juste ?", "Qu'est-ce que tu proposerais pour celle que nous allons construire ?"]}, {"titre": "Le conseil de famille", "mission": "Tenir un premier conseil de famille de 10 minutes.", "etapes": ["Choisissez un moment calme, avec un ordre du jour d'une seule règle.", "Chacun donne son avis à tour de rôle, sans interrompre.", "Vous décidez ensemble de l'essai d'une nouvelle règle pour une semaine."], "enParler": ["Est-ce que tu t'es senti(e) écouté(e) ?", "Qu'est-ce qui rend une règle plus facile à respecter ?"]}, {"titre": "Notre charte", "mission": "Écrire la charte de la famille et la signer.", "etapes": ["Choisissez 4 à 6 règles qui comptent le plus pour vous, écrites avec des mots d'enfant.", "Ajoutez un droit pour chacun (être écouté, jouer et se reposer, dire non à un câlin, demander de l'aide).", "Chacun signe, et vous affichez la charte."], "enParler": ["Quel droit est le plus important pour toi ?", "Que fait-on si quelqu'un oublie une règle ?"]}], "garde": {"titre": "Le conseil de famille du mois", "idee": "Une fois par mois, 10 minutes autour de la charte : on regarde ce qui marche, on ajuste une règle, chacun peut proposer un changement.", "invite": "Notre rituel : le jour du conseil de famille, et comment on le mène"}}}, "equilibre": {"intro": "Un parent fatigué n'est pas un mauvais parent. Prendre soin de son énergie, de son sommeil et de ses appuis, c'est aussi prendre soin de son enfant : il ressent notre état général.", "question": "Cette semaine, j'ai pris soin de mon énergie…", "questionEnfant": "Cette semaine, j'avais de l'énergie et je me sentais bien dans mon corps…", "pratiques": ["Me réserver 15 minutes rien que pour moi, sans culpabilité.", "Demander ou déléguer une tâche à un proche, ou à mon enfant si elle est adaptée à son âge.", "Garder des heures de coucher régulières pour toute la famille."], "phrase": "« J'ai besoin de me reposer un moment pour être disponible ensuite. »", "note": "Si la fatigue ou le poids du quotidien durent, en parler à un professionnel (médecin traitant, PMI, référent famille du centre social) est un vrai soutien.", "ensemble": {"titre": "Le plein d'énergie", "duree": "15 min", "materiel": "Une feuille, des crayons", "etapes": ["Dessinez chacun une batterie avec son niveau d'énergie de la semaine.", "Listez ce qui vous recharge (dormir, jouer dehors, la musique, un câlin, cuisiner) et ce qui vous vide (le bruit, la pression, manquer de sommeil).", "Choisissez une « recharge » à vivre ensemble cette semaine : une promenade, une soirée sans écran, une danse dans le salon.", "Fixez le moment dans votre semaine pour qu'il ait vraiment lieu."], "enParler": ["Qu'est-ce qui te fait le plus de bien ?", "À quel moment de la journée te sens-tu le plus fatigué·e ?"]}, "defis": [{"id": "d07", "petale": "equilibre", "titre": "Chacun sa pause", "duree": "10 min", "consigne": "Et si chacun choisissait sa façon de souffler pendant 10 minutes : dessiner, écouter de la musique, s'étirer, lire ? Parent compris, sans culpabilité, et on se retrouve ensuite.", "plus": "Après, chacun dit si ça lui a fait du bien."}, {"id": "d14", "petale": "equilibre", "titre": "Une soirée lumière douce", "duree": "1 soirée", "consigne": "Et si, un soir, on éteignait les écrans pour une soirée lumière douce ? Une histoire, un jeu de société ou des chansons. Quand vous voulez, sans pression : une fois suffit.", "plus": "Regardez ensemble comment s'est passé le coucher."}], "parcours": {"titre": "Notre batterie de famille", "intro": "Pendant un mois, vous prenez soin de votre énergie à tous : repérer ce qui recharge, ce qui vide, et alléger ce qui peut l'être. Sans chercher la norme, à votre rythme.", "semaines": [{"titre": "Ma batterie du jour", "mission": "Colorier chaque soir sa batterie, de 1 à 5.", "etapes": ["Dessinez ensemble une batterie à 5 niveaux.", "Chaque soir, chacun colore son niveau de la journée, sans commentaire.", "Notez à côté ce qui a le plus compté (une bonne nuit, une course contre la montre…)."], "enParler": ["Qu'est-ce qui a rechargé ta batterie aujourd'hui ?", "Qu'est-ce qui l'a vidée ?"]}, {"titre": "Ce qui recharge", "mission": "Choisir un petit moment qui recharge, pour chacun et pour toute la famille.", "etapes": ["Listez ce qui fait du bien : bouger dehors, un moment calme, voir un copain, jouer.", "Chacun choisit une chose à faire cette semaine, et une à faire ensemble.", "Vous la mettez dans l'agenda comme un vrai rendez-vous."], "enParler": ["Qu'est-ce qui te fait le plus de bien ?", "Qu'est-ce qui m'a fait du bien à moi cette semaine ?"]}, {"titre": "On allège", "mission": "Retirer ou déléguer une chose qui pèse.", "etapes": ["Repérez une chose qui vide la batterie de la famille (matin pressé, soirée chargée, écrans).", "Choisissez une façon de l'alléger (se préparer la veille, décaler une activité, demander de l'aide).", "Essayez toute la semaine, et regardez ensemble l'effet sur les batteries."], "enParler": ["Qu'est-ce qui a changé pour toi ?", "Que pourrait-on alléger encore ?"]}, {"titre": "Le rituel du soir", "mission": "Installer un petit rituel du soir qui apaise et fait dormir.", "etapes": ["Choisissez une courte suite de gestes (lumière douce, histoire, câlin, quelques mots sur la journée).", "Pas d'écran dans les 30 dernières minutes avant le coucher, si c'est possible chez vous.", "Faites-le chaque soir de la semaine, même quand la journée a été longue."], "enParler": ["Quel moment du rituel préfères-tu ?", "Qu'est-ce qui t'aide à t'endormir ?"]}], "garde": {"titre": "La batterie du dimanche", "idee": "Le dimanche, 5 minutes : chacun colore sa batterie de la semaine, on repère ce qui a rechargé, on choisit une chose à garder et une chose à alléger.", "invite": "Notre rituel : quand, et ce qu'on y regarde"}}}, "briller": {"intro": "On repère souvent ce qui ne va pas. Pourtant chaque parent a des forces et des réussites, même petites. Les reconnaître donne de la confiance, et cette confiance se transmet à l'enfant.", "question": "Cette semaine, j'ai reconnu mes forces et mes réussites de parent…", "questionEnfant": "Cette semaine, j'ai été fier·ère de quelque chose que j'ai fait…", "pratiques": ["Chaque soir, noter une chose qui s'est bien passée, même toute petite.", "Demander à mon enfant : « Qu'est-ce qu'on fait de bien ensemble ? ».", "Partager une fierté avec un proche ou avec le groupe de parents."], "phrase": "« Aujourd'hui, je suis fier·ère de la façon dont j'ai géré… »", "ensemble": {"titre": "Le tableau des fiertés", "duree": "10 min", "materiel": "Une feuille, des feutres", "etapes": ["Chacun note ou dessine trois choses dont il est fier cette semaine, petites ou grandes.", "Chacun écrit aussi une chose qu'il admire chez l'autre.", "Lisez-les à voix haute, avec le sourire.", "Affichez le tableau là où tout le monde le voit."], "enParler": ["Qu'est-ce que tu sais très bien faire ?", "De quoi es-tu le plus fier·ère en ce moment ?"]}, "defis": [{"id": "d03", "petale": "briller", "titre": "La petite victoire du soir", "duree": "2 min", "consigne": "Et si, avant de dormir, chacun racontait une petite victoire de sa journée ? Même minuscule : avoir osé lever la main, avoir fait sourire quelqu'un, avoir essayé.", "plus": "On applaudit à chaque victoire, même la plus petite."}, {"id": "d10", "petale": "briller", "titre": "Les petits mots piochés", "duree": "5 min", "consigne": "Et si chacun écrivait sur de petits papiers ce qu'il aime chez les autres (« j'aime quand tu… »), puis qu'on pioche et lise à voix haute, un papier chacun ?", "plus": "Gardez les papiers dans un bocal pour les jours moins faciles."}], "parcours": {"titre": "Le pot des victoires", "intro": "Pendant un mois, vous repérez et célébrez vos forces et vos réussites, même petites. L'idée : regarder ce qui va bien, pour vous et pour votre enfant.", "semaines": [{"titre": "Nos forces", "mission": "Repérer ses forces et celles des autres.", "etapes": ["Chacun écrit ou dessine 3 choses qu'il sait bien faire.", "Chacun ajoute une force qu'il voit chez les autres.", "Vous découvrez ce que les autres ont écrit sur vous, avec un grand sourire."], "enParler": ["Quelle force aimerais-tu que je remarque plus souvent ?", "Dans quelle situation ta force t'a-t-elle aidé(e) ?"]}, {"titre": "Le compliment vrai", "mission": "Chaque jour, un compliment précis et sincère.", "etapes": ["Chaque jour, dites à quelqu'un de la famille un compliment sur ce qu'il a fait, pas sur ce qu'il est (« j'ai vu que tu as aidé ton frère »).", "Écrivez-le sur un petit papier.", "Gardez les papiers pour la fin de la semaine."], "enParler": ["Quel compliment t'a fait le plus plaisir ?", "Quel compliment aimerais-tu donner à quelqu'un ?"]}, {"titre": "Un défi à ma mesure", "mission": "Choisir un petit défi pour montrer une force.", "etapes": ["Votre enfant choisit un défi réaliste (montrer un dessin, apprendre quelque chose à quelqu'un, aider).", "Vous choisissez aussi le vôtre, de parent.", "Vous vous encouragez pendant la semaine, sans comparer."], "enParler": ["Comment t'es-tu senti(e) en le faisant ?", "Qu'est-ce que ça t'apprend sur toi ?"]}, {"titre": "La fête des victoires", "mission": "Relire tout ce qui a été réussi et le fêter.", "etapes": ["Relisez les papiers de compliments et les victoires du mois.", "Choisissez les 3 plus belles et dessinez-en une étoile.", "Fêtez-les ensemble (un goûter, un jeu, une sortie courte)."], "enParler": ["De quoi es-tu le plus fier(e) ?", "Qu'est-ce que tu veux réussir le mois prochain ?"]}], "garde": {"titre": "Le pot des victoires", "idee": "Un bocal ou une boîte où l'on glisse chaque semaine un papier avec une victoire ou un compliment. On l'ouvre une fois par mois pour tout relire.", "invite": "Notre rituel : où est le pot, et quand on l'ouvre"}}}, "organisation": {"intro": "Des repères simples (routines, espace, rôles de chacun) allègent le quotidien et aident l'enfant à gagner en autonomie. Le parent donne l'exemple et la direction, sans tout porter seul.", "question": "Cette semaine, notre organisation familiale nous a facilité la vie…", "questionEnfant": "Cette semaine, j'ai réussi à m'organiser et à faire des choses tout·e seul·e…", "pratiques": ["Installer un petit rituel fixe : le matin ou le soir, toujours dans le même ordre.", "Confier à mon enfant une responsabilité adaptée à son âge, et le féliciter quand il l'assume.", "Préparer la veille ce qui peut l'être (sac, vêtements, repas) pour désamorcer les matins tendus."], "phrase": "« Chacun a un rôle dans la famille. Voilà le tien, et je suis là si tu as besoin d'aide. »", "ensemble": {"titre": "La routine en images", "duree": "20 min", "materiel": "Une feuille, des crayons", "etapes": ["Choisissez une routine qui coince : le matin, le retour de l'école ou le coucher.", "Dessinez chaque étape en petit (se laver, s'habiller, déjeuner, préparer le sac…), dans l'ordre.", "L'enfant choisit une étape dont il se charge tout seul.", "Affichez la routine et essayez-la dès demain."], "enParler": ["Quelle étape est la plus difficile pour toi ?", "Qu'est-ce que je peux faire pour t'aider sans le faire à ta place ?"]}, "defis": [{"id": "d04", "petale": "organisation", "titre": "La chanson du matin", "duree": "5 min", "consigne": "Et si le moment qui coince (matin, retour de l'école, coucher) avait sa propre chanson ? Choisissez un morceau ensemble : quand il se termine, tout le monde est prêt !", "plus": "L'enfant choisit la chanson, vous choisissez le moment."}, {"id": "d11", "petale": "organisation", "titre": "Le chef du jour", "duree": "5 min", "consigne": "Et si, aujourd'hui, chaque enfant était « chef » d'une petite mission (mettre la table, choisir la musique, préparer le sac…) ? Montrez une fois, puis laissez faire. Demain, on change de chef.", "plus": "On félicite l'effort, pas le résultat."}], "parcours": {"titre": "Le tableau de la maison", "intro": "Pendant un mois, vous construisez ensemble une organisation qui vous ressemble : un peu plus de responsabilités pour votre enfant, un peu moins de charge pour vous. Une petite étape par semaine.", "semaines": [{"titre": "J'observe notre journée", "mission": "Regarder comment la journée se passe vraiment, sans rien changer.", "etapes": ["Dessinez ensemble 3 moments de la journée (matin, retour de l'école, soir) sur une feuille.", "Pour chaque moment, votre enfant colore ce qu'il fait déjà seul.", "Vous notez, de votre côté, ce que vous faites à sa place par habitude ou par manque de temps."], "enParler": ["Qu'est-ce que tu fais déjà tout seul et dont tu es fier ?", "Qu'est-ce que tu aimerais savoir faire seul bientôt ?"]}, {"titre": "Une responsabilité à lui", "mission": "Choisir une seule responsabilité, petite et claire, qui devient la sienne.", "etapes": ["Votre enfant choisit une tâche (mettre la table, préparer son cartable, nourrir l'animal).", "Vous décidez ensemble quand et comment elle se fait, puis vous l'affichez.", "Pendant toute la semaine, vous ne reprenez pas derrière lui : vous laissez faire, même imparfaitement."], "enParler": ["Comment ça s'est passé pour toi cette semaine ?", "Qu'est-ce qui t'a aidé à ne pas oublier ?"]}, {"titre": "On ajuste", "mission": "Repérer ce qui coince et changer un seul détail.", "etapes": ["Regardez ensemble : qu'est-ce qui a bien marché, qu'est-ce qui a été compliqué ?", "Changez un détail : l'heure, un repère visuel, un minuteur, un coup de main au début.", "Si votre enfant est prêt, ajoutez une deuxième petite responsabilité."], "enParler": ["Qu'est-ce que je peux faire pour t'aider sans le faire à ta place ?", "Qu'est-ce qui te donnerait envie de continuer ?"]}, {"titre": "On célèbre et on fait le point", "mission": "Fêter ce qui a avancé et dessiner le tableau de la maison.", "etapes": ["Faites la liste de tout ce que votre enfant fait seul ou avec un peu d'aide, aujourd'hui.", "Dessinez ensemble « notre tableau de la maison » : qui fait quoi, quand.", "Choisissez une petite façon de fêter ça (un goûter, un dessin, un moment en famille)."], "enParler": ["De quoi es-tu le plus fier(e) ce mois-ci ?", "Quelle nouvelle responsabilité aimerais-tu essayer le mois prochain ?"]}], "garde": {"titre": "Le point du dimanche", "idee": "5 minutes, chaque dimanche, devant le tableau de la maison : on regarde ce qui a marché, on ajuste une chose, on choisit la responsabilité de la semaine.", "invite": "Notre rituel : quand, où, et ce qu'on y fait"}}}}};
+const $=id=>document.getElementById(id);
+const msg=t=>{const m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(msg.t);msg.t=setTimeout(()=>m.style.display='none',6000)};
+const dl=(nom,obj)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(obj,null,1)],{type:'application/json'}));a.download=nom;a.click()};
+const lireFichier=f=>new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>{try{ok(JSON.parse(r.result))}catch(e){ko(e)}};r.readAsText(f)});
+const url=()=>'https://tsioryleonard-ship-it.github.io/brille/';
+const lien=f=>url()+'#/c/'+f.code;
+const ids=()=>contenu.vitrine.map(v=>v.id);
+const titre=id=>(contenu.vitrine.find(v=>v.id===id)||{}).titre||id;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function cases(prefix,sel){return contenu.vitrine.map(v=>`<label class="chip"><input type="checkbox" data-id="${v.id}" ${sel&&sel.includes(v.id)?'checked':''} ${prefix}> ${esc(v.titre)}</label>`).join('')}
+function dessiner(){
+  $('zone-fam').hidden=!carnet;
+  $('choix-ajout').innerHTML=cases('class="ajout"',[]);
+  if(!carnet){$('etat-carnet').innerHTML='<i>Aucun carnet chargé.</i>';return}
+  const act=carnet.familles.filter(f=>f.actif).length;
+  $('etat-carnet').innerHTML=`Carnet chargé : <b>${act}</b> famille(s) active(s), ${carnet.familles.length-act} retirée(s).`;
+  $('liste').innerHTML=carnet.familles.map((f,i)=>`<tr class="${f.actif?'':'retire'}"><td><input type="text" value="${esc(f.nom)}" data-i="${i}" class="nomf"></td><td><code>${f.code}</code></td><td>${f.actif?cases(`class="pf" data-i="${i}"`,f.petales):'—'}</td><td>${f.actif?`<button data-c="${i}">Copier le message</button><button class="gris" data-l="${i}">Copier le lien</button><button class="gris" data-q="${i}">QR</button><button class="rouge" data-r="${i}">Retirer</button>`:'retirée'}</td></tr>`).join('');
+}
+$('liste').addEventListener('input',e=>{if(e.target.classList.contains('nomf'))carnet.familles[+e.target.dataset.i].nom=e.target.value});
+$('liste').addEventListener('change',e=>{
+  if(!e.target.classList.contains('pf'))return;
+  const f=carnet.familles[+e.target.dataset.i],id=e.target.dataset.id;
+  if(e.target.checked){ if(!f.petales.includes(id))f.petales.push(id); msg('Pétale ajouté. Fabriquez et republiez les fichiers (étape 3).') }
+  else { f.petales=f.petales.filter(x=>x!==id); Acces.renouvelerCles(carnet,[id]); msg('Pétale retiré : sa clé est renouvelée. Republiez les fichiers (étape 3).') }
+});
+$('liste').addEventListener('click',async e=>{
+  const c=e.target.dataset.c, r=e.target.dataset.r;
+  if(c!==undefined){const f=carnet.familles[+c];const t=f.admin?`Mon code ingénieure : ${f.code}`:`Bonjour, voici votre code personnel pour prolonger à la maison ce que nous avons vécu à l'atelier : ${f.code}\nTouchez ce lien, l'application s'ouvre toute seule : ${lien(f)}\n(Si on vous demande le code, saisissez-le : ${f.code}). À bientôt, Tsiory (BRILLE)`;try{await navigator.clipboard.writeText(t);msg('Message copié, prêt à coller.')}catch{prompt('Copiez ce message :',t)}}
+  if(e.target.dataset.l!==undefined){const f=carnet.familles[+e.target.dataset.l];try{await navigator.clipboard.writeText(lien(f));msg('Lien copié.')}catch{prompt('Copiez ce lien :',lien(f))}}
+  if(e.target.dataset.q!==undefined){const f=carnet.familles[+e.target.dataset.q];const q=qrcode(0,'M');q.addData(lien(f));q.make();$('qr-img').innerHTML=q.createSvgTag({cellSize:4,margin:2,scalable:true});$('qr-nom').textContent=f.nom;$('qr-code').textContent=f.code;$('qr').style.display='grid'}
+  if(r!==undefined){const f=carnet.familles[+r];if(!confirm(`Retirer l'accès de « ${f.nom} » ? Les clés seront renouvelées : republiez ensuite les fichiers (étape 3).`))return;f.actif=false;Acces.renouvelerCles(carnet);dessiner();msg('Famille retirée. Fabriquez et republiez les fichiers (étape 3).')}
+});
+$('f-carnet').addEventListener('change',async e=>{try{const c=await lireFichier(e.target.files[0]);if(c.v!==2)throw 0;carnet=c;ids().forEach(id=>{if(!carnet.cles[id])Acces.renouvelerCles(carnet,[id])});dessiner()}catch{msg('Ce fichier n\'est pas un carnet valide.')}});
+$('b-admin').onclick=()=>{if(!carnet)return;if(carnet.familles.some(f=>f.admin&&f.actif)&&!confirm('Vous avez déjà un code ingénieure. En créer un deuxième ?'))return;
+  const f=Acces.ajouterFamille(carnet,'Ingénieure (moi)',ids(),true);dessiner();msg('Code ingénieure créé : '+f.code+'. Fabriquez ensuite les fichiers (étape 3).')};
+$('b-nouveau').onclick=()=>{if(carnet&&!confirm('Remplacer le carnet chargé ?'))return;carnet=Acces.nouveauCarnet(ids());dessiner()};
+$('b-ajout').onclick=()=>{if(!carnet)return;
+  const sel=[...document.querySelectorAll('.ajout:checked')].map(x=>x.dataset.id);
+  if(!sel.length){msg('Cochez au moins un pétale vécu en atelier.');return}
+  const f=Acces.ajouterFamille(carnet,$('nom').value.trim()||'Famille',sel);$('nom').value='';dessiner();msg('Code créé : '+f.code+'. Fabriquez ensuite les fichiers (étape 3).')};
+function etatContenu(){$('etat-contenu').textContent=`Contenu intégré : ${contenu.vitrine.length} pétales, ${Object.values(contenu.details).reduce((n,d)=>n+(d.defis||[]).length,0)} défis.`}
+function recomposer(petales,defis){
+  const v=[],d={};
+  petales.forEach(p=>{const {id,couleur,titre,sousTitre,miroir,miroirSous,...reste}=p;v.push({id,couleur,titre,sousTitre,miroir,miroirSous});d[id]={...reste,defis:defis.filter(x=>x.petale===id)}});
+  return {vitrine:v,details:d}
+}
+const sources={petales:null,defis:null};
+async function majSource(k,input){try{const p=await lireFichier(input.files[0]);if(!Array.isArray(p))throw 0;sources[k]=p;
+  if(sources.petales||sources.defis){const pet=sources.petales||contenu.vitrine.map(v=>({...v,...contenu.details[v.id]}));const def=sources.defis||Object.values(contenu.details).flatMap(d=>d.defis||[]);contenu=recomposer(pet.map(p=>{const {defis,...r}=p;return r}),def)}
+  etatContenu();dessiner();msg('Contenu remplacé.')}catch{msg('Fichier invalide.')}}
+$('f-petales').addEventListener('change',e=>majSource('petales',e.target));
+$('f-defis').addEventListener('change',e=>majSource('defis',e.target));
+$('b-fab').onclick=async()=>{if(!carnet||!carnet.familles.some(f=>f.actif&&f.petales.length)){msg('Ajoutez au moins une famille avec un pétale.');return}
+  $('b-fab').disabled=true;try{const r=await Acces.fabriquer(carnet,contenu);dl('acces.json',r.acces);setTimeout(()=>dl('contenu.enc.json',r.contenuEnc),400);setTimeout(()=>dl('vitrine.json',contenu.vitrine),800);setTimeout(()=>dl('carnet-familles.json',carnet),1200);msg('4 fichiers téléchargés : publiez acces.json, contenu.enc.json et vitrine.json ; gardez le carnet.')}finally{$('b-fab').disabled=false}};
+$('b-carnet').onclick=()=>carnet?dl('carnet-familles.json',carnet):msg('Aucun carnet.');
+$('qr-fermer').onclick=()=>$('qr').style.display='none';
+etatContenu();dessiner();
+</script></body></html>

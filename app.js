@@ -462,7 +462,7 @@
   }
   const semCourante = pc => { for (let n = 1; n <= 4; n++) if (!pc.sem[n]) return n; return 4; };
   // Petit mot affiché quand une semaine du parcours est vécue (aussi lu par jeu.js)
-  const MOTS_SEMAINE = ['🌱 La graine est plantée : premier pas fait ensemble.', '🌿 La tige pousse : votre fleur prend racine.', '🌷 Le bourgeon se prépare : vous avez trouvé votre rythme à deux.', '🌸 La fleur s\'ouvre : bravo, ce mois, vous l\'avez vécu ensemble !'];
+  const MOTS_SEMAINE = ['🌱 La graine est plantée : premier pas fait ensemble.', '🌿 La tige pousse : votre fleur prend racine.', '🌷 Le bourgeon se prépare : toute la famille a trouvé son rythme.', '🌸 La fleur s\'ouvre : bravo, ce mois, vous l\'avez vécu ensemble !'];
   window.BRILLE_MOTS_SEM = MOTS_SEMAINE;
   function parcoursHtml(p) {
     const pr = p.parcours, pc = parcoursDe(p.id), faites = Object.keys(pc.sem).length, cur = semCourante(pc);
@@ -474,7 +474,7 @@
     if (!pc.debut) {
       const avant = precedentAVivre(p.id);
       if (avant) return `${entete}${cadre}<div class="pc-verrou-petale"><span class="pc-num" aria-hidden="true">🔒</span><p>Ce parcours s'ouvre quand vous aurez terminé le mois précédent de votre aventure : <b>« ${esc(avant.parcours.titre)} »</b> (pétale « ${esc(avant.titre)} »).</p></div><a class="btn plein" href="#/petale/${esc(avant.id)}">Aller au mois en cours</a>`;
-      return `${entete}${cadre}<p class="petit">4 semaines à vivre à deux, une mission par semaine. Une semaine s'ouvre quand la précédente a été vécue : prenez le temps qu'il faut, sans pression.</p><button type="button" class="btn plein" id="pc-debut">Commencer notre mois</button>`;
+      return `${entete}${cadre}<p class="petit">4 semaines à vivre en famille, une mission par semaine. Une semaine s'ouvre quand la précédente a été vécue : prenez le temps qu'il faut, sans pression.</p><button type="button" class="btn plein" id="pc-debut">Commencer notre mois</button>`;
     }
     const sem = pr.semaines.map((w, i) => {
       const n = i + 1, fait = pc.sem[n], ouverte = n === 1 || !!pc.sem[n - 1];
@@ -836,7 +836,7 @@
 
       <details class="carte"><summary>À propos d'Étincelle</summary>
         <p>Étincelle est la suite à la maison des ateliers proposés par <b>BRILLE</b>. La qualité de vie de l'enfant (QVE) a d'abord été pensée pour l'enfant : c'est elle qui guide tout.</p>
-        <p>Quand vous revenez de l'atelier Main tendue, Étincelle vous aide à continuer à la maison : faire, avec votre enfant, quelque chose en lien avec sa QVE, un moment à deux ou en famille, à votre rythme.</p>
+        <p>Quand vous revenez de l'atelier Main tendue, Étincelle vous aide à continuer à la maison : faire, avec votre enfant, quelque chose en lien avec sa QVE, un moment en famille, à votre rythme.</p>
         <p>Étincelle est un outil pour toute la famille : parents et enfants, quel que soit leur nombre, font grandir la même fleur. Le plus important, c'est de vivre l'aventure ensemble : c'est comme ça que le lien se crée.</p>
         <p class="petit">Étincelle accompagne le bien-être familial. Elle ne remplace pas l'avis d'un médecin ou d'un professionnel de la santé ou du soutien psychologique.</p>
       </details>
