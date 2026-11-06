@@ -133,7 +133,8 @@
       r.fin = s.fin;
     }
     if (r.fin && !r.admin && iso(new Date()) > r.fin) { const e = new Error('expire'); e.fin = r.fin; e.essai = !!ess; throw e; }
-    document.body.dataset.admin = r.admin ? '1' : ''; D.details = r.details; D.admin = r.admin; D.nom = ess ? 'Essai BRILLE' : r.nom; D.fin = r.admin ? '' : r.fin; D.essai = ess; D.apercu = null;
+    document.body.dataset.admin = r.admin ? '1' : ''; D.details = ess ? Object.fromEntries(Object.entries(r.details || {}).map(([k, v]) => { const w = Object.assign({}, v); delete w.parcours; return [k, w]; })) : r.details;   // essai : pas de parcours d'un mois
+    D.admin = r.admin; D.nom = ess ? 'Essai BRILLE' : r.nom; D.fin = r.admin ? '' : r.fin; D.essai = ess; D.apercu = null;
     appliquerProtection();
     composer(Object.keys(r.details));
     try { localStorage.setItem(CLE_CODE, code); } catch { }
@@ -441,7 +442,6 @@
         <div class="icone"><img src="p-${p.id}.png" alt=""></div>
         <h1>${esc(p.titre)}</h1>
         <p class="ss">${esc(p.sousTitre)}</p>
-        <p class="miroir">Pour les enfants, ce pétale se dit : « ${esc(p.miroir)} » (${esc(p.miroirSous.toLowerCase())}). À explorer tous ensemble.</p>
       </div>
 
       ${e ? `<div class="carte ensemble teinte" style="background:${p.couleur}">
@@ -453,7 +453,7 @@
         <label class="coche"><input type="checkbox" id="fait" ${fait ? 'checked' : ''}> Nous l'avons fait ensemble</label>
       </div>` : ''}
 
-      ${p.parcours ? `<div class="carte parcours teinte" id="parcours" style="background:${p.couleur}">${parcoursHtml(p)}</div>` : ''}
+      ${p.parcours ? `<div class="carte parcours teinte" id="parcours" style="background:${p.couleur}">${parcoursHtml(p)}</div>` : (D.essai ? `<div class="carte"><span class="etiquette">🔒 Parcours d'un mois</span><p style="margin:0">Le parcours d'un mois (4 semaines, une mission par semaine) est réservé aux familles qui ont un accès complet à ce pétale.</p></div>` : '')}
 
       ${D.essai ? '' : `<div class="carte transmettre">
         <span class="etiquette">Je transmets</span>

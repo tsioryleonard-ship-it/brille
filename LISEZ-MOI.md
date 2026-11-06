@@ -204,3 +204,9 @@ Tant que les codes sont vides, le bouton d'essai n'apparaît pas.
 - Si tu mets l'adresse de ton script Google dans `config.json` (ligne `"serveur"`), l'essai exige un **e-mail vérifié** (code à 6 chiffres) : un essai par adresse, sur n'importe quel téléphone. Les codes d'essai sortent alors de `config.json`.
 - Si la ligne `"serveur"` est vide, le bouton « Tester gratuitement » **n'apparaît pas** (sauf si des codes sont dans `config.json` : l'ancien verrou sur le téléphone s'applique alors).
 - La mise en place est expliquée dans `SERVEUR-ESSAI.md` (fichier privé, à garder dans le Drive).
+
+## Version 41 : essai sans parcours d'un mois, mentions légales à jour
+
+- Pendant l'essai, le **parcours d'un mois n'est pas accessible** : une petite carte 🔒 explique qu'il est réservé à l'accès complet. Il reste ouvert pour les familles qui ont un code (atelier ou achat).
+- `legal.html` (conditions et mentions légales) : ajout de l'article « 3 bis. Essai gratuit de 7 jours », de l'adresse e-mail dans les données collectées (consentement, 12 mois maximum, conservée sous forme chiffrée) et de Google dans les prestataires.
+- La phrase « Pour les enfants, ce pétale se dit… » est retirée : le titre du pétale est déjà celui de l'enfant.
