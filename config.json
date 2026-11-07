@@ -105,34 +105,77 @@
   },
   "achat": {
     "actif": false,
+    "ouvertureLe": "2026-11-18",
+    "lancementJusqu": "2026-12-18",
     "offres": [
       {
         "id": "petale",
-        "nom": "Un pétale",
-        "detail": "Un pétale au choix de la fleur.",
-        "prix": "19 €",
-        "lien": ""
+        "nom": "Un pétale, 12 mois",
+        "detail": "Un pétale au choix de la fleur, pendant 12 mois.",
+        "prix": "17,50 €",
+        "lien": "",
+        "lancement": {
+          "prix": "12,50 €",
+          "lien": ""
+        }
       },
       {
         "id": "fleur",
         "nom": "La fleur complète, 1 an",
         "detail": "Les 7 pétales pendant 12 mois.",
-        "prix": "49 €",
-        "lien": ""
-      },
-      {
-        "id": "solidaire",
-        "nom": "Tarif solidaire, 1 an",
-        "detail": "La fleur complète, pour les familles pour qui le tarif standard est une difficulté (RSA, ASS, aides CAF…). Simple déclaration sur l'honneur, aucun justificatif.",
-        "prix": "28 €",
-        "lien": ""
+        "prix": "70 €",
+        "lien": "",
+        "lancement": {
+          "prix": "49 €",
+          "lien": ""
+        }
       },
       {
         "id": "vie",
         "nom": "Accès longue durée, 5 ans",
         "detail": "La fleur complète pendant 5 ans.",
-        "prix": "99 €",
-        "lien": ""
+        "prix": "140 €",
+        "lien": "",
+        "lancement": {
+          "prix": "99 €",
+          "lien": ""
+        }
+      },
+      {
+        "id": "petale-solidaire",
+        "nom": "Un pétale, tarif solidaire",
+        "detail": "Un pétale pendant 12 mois. Moitié prix. Ce tarif est un geste de solidarité : il existe pour que le prix ne soit pas un obstacle quand le budget est serré (RSA, ASS, aides CAF…). Simple déclaration sur l'honneur, aucun justificatif. Si vous pouvez régler le tarif standard, merci de le choisir : c'est lui qui permet de maintenir ce geste pour d'autres familles.",
+        "prix": "8,75 €",
+        "lien": "",
+        "lancement": {
+          "prix": "6,25 €",
+          "lien": ""
+        },
+        "solidaire": true
+      },
+      {
+        "id": "fleur-solidaire",
+        "nom": "La fleur complète, tarif solidaire",
+        "detail": "Les 7 pétales pendant 12 mois. Moitié prix. Ce tarif est un geste de solidarité : il existe pour que le prix ne soit pas un obstacle quand le budget est serré (RSA, ASS, aides CAF…). Simple déclaration sur l'honneur, aucun justificatif. Si vous pouvez régler le tarif standard, merci de le choisir : c'est lui qui permet de maintenir ce geste pour d'autres familles.",
+        "prix": "35 €",
+        "lien": "",
+        "lancement": {
+          "prix": "24,50 €",
+          "lien": ""
+        },
+        "solidaire": true
+      },
+      {
+        "id": "vie-solidaire",
+        "nom": "Accès longue durée, tarif solidaire",
+        "detail": "La fleur complète pendant 5 ans. Moitié prix. Ce tarif est un geste de solidarité : il existe pour que le prix ne soit pas un obstacle quand le budget est serré (RSA, ASS, aides CAF…). Simple déclaration sur l'honneur, aucun justificatif. Si vous pouvez régler le tarif standard, merci de le choisir : c'est lui qui permet de maintenir ce geste pour d'autres familles.",
+        "prix": "70 €",
+        "lien": "",
+        "lancement": {
+          "prix": "49,50 €",
+          "lien": ""
+        },
+        "solidaire": true
       }
     ],
     "delai": "48 heures ouvrées"
