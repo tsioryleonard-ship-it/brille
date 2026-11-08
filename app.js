@@ -171,8 +171,8 @@
       </div>
       <div class="carte" role="tabpanel">
         <span class="etiquette">${ing ? 'Espace conceptrice' : 'Accès famille'}</span>
-        <h1>${ing ? 'Espace ingénieure' : 'Bienvenue dans Étincelle'}</h1>
-        <p>${ing ? 'Réservé à la conceptrice d\'Étincelle : aperçu complet de tous les pétales et vue « comme une famille ». Entrez votre code personnel.' : (achatActif() ? 'Cette application prolonge les ateliers BRILLE. Elle est gratuite pour les familles accompagnées par un centre partenaire : entrez le code personnel remis à l\'atelier, ou reçu après votre achat.' : 'Cette application prolonge les ateliers BRILLE. Elle est réservée aux familles accompagnées : entrez le code personnel qui vous a été remis à l\'atelier.')}</p>
+        <h1>${ing ? 'Espace ingénieure' : 'J\'ai un code'}</h1>
+        <p>${ing ? 'Réservé à la conceptrice d\'Étincelle : aperçu complet de tous les pétales et vue « comme une famille ». Entrez votre code personnel.' : 'Entrez le code personnel remis à l\'atelier ou reçu à l\'inscription.'}</p>
         <form id="form-code" autocomplete="off">
           <label for="champ-code">${ing ? 'Votre code ingénieure' : 'Votre code famille'}</label>
           <input id="champ-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="${ing ? 'XXXX-XXXX-XXXX' : 'XXXX-XXXX'}" maxlength="16">
@@ -1231,11 +1231,7 @@
   });
   (() => {
     const st = document.createElement('style');
-    st.textContent = `.topbar{display:grid!important;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:8px}
-.topbar .brand{display:contents!important}
-.topbar .brand img{grid-column:1;grid-row:1;justify-self:start}
-.topbar .brand-nom{grid-column:2;grid-row:1;justify-self:center;text-align:center;font-family:'Gruppo','Quicksand',sans-serif!important;font-weight:400;color:#000!important;-webkit-text-stroke:.9px #000;letter-spacing:.015em;background:linear-gradient(transparent 58%,var(--vert,#cbe1b6) 58%);padding:0 .25em;margin:0 -.25em;white-space:nowrap}
-.topbar>:not(.brand){grid-column:3;grid-row:1;justify-self:end;margin-left:0!important}
+    st.textContent = `.topbar .brand-nom{display:none!important}
 .fam-essai{background:#fdd5a5!important;border:2px solid #f49f4c}.fam-essai code{background:#fff6e8}
 .hero-accueil{display:block!important;position:relative;overflow:hidden}
 .hero-accueil .logo-etincelle{position:static!important;float:right;width:min(42%,230px)!important;height:auto!important;margin:0 0 4px 14px!important;shape-outside:margin-box}
