@@ -179,7 +179,7 @@
           <p class="erreur" id="erreur-code" role="alert">${esc(message || '')}</p>
           <button class="btn plein" type="submit" id="valider-code">Entrer</button>
         </form>
-        ${!ing && essaiDispo() ? `<button type="button" class="btn plein" id="essai" style="margin-top:10px">🌱 Tester gratuitement ${essaiJours() === 7 ? 'une semaine' : essaiJours() + ' jours'}</button><p class="petit" style="margin:6px 0 0">Répondez à 3 questions : nous vous conseillons un pétale à essayer, sans paiement ni engagement.</p>` : ''}
+        ${!ing && essaiDispo() ? `<button type="button" class="btn plein" id="essai" style="margin-top:10px">🌱 Tester gratuitement ${essaiJours() === 7 ? 'une semaine' : essaiJours() + ' jours'}</button><p class="petit" style="margin:6px 0 0">Répondez à 3 questions : je vous conseille un pétale à essayer, sans paiement ni engagement.</p>` : ''}
         ${!ing && !essaiDispo() && D.config.codeDecouverte ? '<button type="button" class="btn plein gris" id="decouverte" style="margin-top:10px">Découvrir un extrait gratuit</button>' : ''}
         ${ing ? '' : (achatActif() ? `<p class="petit">Vous n'avez pas suivi d'atelier ? <button type="button" class="lien" id="voir-offres">Obtenir un accès</button></p>` : `<p class="petit">Vous n'avez pas encore de code ? Écrivez à <a href="mailto:${esc(c.email || '')}">${esc(c.email || '')}</a>.</p>`)}
         <p class="petit liens-legaux" style="margin-top:14px">${liensLegaux()}</p>
@@ -193,7 +193,7 @@
       const code = champ.value.trim(); if (!code) { err.textContent = 'Saisissez votre code.'; return; }
       bt.disabled = true; bt.textContent = 'Vérification…'; err.textContent = '';
       try { await deverrouiller(code, ing); document.body.classList.remove('verrouille'); premiere = true; rendre(); }
-      catch (x) { if (x.message !== 'admin' && x.message !== 'code' && x.message !== 'expire') console.error(x); err.textContent = x.message === 'expire' ? messageAcces(x) : x.message === 'admin' ? 'Ce code n\'ouvre pas l\'espace ingénieure.' : 'Ce code n\'est pas reconnu. Vérifiez-le, ou contactez BRILLE.'; bt.disabled = false; bt.textContent = 'Entrer'; }
+      catch (x) { if (x.message !== 'admin' && x.message !== 'code' && x.message !== 'expire') console.error(x); err.textContent = x.message === 'expire' ? messageAcces(x) : x.message === 'admin' ? 'Ce code n\'ouvre pas l\'espace ingénieure.' : 'Ce code n\'est pas reconnu. Vérifiez-le, ou écrivez-moi.'; bt.disabled = false; bt.textContent = 'Entrer'; }
     });
     const es = $app.querySelector('#essai'); if (es) es.addEventListener('click', () => ecranEssai());
     const dec = $app.querySelector('#decouverte');
@@ -244,7 +244,7 @@
       else {
         const corps = `Bonjour, je souhaite l'accès « ${o.nom} » (${o.prix}). J'ai lu les conditions générales et je reconnais perdre mon droit de rétractation dès que mon code m'est fourni.`;
         location.href = `mailto:${c.email || ''}?subject=${encodeURIComponent('Étincelle : ' + o.nom)}&body=${encodeURIComponent(corps)}`;
-        info.textContent = 'Votre message est prêt : envoyez-le, nous vous répondons avec les moyens de paiement.';
+        info.textContent = 'Votre message est prêt : envoyez-le, je vous réponds avec les moyens de paiement.';
       }
     }));
   }
@@ -419,7 +419,7 @@
         <span class="etiquette">🔒 À découvrir en atelier</span>
         <h2>Ce pétale se vit d'abord ensemble</h2>
         <p>Chez BRILLE, le lien passe avant tout. Ce pétale se découvre en atelier, avec d'autres parents et avec votre enfant : c'est là qu'il prend tout son sens. Étincelle vous aidera ensuite à le prolonger à la maison.</p>
-        <p>Vous l'avez déjà vécu en atelier et il n'est pas encore ouvert ? Écrivez-nous, nous l'ajouterons à votre accès.</p>
+        <p>Vous l'avez déjà vécu en atelier et il n'est pas encore ouvert ? Écrivez-moi, je l'ajouterai à votre accès.</p>
         <a class="btn plein" href="mailto:${esc(c.email || '')}?subject=${encodeURIComponent('Étincelle : ouvrir un pétale')}">Écrire à BRILLE</a>
         ${achatActif() ? `<p style="margin-top:18px">Vous n'avez pas suivi d'atelier ? Vous pouvez ouvrir ce pétale ou la fleur complète.</p><a class="btn discret plein" href="#/acces">Voir les accès</a>` : ''}
       </div>
@@ -862,7 +862,7 @@
       </details>
 
       <details class="carte"><summary>Mes données et ma vie privée</summary>
-        <p>Vos bilans et vos notes sont enregistrés <b>uniquement sur ce téléphone</b>. Il n'y a ni compte, ni serveur : BRILLE ne les voit pas et ne peut pas les récupérer. Seuls un nom de famille et des prénoms sont demandés : n'ajoutez pas d'informations sensibles.</p>
+        <p>Vos bilans et vos notes sont enregistrés <b>uniquement sur ce téléphone</b>. Il n'y a ni compte, ni serveur : je ne les vois pas et ne peux pas les récupérer. Seuls un nom de famille et des prénoms sont demandés : n'ajoutez pas d'informations sensibles.</p>
         <p class="petit">Si vous changez de téléphone ou videz les données du navigateur, vous perdez l'historique, sauf si vous l'enregistrez avant.</p>
         <button class="btn discret plein" id="exporter" type="button">Enregistrer une copie de mes données</button>
         <label class="btn discret plein" style="margin-top:12px">Récupérer une copie<input type="file" id="importer" accept="application/json,.json" hidden></label>
@@ -1031,7 +1031,7 @@
     const imp = $app.querySelector('#f-carnet');
     if (imp) { imp.addEventListener('change', () => { const r = new FileReader(); r.onload = () => { try { const c = JSON.parse(r.result); if (c.v !== 2 || !c.cles || !c.familles) throw 0; ecrireCarnet(c); rendre(); } catch { st('Ce fichier n\'est pas un carnet valide.'); } }; r.readAsText(imp.files[0]); }); return; }
     const carnet = lireCarnet(); if (!carnet) return;
-    const msgFamille = f => `Bonjour, voici votre accès personnel pour prolonger à la maison ce que nous avons vécu à l'atelier. Touchez ce lien, l'application s'ouvre toute seule : ${lienFamille(f)}\n(Si on vous demande le code, saisissez-le : ${f.code}). À bientôt, Tsiory (BRILLE)`;
+    const msgFamille = f => `Bonjour, voici votre accès personnel pour prolonger à la maison ce que nous avons vécu ensemble à l'atelier. Touchez ce lien, l'application s'ouvre toute seule : ${lienFamille(f)}\n(Si on vous demande le code, saisissez-le : ${f.code}). À bientôt, Tsiory (BRILLE)`;
     const msgAchat = f => `Bonjour, merci pour votre achat d'un accès à Étincelle ! Touchez ce lien, l'application s'ouvre toute seule : ${lienFamille(f)}\n(Si on vous demande le code, saisissez-le : ${f.code}). Bon moment en famille, Tsiory (BRILLE)`;
     const copier = async (t, ok) => { try { await navigator.clipboard.writeText(t); st(ok); } catch { prompt('Copiez ce texte :', t); } };
     $app.querySelector('#creer').addEventListener('click', () => {
@@ -1182,7 +1182,7 @@
     if (etape === 1) {
       $app.innerHTML = `<section class="vue acces"><div class="carte"><span class="etiquette">Essai gratuit · ${esc(nom)}</span>
         <h1 class="essai-q">Votre adresse e-mail</h1>
-        <p>Nous vous envoyons un code à 6 chiffres pour démarrer votre essai de ${essaiJours()} jours. C'est ce qui garantit <b>un essai par famille</b>.</p>
+        <p>Je vous envoie un code à 6 chiffres pour démarrer votre essai de ${essaiJours()} jours. C'est ce qui garantit <b>un essai par famille</b>.</p>
         <input type="email" id="em-mail" autocomplete="email" inputmode="email" placeholder="prenom@exemple.fr" value="${esc(email)}" style="width:100%;font-size:1.05rem;padding:12px;border-radius:12px;border:1px solid #ccc">
         <label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-size:.9rem"><input type="checkbox" id="em-ok" style="margin-top:3px"><span>J'accepte que mon adresse serve uniquement à vérifier cet essai. Elle est conservée sous une forme chiffrée, illisible, et jamais utilisée pour m'écrire. <a href="legal.html#confidentialite" target="_blank" rel="noopener">En savoir plus</a></span></label>
         <p class="petit liens-legaux">${liensLegaux()}</p>
@@ -1278,12 +1278,12 @@
       const lien = decodeURIComponent(m[1]);
       history.replaceState(null, '', location.pathname + location.search + '#/');
       try { await deverrouiller(lien); document.body.classList.remove('verrouille'); premiere = true; rendre(); return; }
-      catch (x) { ecranCode(messageAcces(x) || 'Ce lien n\'est plus valide. Entrez votre code ou contactez BRILLE.'); return; }
+      catch (x) { ecranCode(messageAcces(x) || 'Ce lien n\'est plus valide. Entrez votre code ou écrivez-moi.'); return; }
     }
     const code = codeMemorise();
     let raison = null;
     if (code) { try { await deverrouiller(code); document.body.classList.remove('verrouille'); rendre(); return; } catch (x) { raison = x; /* code retiré, changé ou expiré */ } }
-    ecranCode(code ? (messageAcces(raison) || 'Votre accès n\'est plus valide. Entrez un nouveau code ou contactez BRILLE.') : '');
+    ecranCode(code ? (messageAcces(raison) || 'Votre accès n\'est plus valide. Entrez un nouveau code ou écrivez-moi.') : '');
   }).catch(() => {
     $app.innerHTML = '<section class="vue"><h1>Oups</h1><p>Impossible de charger le contenu. Vérifiez votre connexion et rechargez la page.</p></section>';
   });
