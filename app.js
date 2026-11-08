@@ -163,8 +163,8 @@
     const c = D.config.contact || {};
     const ing = onglet === 'ing';
     $app.innerHTML = `<section class="vue acces">
-      ${motIngenieure()}
       ${heroEtincelle()}
+      ${motIngenieure()}
       <div class="onglets-acces" role="tablist" aria-label="Type d'accès">
         <button type="button" role="tab" id="t-fam" aria-selected="${!ing}">Accès famille</button>
         <button type="button" role="tab" id="t-ing" aria-selected="${ing}">Accès ingénieure</button>
