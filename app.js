@@ -206,13 +206,10 @@
   }
 
   /* ---------- Accès payant ---------- */
-  const achatActif = () => { const a = D.config.achat; return !!(a && a.actif && (a.offres || []).length && (!a.ouvertureLe || new Date() >= new Date(a.ouvertureLe + 'T00:00:00'))); };
-  const lancementEnCours = () => { const a = D.config.achat || {}; return !!a.lancementJusqu && new Date() <= new Date(a.lancementJusqu + 'T23:59:59'); };
-  const offreActive = o => (lancementEnCours() && o.lancement) ? Object.assign({}, o, { prix: o.lancement.prix || o.prix, lien: o.lancement.lien || '', enLancement: true }) : o;
-  const dateLancement = iso => new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+  const achatActif = () => !!(D.config.achat && D.config.achat.actif && (D.config.achat.offres || []).length);
   const liensLegaux = () => `<a href="legal.html#cgv" target="_blank" rel="noopener">Conditions générales</a> · <a href="legal.html#confidentialite" target="_blank" rel="noopener">Confidentialité</a> · <a href="legal.html#mentions" target="_blank" rel="noopener">Mentions légales</a>`;
   function htmlAchat(retour) {
-    const offres = (D.config.achat.offres || []).map(offreActive);
+    const offres = D.config.achat.offres || [];
     return `<section class="vue achat">
       <button type="button" class="retour lien" id="achat-retour">← ${retour === 'code' ? 'Retour' : 'La fleur'}</button>
       <div class="carte">
@@ -227,11 +224,9 @@
           <h2>${esc(o.nom)}</h2>
           <p class="petit">${esc(o.detail || '')}</p>
           <div class="offre-prix">${esc(o.prix || '')}</div>
-          ${o.enLancement ? `<p class="petit">Prix de lancement jusqu'au ${esc(dateLancement(D.config.achat.lancementJusqu))}.</p>` : ''}
-          ${o.solidaire ? `<label class="coche"><input type="checkbox" class="decl-solidaire"> Je déclare sur l'honneur que le tarif standard représente une difficulté financière pour mon foyer, et je comprends que ce tarif solidaire est réservé à cette situation.</label>` : ''}
+          ${o.id === 'solidaire' ? `<label class="coche"><input type="checkbox" class="decl-solidaire"> Je déclare sur l'honneur que le tarif standard représente une difficulté financière pour mon foyer.</label>` : ''}
           <button type="button" class="btn plein payer" data-id="${esc(o.id)}" disabled>Choisir cet accès</button>
         </div>`).join('')}</div>
-        <p class="petit">Les prix pourront être revalorisés après une première année de développement d'Étincelle. Le prix payé ne change pas pour un accès déjà acheté, pendant toute sa durée.</p>
         <p class="ok" id="achat-info" role="status"></p>
         <p class="petit">Votre code vous est envoyé par e-mail après le paiement. Un seul tarif solidaire par foyer.</p>
         <p class="petit liens-legaux">${liensLegaux()}</p>
@@ -239,11 +234,11 @@
   }
   function lierAchat(retour) {
     const cgv = $app.querySelector('#ok-cgv'), ret = $app.querySelector('#ok-retractation'), decl = $app.querySelector('.decl-solidaire'), info = $app.querySelector('#achat-info');
-    const maj = () => $app.querySelectorAll('.payer').forEach(b => { const d = b.closest('.offre').querySelector('.decl-solidaire'); b.disabled = !(cgv.checked && ret.checked && (!d || d.checked)); });
+    const maj = () => $app.querySelectorAll('.payer').forEach(b => { b.disabled = !(cgv.checked && ret.checked && (b.dataset.id !== 'solidaire' || (decl && decl.checked))); });
     $app.querySelectorAll('.achat input[type=checkbox]').forEach(x => x.addEventListener('change', maj)); maj();
     $app.querySelector('#achat-retour').addEventListener('click', () => { if (retour === 'code') ecranCode(); else location.hash = '#/'; });
     $app.querySelectorAll('.payer').forEach(b => b.addEventListener('click', () => {
-      const o0 = (D.config.achat.offres || []).find(x => x.id === b.dataset.id); if (!o0) return; const o = offreActive(o0);
+      const o = (D.config.achat.offres || []).find(x => x.id === b.dataset.id); if (!o) return;
       const c = D.config.contact || {};
       if (o.lien) { window.open(o.lien, '_blank', 'noopener'); info.textContent = 'Le paiement s\'ouvre dans un nouvel onglet. Votre code vous sera envoyé par e-mail.'; }
       else {
@@ -1236,7 +1231,12 @@
   });
   (() => {
     const st = document.createElement('style');
-    st.textContent = `.fam-essai{background:#fdd5a5!important;border:2px solid #f49f4c}.fam-essai code{background:#fff6e8}
+    st.textContent = `.topbar{display:grid!important;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:8px}
+.topbar .brand{display:contents!important}
+.topbar .brand img{grid-column:1;grid-row:1;justify-self:start}
+.topbar .brand-nom{grid-column:2;grid-row:1;justify-self:center;text-align:center;font-family:'Gruppo','Quicksand',sans-serif!important;font-weight:400;color:#000!important;-webkit-text-stroke:.9px #000;letter-spacing:.015em;background:linear-gradient(transparent 58%,var(--vert,#cbe1b6) 58%);padding:0 .25em;margin:0 -.25em;white-space:nowrap}
+.topbar>:not(.brand){grid-column:3;grid-row:1;justify-self:end;margin-left:0!important}
+.fam-essai{background:#fdd5a5!important;border:2px solid #f49f4c}.fam-essai code{background:#fff6e8}
 .hero-accueil{display:block!important;position:relative;overflow:hidden}
 .hero-accueil .logo-etincelle{position:static!important;float:right;width:min(42%,230px)!important;height:auto!important;margin:0 0 4px 14px!important;shape-outside:margin-box}
 .hero-accueil h1{font-size:clamp(2.2rem,9vw,3.8rem);line-height:1.05;margin:.25em 0 .3em}

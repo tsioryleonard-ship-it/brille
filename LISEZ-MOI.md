@@ -225,11 +225,6 @@ Les liens « Conditions générales · Confidentialité · Mentions légales » 
 
 Dans « Gérer les familles », les 7 lignes « Essai · … » sont en **orange**, avec le badge « 🔒 Code d'essai · protégé ». Leur code est masqué (••••-••••), et il n'y a plus ni boutons (copier le message, le lien, le QR code, retirer), ni date de fin, ni cases modifiables : impossible de les envoyer ou de les casser par erreur. Elles sont rangées en bas de la liste.
 
-## Prix, lancement et ouverture de la vente (6 nov. 2026)
+## Version 45-46 : titre « Étincelle » centré, police Gruppo, surligné en vert
 
-- `config.json` > `achat` contient 6 offres : pétale, fleur 1 an, accès 5 ans, chacune en tarif normal et en tarif solidaire (moitié prix).
-- `ouvertureLe` (18 nov. 2026) : la vente ne s'affiche pas avant cette date, même avec `"actif": true` (début de l'activité 2 au guichet unique).
-- `lancementJusqu` (18 déc. 2026) : jusqu'à cette date inclus, l'application affiche le prix `lancement.prix` de chaque offre, puis le prix normal automatiquement, sans republier.
-- Chaque offre a deux liens Stripe : `lien` (prix normal) et `lancement.lien` (prix de lancement). Un lien vide ouvre un message e-mail au lieu du paiement. Ne mettez jamais le lien normal à la place du lien de lancement.
-- Les prix pourront être revalorisés après un an : mention déjà présente dans l'article 4 des CGV et sur la page d'achat.
-- Pour revaloriser plus tard : modifiez `prix` dans `config.json`, créez de nouveaux liens Stripe, changez la version de `sw.js`, republiez.
+Dans la barre du haut, « Étincelle » est maintenant centré, dans la police Gruppo des titres (contour noir), avec le surlignage vert de la charte, entre le logo BRILLE à gauche et le bouton son à droite.
