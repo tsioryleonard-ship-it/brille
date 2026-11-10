@@ -167,14 +167,14 @@
       ${motIngenieure()}
       <div class="onglets-acces" role="tablist" aria-label="Type d'accès">
         <button type="button" role="tab" id="t-fam" aria-selected="${!ing}">Accès famille</button>
-        <button type="button" role="tab" id="t-ing" aria-selected="${ing}">Accès ingénieure</button>
+        <button type="button" role="tab" id="t-ing" aria-selected="${ing}">Accès conceptrice</button>
       </div>
       <div class="carte" role="tabpanel">
         <span class="etiquette">${ing ? 'Espace conceptrice' : 'Accès famille'}</span>
-        <h1>${ing ? 'Espace ingénieure' : 'J\'ai un code'}</h1>
+        <h1>${ing ? 'Espace conceptrice' : 'J\'ai un code'}</h1>
         <p>${ing ? 'Réservé à la conceptrice d\'Étincelle : aperçu complet de tous les pétales et vue « comme une famille ». Entrez votre code personnel.' : 'Entrez le code personnel remis à l\'atelier ou reçu à l\'inscription.'}</p>
         <form id="form-code" autocomplete="off">
-          <label for="champ-code">${ing ? 'Votre code ingénieure' : 'Votre code famille'}</label>
+          <label for="champ-code">${ing ? 'Votre code conceptrice' : 'Votre code famille'}</label>
           <input id="champ-code" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="${ing ? 'XXXX-XXXX-XXXX' : 'XXXX-XXXX'}" maxlength="16">
           <p class="erreur" id="erreur-code" role="alert">${esc(message || '')}</p>
           <button class="btn plein" type="submit" id="valider-code">Entrer</button>
@@ -193,7 +193,7 @@
       const code = champ.value.trim(); if (!code) { err.textContent = 'Saisissez votre code.'; return; }
       bt.disabled = true; bt.textContent = 'Vérification…'; err.textContent = '';
       try { await deverrouiller(code, ing); document.body.classList.remove('verrouille'); premiere = true; rendre(); }
-      catch (x) { if (x.message !== 'admin' && x.message !== 'code' && x.message !== 'expire') console.error(x); err.textContent = x.message === 'expire' ? messageAcces(x) : x.message === 'admin' ? 'Ce code n\'ouvre pas l\'espace ingénieure.' : 'Ce code n\'est pas reconnu. Vérifiez-le, ou écrivez-moi.'; bt.disabled = false; bt.textContent = 'Entrer'; }
+      catch (x) { if (x.message !== 'admin' && x.message !== 'code' && x.message !== 'expire') console.error(x); err.textContent = x.message === 'expire' ? messageAcces(x) : x.message === 'admin' ? 'Ce code n\'ouvre pas l\'espace conceptrice.' : 'Ce code n\'est pas reconnu. Vérifiez-le, ou écrivez-moi.'; bt.disabled = false; bt.textContent = 'Entrer'; }
     });
     const es = $app.querySelector('#essai'); if (es) es.addEventListener('click', () => ecranEssai());
     const dec = $app.querySelector('#decouverte');
@@ -297,7 +297,7 @@
         ${essaiDispo() ? `<p class="hero-essai">Pas encore venus en atelier ? <b>Testez gratuitement un pétale pendant ${essaiJours()} jours</b>, en famille.</p>` : ''}
       </div>`;
   const motIngenieure = () => `<figure class="mot">
-      <figcaption>Le mot de l'ingénieure QVE</figcaption>
+      <figcaption>Le mot de la fondatrice</figcaption>
       <blockquote>Défendre l'épanouissement et l'harmonie familiale : redonner sa place au lien, à l'écoute et au bien-être de l'enfant, pour mieux vivre le quotidien.</blockquote>
       <p class="signature"><b>Rindra Tsiory</b><span>Fondatrice de BRILLE</span></p>
     </figure>`;
@@ -496,7 +496,7 @@
   const ORDRE = ['organisation', 'emotions', 'apprentissages', 'liens', 'droits', 'equilibre', 'briller'];
   const parcoursFini = id => { const pc = (charger().parcours || {})[id]; return !!(pc && (pc.nb > 0 || pc.fini || Object.keys(pc.sem || {}).length === 4)); };
   const petalesAventure = () => ORDRE.map(i => petale(i)).filter(q => q && q.ouvert && q.parcours);   // ceux que la famille peut vivre
-  function precedentAVivre(id) {                         // le pétale à terminer avant celui-ci (jamais pour l'accès ingénieure)
+  function precedentAVivre(id) {                         // le pétale à terminer avant celui-ci (jamais pour l'accès conceptrice)
     return null;                                       // pas de verrou entre pétales : chaque famille choisit son ordre
   }
   const semCourante = pc => { for (let n = 1; n <= 4; n++) if (!pc.sem[n]) return n; return 4; };
@@ -902,7 +902,7 @@
   function vueIngenieure() {
     const sel = D.apercu || D.vitrine.map(v => v.id);
     return `<div class="carte teinte" style="background:var(--vert)" id="carte-ing">
-      <span class="etiquette">Espace ingénieure</span>
+      <span class="etiquette">Espace conceptrice</span>
       <h2>Aperçu « comme une famille »</h2>
       <p>Vous voyez tous les pétales. Cochez ceux qu'une famille a vécus en atelier pour voir exactement son application :</p>
       <div class="apercu">${D.vitrine.map(v => `<label class="coche"><input type="checkbox" data-id="${v.id}" ${sel.includes(v.id) ? 'checked' : ''}> ${esc(v.titre)}</label>`).join('')}</div>
@@ -946,7 +946,7 @@
   }
 
 
-  /* ----- Gestion des familles (espace ingénieure) ----- */
+  /* ----- Gestion des familles (espace conceptrice) ----- */
   const CLE_CARNET = 'brille-carnet';
   const lireCarnet = () => { try { return JSON.parse(localStorage.getItem(CLE_CARNET) || 'null'); } catch { return null; } };
   const ecrireCarnet = c => { try { localStorage.setItem(CLE_CARNET, JSON.stringify(c)); } catch { } };
@@ -968,7 +968,7 @@
     const stock = carnet.familles.filter(f => f.actif && f.vente && f.publie && !f.envoye).length;
     const aPublier = carnet.familles.filter(f => f.actif && f.vente && !f.publie).length;
     const ligneFam = (f, i) => f.actif ? `<div class="carte fam${f.admin ? ' fam-admin' : ''}${f.essai ? ' fam-essai' : ''}" data-i="${i}">
-        ${f.admin ? '<span class="badge-admin">Mon accès ingénieure · protégé</span>' : ''}${f.essai ? '<span class="badge-admin" style="background:#f49f4c;color:#2b2b2b">🔒 Code d\'essai · protégé · à ne jamais envoyer à une famille</span>' : ''}
+        ${f.admin ? '<span class="badge-admin">Mon accès conceptrice · protégé</span>' : ''}${f.essai ? '<span class="badge-admin" style="background:#f49f4c;color:#2b2b2b">🔒 Code d\'essai · protégé · à ne jamais envoyer à une famille</span>' : ''}
         <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe"${f.admin || f.essai ? ' disabled' : ''}>
         <p>Code : <code>${f.essai ? '••••-••••' : esc(f.code)}</code></p>
         ${f.essai ? '<p class="petit" style="margin:2px 0 10px">Ce code est utilisé automatiquement par l\'essai gratuit (après la vérification par e-mail). Ne le modifiez pas, ne le retirez pas.</p>' : ''}

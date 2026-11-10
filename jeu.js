@@ -19,7 +19,7 @@
   let S;
   try { S = Object.assign(neuf(), JSON.parse(localStorage.getItem(CLE) || '{}')); } catch { S = neuf(); }
   const lireJeu = () => { try { return Object.assign(neuf(), JSON.parse(localStorage.getItem(CLE) || '{}')); } catch { return neuf(); } };
-  /* Session ingénieure : bac à sable. Les étincelles gagnées pendant vos tests ne sont jamais enregistrées. */
+  /* Session conceptrice : bac à sable. Les étincelles gagnées pendant vos tests ne sont jamais enregistrées. */
   const estAdmin = () => document.body.dataset.admin === '1';
   let bac = false;
   const garde = () => {
@@ -177,7 +177,7 @@
     return `<div class="jeu-niv"><span class="jeu-emo" aria-hidden="true">${nv.e}</span>
         <div><b>Niveau « ${nv.n} »</b><small>${S.pts} étincelle${S.pts > 1 ? 's' : ''} ✨</small></div></div>
       <div class="jeu-barre" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i style="width:${pct}%"></i></div>
-      <p class="jeu-aide">${suiv ? `Encore ${reste} ✨ pour devenir « ${suiv.n} » ${suiv.e}. Chaque mission vécue ensemble en rapporte !` : 'Votre fleur brille de mille feux !'}${estAdmin() ? ' <b>Mode ingénieure : vos étincelles de test ne sont pas enregistrées.</b>' : ''}</p>
+      <p class="jeu-aide">${suiv ? `Encore ${reste} ✨ pour devenir « ${suiv.n} » ${suiv.e}. Chaque mission vécue ensemble en rapporte !` : 'Votre fleur brille de mille feux !'}${estAdmin() ? ' <b>Mode conceptrice : vos étincelles de test ne sont pas enregistrées.</b>' : ''}</p>
       <div class="jeu-badges" aria-label="Badges">${BADGES.map(b => { const a = S.badges.includes(b.id); return `<span class="jeu-badge${a ? ' on' : ''}" title="${esc(b.n)}"><i aria-hidden="true">${a ? b.e : '🔒'}</i><small>${esc(b.n)}</small></span>`; }).join('')}</div>`;
   }
   function majHud() { const h = app.querySelector('.jeu-hud'); if (h) h.innerHTML = htmlHud(); }
