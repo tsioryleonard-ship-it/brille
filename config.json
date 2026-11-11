@@ -104,35 +104,66 @@
     ]
   },
   "achat": {
-    "actif": false,
+    "actif": true,
+    "ouverture": "2026-11-18",
+    "finLancement": "2026-12-18",
     "offres": [
       {
         "id": "petale",
         "nom": "Un pétale",
-        "detail": "Un pétale au choix de la fleur.",
-        "prix": "19 €",
-        "lien": ""
+        "detail": "Un pétale au choix, pendant 12 mois.",
+        "prix": "12 €",
+        "prixNormal": "18 €",
+        "lien": "https://buy.stripe.com/cNifZj3ITe8k5FdeNyaZi03",
+        "lienNormal": "https://buy.stripe.com/4gM9AV5R11ly7Nl34QaZi0c"
       },
       {
         "id": "fleur",
-        "nom": "La fleur complète, 1 an",
-        "detail": "Les 7 pétales pendant 12 mois.",
-        "prix": "49 €",
-        "lien": ""
-      },
-      {
-        "id": "solidaire",
-        "nom": "Tarif solidaire, 1 an",
-        "detail": "La fleur complète, pour les familles pour qui le tarif standard est une difficulté (RSA, ASS, aides CAF…). Simple déclaration sur l'honneur, aucun justificatif.",
-        "prix": "28 €",
-        "lien": ""
+        "nom": "La fleur complète",
+        "detail": "Les 7 pétales, pendant 12 mois.",
+        "prix": "50 €",
+        "prixNormal": "70 €",
+        "lien": "https://buy.stripe.com/8x2cN7enx7JWebJdJuaZi04",
+        "lienNormal": "https://buy.stripe.com/8x26oJ3ITggs2t1fRCaZi0b"
       },
       {
         "id": "vie",
-        "nom": "Accès longue durée, 5 ans",
-        "detail": "La fleur complète pendant 5 ans.",
-        "prix": "99 €",
-        "lien": ""
+        "nom": "Accès longue durée",
+        "detail": "La fleur complète, pendant 5 ans.",
+        "prix": "100 €",
+        "prixNormal": "140 €",
+        "lien": "https://buy.stripe.com/eVqdRb3IT8O06Jh5cYaZi02",
+        "lienNormal": "https://buy.stripe.com/7sY14pgvF4xK9Vt8paaZi0d"
+      },
+      {
+        "id": "petale-sol",
+        "nom": "Un pétale · tarif solidaire",
+        "detail": "Un pétale au choix, pendant 12 mois.",
+        "prix": "6 €",
+        "prixNormal": "9 €",
+        "lien": "https://buy.stripe.com/5kQaEZ4MXd4g5Fd34QaZi05",
+        "lienNormal": "https://buy.stripe.com/9B64gBbbl7JW2t15cYaZi0a",
+        "solidaire": true
+      },
+      {
+        "id": "fleur-sol",
+        "nom": "La fleur complète · tarif solidaire",
+        "detail": "Les 7 pétales, pendant 12 mois.",
+        "prix": "25 €",
+        "prixNormal": "35 €",
+        "lien": "https://buy.stripe.com/00wbJ3cfp6FS3x59teaZi06",
+        "lienNormal": "https://buy.stripe.com/cNi6oJ2EPe8k8Rp5cYaZi09",
+        "solidaire": true
+      },
+      {
+        "id": "vie-sol",
+        "nom": "Accès longue durée · tarif solidaire",
+        "detail": "La fleur complète, pendant 5 ans.",
+        "prix": "50 €",
+        "prixNormal": "70 €",
+        "lien": "https://buy.stripe.com/fZuaEZbblggsd7FdJuaZi07",
+        "lienNormal": "https://buy.stripe.com/aFa5kF5R1c0cc3B5cYaZi08",
+        "solidaire": true
       }
     ],
     "delai": "48 heures ouvrées"

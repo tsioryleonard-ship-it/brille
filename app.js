@@ -206,8 +206,18 @@
   }
 
   /* ---------- Accès payant ---------- */
-  const achatActif = () => !!(D.config.achat && D.config.achat.actif && (D.config.achat.offres || []).length);
+  const achatActif = () => !!(D.config.achat && D.config.achat.actif && (D.config.achat.offres || []).length && iso(new Date()) >= (D.config.achat.ouverture || '0000-00-00'));
+  /* Prix de lancement jusqu'à « finLancement » (inclus), puis prix normal et lien de paiement normal (config.json) */
+  const enLancement = () => { const f = (D.config.achat || {}).finLancement; return !f || iso(new Date()) <= f; };
+  const prixDe = o => (enLancement() || !o.prixNormal) ? (o.prix || '') : o.prixNormal;
+  const lienDe = o => enLancement() ? (o.lien || '') : (o.lienNormal || '');   // jamais le lien de lancement après la fin du lancement
   const liensLegaux = () => `<a href="legal.html#cgv" target="_blank" rel="noopener">Conditions générales</a> · <a href="legal.html#confidentialite" target="_blank" rel="noopener">Confidentialité</a> · <a href="legal.html#mentions" target="_blank" rel="noopener">Mentions légales</a>`;
+  const carteOffre = o => `<div class="offre">
+          <h2>${esc(o.nom)}</h2>
+          <p class="petit">${esc(o.detail || '')}</p>
+          <div class="offre-prix">${esc(prixDe(o))}${enLancement() && o.prixNormal ? ` <s class="petit" style="font-weight:400">${esc(o.prixNormal)}</s>` : ''}</div>
+          <button type="button" class="btn plein payer" data-id="${esc(o.id)}" data-sol="${o.solidaire ? '1' : ''}" disabled>Choisir cet accès</button>
+        </div>`;
   function htmlAchat(retour) {
     const offres = D.config.achat.offres || [];
     return `<section class="vue achat">
@@ -218,31 +228,31 @@
         <p>Étincelle est <b>gratuite pour les familles accompagnées lors d'un atelier BRILLE</b> : leur code est remis à l'atelier. Si vous n'avez pas suivi d'atelier, vous pouvez acheter un accès.</p>
         <div class="consent">
           <label class="coche"><input type="checkbox" id="ok-cgv"> J'ai lu et j'accepte les conditions générales et la politique de confidentialité.</label>
-          <label class="coche"><input type="checkbox" id="ok-retractation"> Je demande l'accès immédiat à Étincelle et je reconnais perdre mon droit de rétractation dès que mon code m'est fourni.</label>
+          <p class="petit" style="margin:8px 0 0">Au moment du paiement, vous choisissez : recevoir votre code tout de suite (vous renoncez alors à votre droit de rétractation de 14 jours) ou attendre 14 jours avant de le recevoir.</p>
         </div>
-        <div class="offres">${offres.map(o => `<div class="offre">
-          <h2>${esc(o.nom)}</h2>
-          <p class="petit">${esc(o.detail || '')}</p>
-          <div class="offre-prix">${esc(o.prix || '')}</div>
-          ${o.id === 'solidaire' ? `<label class="coche"><input type="checkbox" class="decl-solidaire"> Je déclare sur l'honneur que le tarif standard représente une difficulté financière pour mon foyer.</label>` : ''}
-          <button type="button" class="btn plein payer" data-id="${esc(o.id)}" disabled>Choisir cet accès</button>
-        </div>`).join('')}</div>
+        ${enLancement() && (D.config.achat || {}).finLancement ? `<p class="petit"><b>Prix de lancement jusqu'au ${esc(dateLongue(D.config.achat.finLancement))}</b>, puis prix normal.</p>` : ''}
+        <div class="offres">${offres.filter(o => !o.solidaire).map(carteOffre).join('')}</div>
+        ${offres.some(o => o.solidaire) ? `<h2 style="margin-top:22px">Tarif solidaire</h2>
+        <p class="petit">Un geste de solidarité, pas une promotion : la moitié du prix pour les familles dont le budget est serré (RSA, ASS, aides CAF…), sur simple déclaration, sans justificatif. Si vous pouvez payer le tarif standard, merci de le choisir : il permet de maintenir ce geste pour d'autres familles. Un accès par foyer.</p>
+        <label class="coche"><input type="checkbox" class="decl-solidaire"> Je déclare sur l'honneur que le tarif standard représente une difficulté financière pour mon foyer.</label>
+        <div class="offres">${offres.filter(o => o.solidaire).map(carteOffre).join('')}</div>` : ''}
         <p class="ok" id="achat-info" role="status"></p>
         <p class="petit">Votre code vous est envoyé par e-mail après le paiement. Un seul tarif solidaire par foyer.</p>
         <p class="petit liens-legaux">${liensLegaux()}</p>
       </div></section>`;
   }
   function lierAchat(retour) {
-    const cgv = $app.querySelector('#ok-cgv'), ret = $app.querySelector('#ok-retractation'), decl = $app.querySelector('.decl-solidaire'), info = $app.querySelector('#achat-info');
-    const maj = () => $app.querySelectorAll('.payer').forEach(b => { b.disabled = !(cgv.checked && ret.checked && (b.dataset.id !== 'solidaire' || (decl && decl.checked))); });
+    const cgv = $app.querySelector('#ok-cgv'), decl = $app.querySelector('.decl-solidaire'), info = $app.querySelector('#achat-info');
+    const maj = () => $app.querySelectorAll('.payer').forEach(b => { b.disabled = !(cgv.checked && (!b.dataset.sol || (decl && decl.checked))); });
     $app.querySelectorAll('.achat input[type=checkbox]').forEach(x => x.addEventListener('change', maj)); maj();
     $app.querySelector('#achat-retour').addEventListener('click', () => { if (retour === 'code') ecranCode(); else location.hash = '#/'; });
     $app.querySelectorAll('.payer').forEach(b => b.addEventListener('click', () => {
       const o = (D.config.achat.offres || []).find(x => x.id === b.dataset.id); if (!o) return;
       const c = D.config.contact || {};
-      if (o.lien) { window.open(o.lien, '_blank', 'noopener'); info.textContent = 'Le paiement s\'ouvre dans un nouvel onglet. Votre code vous sera envoyé par e-mail.'; }
+      const lien = lienDe(o);
+      if (lien) { window.open(lien, '_blank', 'noopener'); info.textContent = 'Le paiement s\'ouvre dans un nouvel onglet. Votre code vous sera envoyé par e-mail.'; }
       else {
-        const corps = `Bonjour, je souhaite l'accès « ${o.nom} » (${o.prix}). J'ai lu les conditions générales et je reconnais perdre mon droit de rétractation dès que mon code m'est fourni.`;
+        const corps = `Bonjour, je souhaite l'accès « ${o.nom} » (${prixDe(o)}). J'ai lu les conditions générales. Je choisis (rayer la mention inutile) : l'accès immédiat, en renonçant à mon droit de rétractation / d'attendre 14 jours avant de recevoir mon code.`;
         location.href = `mailto:${c.email || ''}?subject=${encodeURIComponent('Étincelle : ' + o.nom)}&body=${encodeURIComponent(corps)}`;
         info.textContent = 'Votre message est prêt : envoyez-le, je vous réponds avec les moyens de paiement.';
       }
