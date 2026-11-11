@@ -1012,6 +1012,7 @@
         <label for="duree" class="petit" style="display:block;margin-top:6px"><b>Durée de l'accès</b> (compte à partir d'aujourd'hui)</label>
         <select id="duree" style="width:100%;padding:10px 14px;border:2px solid #e4dcec;border-radius:16px;font:inherit;background:#fff;margin:4px 0 12px">
           <option value="">Sans limite (familles du centre social)</option>
+          <option value="3m">3 mois (familles du centre, un pétale)</option>
           <option value="12m" selected>12 mois (fleur entière, un pétale)</option>
           <option value="5a">5 ans (accès longue durée)</option>
         </select>
@@ -1051,7 +1052,7 @@
       const base = $app.querySelector('#nouveau-nom').value.trim() || 'Famille';
       const crees = []; for (let i = 0; i < n; i++) crees.push(Acces.ajouterFamille(carnet, n > 1 ? `${base} ${String(i + 1).padStart(2, '0')}` : base, sel));
       const dr = $app.querySelector('#duree').value;
-      if (dr) { const d = new Date(); d.setFullYear(d.getFullYear() + (dr === '5a' ? 5 : 1)); crees.forEach(f => { f.fin = iso(d); }); }
+      if (dr) { const d = new Date(); if (dr === '3m') d.setMonth(d.getMonth() + 3); else d.setFullYear(d.getFullYear() + (dr === '5a' ? 5 : 1)); crees.forEach(f => { f.fin = iso(d); }); }
       if ($app.querySelector('#lot-vente').checked) crees.forEach(f => { f.vente = true; });
       ecrireCarnet(carnet); rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = (n === 1 ? 'Code créé : ' + crees[0].code : n + ' codes créés') + '. Pensez à publier (bouton « Préparer les fichiers »).'; }
     });
