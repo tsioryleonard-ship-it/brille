@@ -540,3 +540,8 @@ body.verrouille .brand-nom { display: none; }
 
 /* v36 : espace entre les cartes de « Plus » et « Conditions d'utilisation » (grand écran) */
 .grille-cartes + details.carte { margin-top: 24px; }
+
+/* ===== v37 : second parent (facultatif) dans le bilan de la semaine ===== */
+.parent-lib { margin: 12px 0 0; font-size: .95rem; text-align: left; }
+#p2-ajouter { margin-top: 12px; }
+#p2-retirer { margin: 8px 0 2px; font-size: .86rem; color: var(--doux); }

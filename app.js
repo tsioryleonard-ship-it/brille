@@ -25,7 +25,8 @@
   const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify(memoire)); return true; } catch { return false; } };
   const cle = qui => (qui === 'enfant' ? 'enfant' : 'bilans');
   const bilansDe = (id, qui = 'parent') => ((charger()[cle(qui)] || {})[id] || []).slice().sort((a, b) => a.w.localeCompare(b.w));
-  const bilanFamille = id => { const a = dernierBilan(id, 'parent'), e = dernierBilan(id, 'enfant'), l = [a, e].filter(Boolean); return l.length ? { s: Math.round(l.reduce((t, x) => t + x.s, 0) / l.length) } : null; };
+  const scoreDe = b => { const l = [b.s, b.s2].filter(Boolean); return l.length ? Math.round(l.reduce((t, x) => t + x, 0) / l.length) : 0; };   // parent : moyenne du parent 1 et du parent 2 s'il y en a deux
+  const bilanFamille = id => { const a = dernierBilan(id, 'parent'), e = dernierBilan(id, 'enfant'), l = [a, e].filter(Boolean); return l.length ? { s: Math.round(l.reduce((t, x) => t + scoreDe(x), 0) / l.length) } : null; };
   const dernierBilan = (id, qui = 'parent') => { const l = bilansDe(id, qui); return l.length ? l[l.length - 1] : null; };
 
   /* ---------- La famille : les prénoms des parents et de TOUS les enfants (aucune limite) ---------- */
@@ -399,12 +400,18 @@
   const nomEnfant = (i, k) => famille().enfants[i] || (k === 1 ? 'Mon enfant' : 'Enfant ' + (i + 1));
   function bilanBloc(qui, p, actuel) {
     const parent = qui === 'parent', k0 = (actuel && actuel.k) || Math.max(1, famille().enfants.length);
-    const echelle = VISAGES.map((v, k) => `<button type="button" data-note="${k + 1}" aria-pressed="${actuel && actuel.s === k + 1}" aria-label="${k + 1} sur 5, ${v.t}">${visage(k)}<span>${v.t}</span></button>`).join('');
+    const echelleDe = note => VISAGES.map((v, k) => `<button type="button" data-note="${k + 1}" aria-pressed="${note === k + 1}" aria-label="${k + 1} sur 5, ${v.t}">${visage(k)}<span>${v.t}</span></button>`).join('');
+    const s2 = (actuel && actuel.s2) || 0;                 // bilan du parent 2 déjà enregistré cette semaine
     return `<div class="bloc-bilan" data-qui="${qui}">
-      <span class="etiquette">${parent ? 'Moi, parent' : (famille().enfants.length > 1 ? 'Mes enfants' : 'Mon enfant')}</span>
+      <span class="etiquette"${parent ? ' id="etiq-parent"' : ''}>${parent ? (s2 ? 'Nous, parents' : 'Moi, parent') : (famille().enfants.length > 1 ? 'Mes enfants' : 'Mon enfant')}</span>
       ${parent ? '' : '<p class="petit" style="margin:0 0 6px">Chaque enfant choisit lui-même son visage, ou posez-lui la question : une ligne par enfant.</p>'}
       <p style="margin:0"><b>${esc(parent ? p.question : p.questionEnfant)}</b></p>
-      ${parent ? `<div class="echelle" role="group" aria-label="Mon bilan sur 5">${echelle}</div>` : '<div class="rangs" id="rangs"></div>'}
+      ${parent ? `<p class="parent-lib" id="lib-p1"${s2 ? '' : ' hidden'}><b>Parent 1</b></p>
+        <div class="echelle" role="group" aria-label="Mon bilan sur 5" data-qui="parent">${echelleDe(actuel && actuel.s)}</div>
+        <div id="bloc-p2"${s2 ? '' : ' hidden'}><p class="parent-lib"><b>Parent 2</b></p>
+          <div class="echelle" role="group" aria-label="Bilan du parent 2 sur 5" data-qui="parent2">${echelleDe(s2)}</div>
+          <button type="button" class="lien" id="p2-retirer">Retirer le parent 2</button></div>
+        <button type="button" class="btn discret petit-btn" id="p2-ajouter"${s2 ? ' hidden' : ''}>＋ Ajouter un second parent</button>` : '<div class="rangs" id="rangs"></div>'}
       ${parent ? '' : `<div class="nb-enfants"><label for="nb-enfants">Combien d'enfants ont répondu ?</label>
         <div class="stepper"><button type="button" id="nb-moins" aria-label="Un enfant de moins">−</button><input id="nb-enfants" type="number" inputmode="numeric" min="1" max="99" value="${k0}"><button type="button" id="nb-plus" aria-label="Un enfant de plus">+</button></div>
         <p class="petit" style="margin:0">Vous avez plusieurs enfants ? C'est bien de le faire en groupe : c'est ça aussi, une famille épanouie ensemble.</p></div>`}
@@ -413,7 +420,7 @@
   function graphique(id, qui, titre) {
     const recents = bilansDe(id, qui).slice(-8);
     if (!recents.length) return '';
-    return `<h3 style="margin-top:6px">${titre}</h3><div class="histo-wrap"><div class="historique" aria-label="${titre}">${recents.map(b => `<div class="barre" style="height:${b.s * 17}px" title="${dateCourte(b.d)} : ${b.s}/5"><span>${dateCourte(b.d)}</span></div>`).join('')}</div></div>`;
+    return `<h3 style="margin-top:6px">${titre}</h3><div class="histo-wrap"><div class="historique" aria-label="${titre}">${recents.map(b => `<div class="barre" style="height:${scoreDe(b) * 17}px" title="${dateCourte(b.d)} : ${scoreDe(b)}/5"><span>${dateCourte(b.d)}</span></div>`).join('')}</div></div>`;
   }
 
   function vuePetaleFerme(p) {
@@ -665,10 +672,11 @@
     const gros = s => s ? `<div class="bil-visage">${visage(s - 1)}<b>${s} sur 5</b><span>${VISAGES[s - 1].t}</span></div>` : '<div class="bil-visage vide"><b>—</b><span>Pas de réponse cette semaine</span></div>';
     const vv = (data.v || []).slice(0, k);
     const rangsBil = vv.length > 1 ? `<div class="bil-rangs">${vv.map((x, i) => `<div class="bil-rang">${x ? visage(x - 1) : '<div class="bil-rien">—</div>'}<b>${esc(nomEnfant(i, k))}</b><span>${x ? VISAGES[x - 1].t : 'Pas de réponse'}</span></div>`).join('')}</div>` : gros(data.enfant);
+    const rangsParents = data.parent2 ? `<div class="bil-rangs">${[['Parent 1', data.parent], ['Parent 2', data.parent2]].map(([n, x]) => `<div class="bil-rang">${x ? visage(x - 1) : '<div class="bil-rien">—</div>'}<b>${n}</b><span>${x ? VISAGES[x - 1].t : 'Pas de réponse'}</span></div>`).join('')}</div>` : gros(data.parent);
     const avant = {};
     bilansDe(p.id, 'parent').forEach(b => { if (b.w !== sem) (avant[b.w] = avant[b.w] || {}).p = b; });
     bilansDe(p.id, 'enfant').forEach(b => { if (b.w !== sem) (avant[b.w] = avant[b.w] || {}).e = b; });
-    const lignes = Object.keys(avant).sort().reverse().slice(0, 8).map(w => { const a = avant[w]; return `<tr><td>${dateLongue(w)}</td><td>${a.p ? a.p.s + ' sur 5' : '—'}</td><td>${a.e ? a.e.s + ' sur 5' + (a.e.k > 1 ? ' · ' + a.e.k + ' enfants' : '') : '—'}</td></tr>`; }).join('');
+    const lignes = Object.keys(avant).sort().reverse().slice(0, 8).map(w => { const a = avant[w]; return `<tr><td>${dateLongue(w)}</td><td>${a.p ? (a.p.s2 ? 'Parent 1 : ' + (a.p.s || '—') + ' · Parent 2 : ' + a.p.s2 : a.p.s + ' sur 5') : '—'}</td><td>${a.e ? a.e.s + ' sur 5' + (a.e.k > 1 ? ' · ' + a.e.k + ' enfants' : '') : '—'}</td></tr>`; }).join('');
     return `<section class="impr-feuille bil" style="--pc:${p.couleur}">
       <div class="bil-cadre">
         <div class="cert-bandeau">${D.petales.map(x => `<i style="background:${x.couleur}"></i>`).join('')}</div>
@@ -678,7 +686,7 @@
         <p class="bil-date">Semaine du ${dateLongue(sem)} au ${dateLongue(plusJours(sem, 6))}</p>
         <p class="bil-famille"><b>Notre famille :</b> ${esc(noms)}</p>
         <div class="bil-duo">
-          <div class="bil-bloc"><span class="bil-tag">Moi, parent</span><p class="bil-q">${esc(p.question)}</p>${gros(data.parent)}</div>
+          <div class="bil-bloc"><span class="bil-tag">${data.parent2 ? 'Les parents' : 'Moi, parent'}</span><p class="bil-q">${esc(p.question)}</p>${rangsParents}</div>
           <div class="bil-bloc"><span class="bil-tag">${k > 1 ? 'Mes enfants · ' + k + ' ont répondu' : 'Mon enfant'}</span><p class="bil-q">${esc(p.questionEnfant)}</p>${rangsBil}</div>
         </div>
         <div class="bil-note"><b>Un mot pour nous</b>${data.note ? `<p>${esc(data.note)}</p>` : ''}<i></i><i></i></div>
@@ -716,14 +724,24 @@
 
   function lierPetale(id) {
     const sem = debutSemaine();
-    const choix = { parent: bilansDe(id, 'parent').find(b => b.w === sem)?.s || null, enfant: bilansDe(id, 'enfant').find(b => b.w === sem)?.s || null };
-    $app.querySelectorAll('.bloc-bilan').forEach(bloc => {
-      const qui = bloc.dataset.qui, boutons = [...bloc.querySelectorAll('.echelle button')];
+    const choix = { parent: bilansDe(id, 'parent').find(b => b.w === sem)?.s || null, parent2: bilansDe(id, 'parent').find(b => b.w === sem)?.s2 || null, enfant: bilansDe(id, 'enfant').find(b => b.w === sem)?.s || null };
+    $app.querySelectorAll('.echelle[data-qui]').forEach(ech => {
+      const qui = ech.dataset.qui, boutons = [...ech.querySelectorAll('button')];
       boutons.forEach(b => b.addEventListener('click', () => {
         choix[qui] = Number(b.dataset.note);
         boutons.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
       }));
     });
+    /* Second parent : facultatif, la ligne s'ouvre ou se ferme */
+    const montrerP2 = oui => {
+      const b2 = $app.querySelector('#bloc-p2'), l1 = $app.querySelector('#lib-p1'), aj = $app.querySelector('#p2-ajouter'), et = $app.querySelector('#etiq-parent');
+      if (!b2) return;
+      b2.hidden = !oui; if (l1) l1.hidden = !oui; if (aj) aj.hidden = oui; if (et) et.textContent = oui ? 'Nous, parents' : 'Moi, parent';
+      if (!oui) { choix.parent2 = null; b2.querySelectorAll('.echelle button').forEach(x => x.setAttribute('aria-pressed', 'false')); }
+    };
+    const ajP2 = $app.querySelector('#p2-ajouter'), retP2 = $app.querySelector('#p2-retirer');
+    if (ajP2) ajP2.addEventListener('click', () => montrerP2(true));
+    if (retP2) retP2.addEventListener('click', () => montrerP2(false));
     lierParcours(id);
     const c = $app.querySelector('#fait');
     if (c) c.addEventListener('change', () => { const S = charger(); if (c.checked) S.ensembleFaits[id] = iso(new Date()); else delete S.ensembleFaits[id]; sauver(); });
@@ -753,21 +771,22 @@
     }
     $app.querySelector('#imprimer-bilan').addEventListener('click', () => {
       const ok = $app.querySelector('#retour-ok');
-      if (!choix.parent && !choix.enfant) { ok.style.color = '#a33'; ok.textContent = 'Choisissez au moins un visage, pour vous ou pour votre enfant, avant d\'imprimer.'; return; }
+      if (!choix.parent && !choix.parent2 && !choix.enfant) { ok.style.color = '#a33'; ok.textContent = 'Choisissez au moins un visage, pour vous ou pour votre enfant, avant d\'imprimer.'; return; }
       ok.textContent = '';
-      ouvrirImpression('bilan', id, { sem, parent: choix.parent, enfant: choix.enfant, k: lireNb(), v: vE.slice(0, lireNb()), note: $app.querySelector('#note').value.trim() });
+      ouvrirImpression('bilan', id, { sem, parent: choix.parent, parent2: choix.parent2, enfant: choix.enfant, k: lireNb(), v: vE.slice(0, lireNb()), note: $app.querySelector('#note').value.trim() });
     });
     $app.querySelector('#enregistrer').addEventListener('click', () => {
       const ok = $app.querySelector('#retour-ok');
-      if (!choix.parent && !choix.enfant) { ok.style.color = '#a33'; ok.textContent = 'Choisissez au moins un visage, pour vous ou pour votre enfant.'; return; }
+      if (!choix.parent && !choix.parent2 && !choix.enfant) { ok.style.color = '#a33'; ok.textContent = 'Choisissez au moins un visage, pour vous ou pour votre enfant.'; return; }
       const S = charger(), note = $app.querySelector('#note').value.trim(), d = iso(new Date());
       ['parent', 'enfant'].forEach(qui => {
-        if (!choix[qui]) return;
+        if (qui === 'parent' ? !(choix.parent || choix.parent2) : !choix[qui]) return;
         const k = cle(qui);
         const liste = ((S[k] || {})[id] || []).filter(b => b.w !== sem);
-        const entree = { w: sem, d, s: choix[qui] };
+        const entree = { w: sem, d, s: choix[qui] || 0 };
+        if (qui === 'parent' && choix.parent2) entree.s2 = choix.parent2;
         if (qui === 'enfant') { entree.k = lireNb(); entree.v = vE.slice(0, entree.k).map(x => x || 0); }
-        if (note && (qui === 'parent' || !choix.parent)) entree.n = note;
+        if (note && (qui === 'parent' || !(choix.parent || choix.parent2))) entree.n = note;
         liste.push(entree);
         S[k] = S[k] || {}; S[k][id] = liste.slice(-52);
       });
