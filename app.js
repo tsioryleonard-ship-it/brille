@@ -1,6 +1,6 @@
 /* Étincelle · BRILLE
    La suite des ateliers, à la maison, parent et enfant ensemble.
-   Application sans serveur : tout ce que la famille saisit reste dans son téléphone. */
+   Application sans serveur : tout ce que la famille saisit reste sur son appareil (ordinateur, tablette ou téléphone). */
 (() => {
   'use strict';
 
@@ -36,6 +36,7 @@
     if (typeof f.parents !== 'string') f.parents = '';
     return f;
   };
+  const MAX_ENFANTS = 20;                                   // nombre maximum d'enfants par famille
   const jointNoms = l => (l.length > 1 ? l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1] : (l[0] || ''));
   const nomDeFamille = () => { const p = famille().parents.trim().replace(/^famille\s+/i, ''); return p ? 'Famille ' + p : ''; };   // « parents » contient désormais le nom de famille
   const nomsFamille = () => { const n = nomDeFamille(), e = jointNoms(famille().enfants); return n && e ? n + ' : ' + e : (n || e); };
@@ -319,10 +320,10 @@
     const puces = f.enfants.map((e, i) => `<li><span>${esc(e)}</span><button type="button" class="x" data-i="${i}" aria-label="Retirer ${esc(e)}">✕</button></li>`).join('');
     return `<details class="carte famille" id="carte-famille"${vide || familleOuverte ? ' open' : ''}>
       <summary>👨‍👩‍👧‍👦 ${esc(nomDeFamille() || 'Notre famille')}</summary>
-      <p class="petit">L'aventure se vit ensemble. Indiquez le nom de famille et les prénoms de tous les enfants : ils seront sur vos cartes souvenirs, pour que personne ne soit oublié. Ces informations restent sur ce téléphone.</p>
+      <p class="petit">L'aventure se vit ensemble. Indiquez le nom de famille et les prénoms de tous les enfants : ils seront sur vos cartes souvenirs, pour que personne ne soit oublié. Ces informations restent sur cet appareil.</p>
       <label for="fam-parents" class="aide">Le nom de famille</label>
       <input type="text" id="fam-parents" maxlength="60" value="${esc(f.parents)}" placeholder="Ex. Martin" autocomplete="off">
-      <label for="fam-enfant" class="aide">Les enfants de 6 à 12 ans : autant que vous voulez</label>
+      <label for="fam-enfant" class="aide">Les enfants de 6 à 12 ans : jusqu'à ${MAX_ENFANTS}</label>
       <ul class="puces-enfants" aria-label="Enfants de la famille">${puces}</ul>
       <div class="fam-ajout"><input type="text" id="fam-enfant" maxlength="24" placeholder="Prénom d'un enfant" autocomplete="off"><button type="button" class="btn plein" id="fam-ajouter">Ajouter</button></div>
       <p class="ok" id="fam-ok" role="status"></p>
@@ -340,10 +341,11 @@
     const ajouter = () => {
       const champ = zone.querySelector('#fam-enfant'), nom = champ.value.trim().replace(/\s+/g, ' ').slice(0, 24);
       if (!nom) return;
+      if (famille().enfants.length >= MAX_ENFANTS) { const o = $app.querySelector('#fam-ok'); if (o) o.textContent = `Vous pouvez ajouter jusqu'à ${MAX_ENFANTS} enfants.`; return; }
       famille().enfants.push(nom);
       const ok = sauver(); redessiner();
       const c = $app.querySelector('#fam-enfant'); if (c) c.focus({ preventScroll: true });
-      const o = $app.querySelector('#fam-ok'); if (o) o.textContent = ok ? `${nom} est dans l'aventure !` : 'Impossible d\'enregistrer sur ce téléphone.';
+      const o = $app.querySelector('#fam-ok'); if (o) o.textContent = ok ? `${nom} est dans l'aventure !` : 'Impossible d\'enregistrer sur cet appareil.';
     };
     zone.querySelector('#fam-ajouter').addEventListener('click', ajouter);
     zone.querySelector('#fam-enfant').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ajouter(); } });
@@ -399,7 +401,7 @@
 
   const nomEnfant = (i, k) => famille().enfants[i] || (k === 1 ? 'Mon enfant' : 'Enfant ' + (i + 1));
   function bilanBloc(qui, p, actuel) {
-    const parent = qui === 'parent', k0 = (actuel && actuel.k) || Math.max(1, famille().enfants.length);
+    const parent = qui === 'parent', k0 = Math.min(MAX_ENFANTS, (actuel && actuel.k) || Math.max(1, famille().enfants.length));
     const echelleDe = note => VISAGES.map((v, k) => `<button type="button" data-note="${k + 1}" aria-pressed="${note === k + 1}" aria-label="${k + 1} sur 5, ${v.t}">${visage(k)}<span>${v.t}</span></button>`).join('');
     const s2 = (actuel && actuel.s2) || 0;                 // bilan du parent 2 déjà enregistré cette semaine
     return `<div class="bloc-bilan" data-qui="${qui}">
@@ -413,8 +415,8 @@
           <button type="button" class="lien" id="p2-retirer">Retirer le parent 2</button></div>
         <button type="button" class="btn discret petit-btn" id="p2-ajouter"${s2 ? ' hidden' : ''}>＋ Ajouter un second parent</button>` : '<div class="rangs" id="rangs"></div>'}
       ${parent ? '' : `<div class="nb-enfants"><label for="nb-enfants">Combien d'enfants ont répondu ?</label>
-        <div class="stepper"><button type="button" id="nb-moins" aria-label="Un enfant de moins">−</button><input id="nb-enfants" type="number" inputmode="numeric" min="1" max="99" value="${k0}"><button type="button" id="nb-plus" aria-label="Un enfant de plus">+</button></div>
-        <p class="petit" style="margin:0">Vous avez plusieurs enfants ? C'est bien de le faire en groupe : c'est ça aussi, une famille épanouie ensemble.</p></div>`}
+        <div class="stepper"><button type="button" id="nb-moins" aria-label="Un enfant de moins">−</button><input id="nb-enfants" type="number" inputmode="numeric" min="1" max="${MAX_ENFANTS}" value="${k0}"><button type="button" id="nb-plus" aria-label="Un enfant de plus">+</button></div>
+        <p class="petit" style="margin:0">Vous avez plusieurs enfants ? C'est bien de le faire en groupe : c'est ça aussi, une famille épanouie ensemble. (${MAX_ENFANTS} enfants au maximum.)</p></div>`}
     </div>`;
   }
   function graphique(id, qui, titre) {
@@ -487,7 +489,7 @@
         <h2>Notre bilan de la semaine</h2>
         ${bilanBloc('parent', p, actP)}
         ${bilanBloc('enfant', p, actE)}
-        <label for="note" class="aide">Un mot pour nous, si vous en avez envie (facultatif, il reste sur votre téléphone)</label>
+        <label for="note" class="aide">Un mot pour nous, si vous en avez envie (facultatif, il reste sur votre appareil)</label>
         <textarea id="note" maxlength="300" placeholder="Ce qui a aidé, ce qui a été difficile…">${esc(actP?.n || actE?.n || '')}</textarea>
         <button class="btn plein" id="enregistrer" type="button" style="margin-top:14px">Enregistrer notre bilan</button>
         <button class="btn" id="imprimer-bilan" type="button" style="margin-top:10px">🖨️ Imprimer le bilan de la semaine</button>
@@ -584,8 +586,8 @@
       pc.garde = zone.querySelector('#pc-garde').value.trim().slice(0, 300);
       const nm = zone.querySelector('#pc-noms'); if (nm) { const v = nm.value.trim().slice(0, 240); pc.noms = v === nomsFamille() ? '' : v; }
       const ok = sauver();
-      if (nm) { redessiner(); const o = zone.querySelector('#pc-ok'); if (o) o.textContent = ok ? 'Gardé sur votre téléphone.' : 'Impossible d\'enregistrer sur ce téléphone.'; }
-      else zone.querySelector('#pc-ok').textContent = ok ? 'Rituel gardé sur votre téléphone.' : 'Impossible d\'enregistrer sur ce téléphone.';
+      if (nm) { redessiner(); const o = zone.querySelector('#pc-ok'); if (o) o.textContent = ok ? 'Gardé sur votre appareil.' : 'Impossible d\'enregistrer sur cet appareil.'; }
+      else zone.querySelector('#pc-ok').textContent = ok ? 'Rituel gardé sur votre appareil.' : 'Impossible d\'enregistrer sur cet appareil.';
     });
     const bc = zone.querySelector('#pc-carte'); if (bc) bc.addEventListener('click', () => ouvrirImpression('carte', id));
     const bt = zone.querySelector('#pc-tous'); if (bt) bt.addEventListener('click', () => ouvrirImpression('petales', id));
@@ -668,16 +670,18 @@
   /* ---------- Bilan de la semaine, imprimable et archivable ---------- */
   const plusJours = (w, n) => { const [a, m, j] = w.split('-').map(Number), d = new Date(a, m - 1, j); d.setDate(d.getDate() + n); return iso(d); };
   function htmlBilan(p, data) {
-    const noms = nomsFamille(), sem = data.sem, k = Math.max(1, data.k || 1);
+    const noms = nomsFamille(), sem = data.sem, k = Math.min(MAX_ENFANTS, Math.max(1, data.k || 1));
+    const grand = k > 3, dense = grand;                    // familles nombreuses : les enfants passent sur toute la largeur, en grille
+    const cols = k <= 5 ? k : k <= 10 ? 5 : k <= 15 ? 6 : 7, fs = k <= 5 ? 16 : k <= 10 ? 14 : k <= 15 ? 12 : 10;
     const gros = s => s ? `<div class="bil-visage">${visage(s - 1)}<b>${s} sur 5</b><span>${VISAGES[s - 1].t}</span></div>` : '<div class="bil-visage vide"><b>—</b><span>Pas de réponse cette semaine</span></div>';
     const vv = (data.v || []).slice(0, k);
-    const rangsBil = vv.length > 1 ? `<div class="bil-rangs">${vv.map((x, i) => `<div class="bil-rang">${x ? visage(x - 1) : '<div class="bil-rien">—</div>'}<b>${esc(nomEnfant(i, k))}</b><span>${x ? VISAGES[x - 1].t : 'Pas de réponse'}</span></div>`).join('')}</div>` : gros(data.enfant);
-    const rangsParents = data.parent2 ? `<div class="bil-rangs">${[['Parent 1', data.parent], ['Parent 2', data.parent2]].map(([n, x]) => `<div class="bil-rang">${x ? visage(x - 1) : '<div class="bil-rien">—</div>'}<b>${n}</b><span>${x ? VISAGES[x - 1].t : 'Pas de réponse'}</span></div>`).join('')}</div>` : gros(data.parent);
+    const rangsBil = vv.length > 1 ? `<div class="bil-rangs${grand ? ' dense' : ''}" style="--cols:${cols};--fs:${fs}mm">${vv.map((x, i) => `<div class="bil-rang">${x ? visage(x - 1) : '<div class="bil-rien">—</div>'}<b>${esc(nomEnfant(i, k))}</b><span>${x ? VISAGES[x - 1].t : 'Pas de réponse'}</span></div>`).join('')}</div>` : gros(data.enfant);
+    const rangsParents = data.parent2 ? `<div class="bil-rangs par">${[['Parent 1', data.parent], ['Parent 2', data.parent2]].map(([n, x]) => `<div class="bil-rang">${x ? visage(x - 1) : '<div class="bil-rien">—</div>'}<b>${n}</b><span>${x ? VISAGES[x - 1].t : 'Pas de réponse'}</span></div>`).join('')}</div>` : gros(data.parent);
     const avant = {};
     bilansDe(p.id, 'parent').forEach(b => { if (b.w !== sem) (avant[b.w] = avant[b.w] || {}).p = b; });
     bilansDe(p.id, 'enfant').forEach(b => { if (b.w !== sem) (avant[b.w] = avant[b.w] || {}).e = b; });
-    const lignes = Object.keys(avant).sort().reverse().slice(0, 8).map(w => { const a = avant[w]; return `<tr><td>${dateLongue(w)}</td><td>${a.p ? (a.p.s2 ? 'Parent 1 : ' + (a.p.s || '—') + ' · Parent 2 : ' + a.p.s2 : a.p.s + ' sur 5') : '—'}</td><td>${a.e ? a.e.s + ' sur 5' + (a.e.k > 1 ? ' · ' + a.e.k + ' enfants' : '') : '—'}</td></tr>`; }).join('');
-    return `<section class="impr-feuille bil" style="--pc:${p.couleur}">
+    const lignes = Object.keys(avant).sort().reverse().slice(0, dense ? 2 : 8).map(w => { const a = avant[w]; return `<tr><td>${dateLongue(w)}</td><td>${a.p ? (a.p.s2 ? 'Parent 1 : ' + (a.p.s || '—') + ' · Parent 2 : ' + a.p.s2 : a.p.s + ' sur 5') : '—'}</td><td>${a.e ? a.e.s + ' sur 5' + (a.e.k > 1 ? ' · ' + a.e.k + ' enfants' : '') : '—'}</td></tr>`; }).join('');
+    return `<section class="impr-feuille bil${dense ? ' dense' : ''}" style="--pc:${p.couleur}">
       <div class="bil-cadre">
         <div class="cert-bandeau">${D.petales.map(x => `<i style="background:${x.couleur}"></i>`).join('')}</div>
         <div class="bil-tete"><img class="bil-logo" src="logo-brille.png" alt="BRILLE"><img class="bil-icone" src="p-${esc(p.id)}.png" alt=""></div>
@@ -685,7 +689,7 @@
         <h1>${esc(p.titre)}</h1>
         <p class="bil-date">Semaine du ${dateLongue(sem)} au ${dateLongue(plusJours(sem, 6))}</p>
         <p class="bil-famille"><b>Notre famille :</b> ${esc(noms)}</p>
-        <div class="bil-duo">
+        <div class="bil-duo${grand ? ' large' : ''}">
           <div class="bil-bloc"><span class="bil-tag">${data.parent2 ? 'Les parents' : 'Moi, parent'}</span><p class="bil-q">${esc(p.question)}</p>${rangsParents}</div>
           <div class="bil-bloc"><span class="bil-tag">${k > 1 ? 'Mes enfants · ' + k + ' ont répondu' : 'Mon enfant'}</span><p class="bil-q">${esc(p.questionEnfant)}</p>${rangsBil}</div>
         </div>
@@ -747,7 +751,7 @@
     if (c) c.addEventListener('change', () => { const S = charger(); if (c.checked) S.ensembleFaits[id] = iso(new Date()); else delete S.ensembleFaits[id]; sauver(); });
     if (!$app.querySelector('#enregistrer')) return;      // pétale fermé : rien à lier
     const nb = $app.querySelector('#nb-enfants');
-    const lireNb = () => Math.min(99, Math.max(1, parseInt(nb && nb.value, 10) || 1));
+    const lireNb = () => Math.min(MAX_ENFANTS, Math.max(1, parseInt(nb && nb.value, 10) || 1));
     const actE0 = bilansDe(id, 'enfant').find(b => b.w === sem);
     let vE = actE0 ? (actE0.v && actE0.v.length ? actE0.v.map(x => x || null) : Array(actE0.k || 1).fill(actE0.s)) : [];
     const moy = () => { const f = vE.filter(Boolean); return f.length ? Math.round(f.reduce((a, b) => a + b, 0) / f.length) : null; };
@@ -765,7 +769,7 @@
     }
     if (nb) {
       $app.querySelector('#nb-moins').addEventListener('click', () => { nb.value = Math.max(1, lireNb() - 1); dessinerRangs(); });
-      $app.querySelector('#nb-plus').addEventListener('click', () => { nb.value = Math.min(99, lireNb() + 1); dessinerRangs(); });
+      $app.querySelector('#nb-plus').addEventListener('click', () => { nb.value = Math.min(MAX_ENFANTS, lireNb() + 1); dessinerRangs(); });
       nb.addEventListener('change', () => { nb.value = lireNb(); dessinerRangs(); });
       dessinerRangs();
     }
@@ -792,7 +796,7 @@
       });
       const stocke = sauver();
       ok.style.color = '';
-      ok.textContent = stocke ? 'Bilan enregistré sur votre téléphone. Merci !' : 'Enregistré pour cette session seulement : votre navigateur bloque le stockage.';
+      ok.textContent = stocke ? 'Bilan enregistré sur votre appareil. Merci !' : 'Enregistré pour cette session seulement : votre navigateur bloque le stockage.';
       setTimeout(() => rendre(), 900);
     });
   }
@@ -867,7 +871,7 @@
       <h1><span class="surligne" style="--hl:var(--vert)">Plus</span></h1>
       <div class="grille-cartes">
       ${D.admin ? vueIngenieure() : ''}
-      ${D.essai && D.fin ? `<div class="carte"><span class="etiquette">Mon essai gratuit</span><p style="margin:0">Votre essai dure jusqu'au <b>${dateLongue(D.fin)}</b> (${joursRestants(D.fin) <= 1 ? 'dernier jour' : joursRestants(D.fin) + ' jours restants'}). Ce que vous notez reste dans votre téléphone. Il vous a plu ? ${achatActif() ? 'Retrouvez les accès ci-dessous.' : `Écrivez à <a href="mailto:${esc((D.config.contact || {}).email || '')}">${esc((D.config.contact || {}).email || 'BRILLE')}</a> pour continuer.`}</p></div>` : ''}
+      ${D.essai && D.fin ? `<div class="carte"><span class="etiquette">Mon essai gratuit</span><p style="margin:0">Votre essai dure jusqu'au <b>${dateLongue(D.fin)}</b> (${joursRestants(D.fin) <= 1 ? 'dernier jour' : joursRestants(D.fin) + ' jours restants'}). Ce que vous notez reste sur votre appareil. Il vous a plu ? ${achatActif() ? 'Retrouvez les accès ci-dessous.' : `Écrivez à <a href="mailto:${esc((D.config.contact || {}).email || '')}">${esc((D.config.contact || {}).email || 'BRILLE')}</a> pour continuer.`}</p></div>` : ''}
       ${!D.admin && !D.essai && D.petales.some(x => x.ouvert) ? `<div class="carte transmettre"><span class="etiquette">🔥 Pionniers BRILLE</span><h2>À vous de transmettre</h2><p style="margin:0 0 10px">Vous avez vécu l'atelier : à votre tour, partagez ce que vous avez appris et reçu avec votre famille et vos proches. Votre accès reste personnel et limité aux pétales que vous avez vécus. Ceux que vous inspirez pourront, eux, ${essaiDispo() ? 'tester gratuitement une semaine' : 'découvrir BRILLE'}.</p><button type="button" class="btn plein" data-partager="">💌 Partager ce que j'ai vécu</button></div>` : ''}
       ${!D.admin && !D.essai && D.fin ? `<div class="carte"><span class="etiquette">Mon accès</span><p style="margin:0">Votre accès est valable jusqu'au <b>${dateLongue(D.fin)}</b>. Pour le renouveler, écrivez à <a href="mailto:${esc((D.config.contact || {}).email || '')}">${esc((D.config.contact || {}).email || 'BRILLE')}</a>.</p></div>` : ''}
       ${achatActif() ? `<details class="carte"><summary>Ouvrir d'autres pétales</summary>
@@ -891,8 +895,8 @@
       </details>
 
       <details class="carte"><summary>Mes données et ma vie privée</summary>
-        <p>Vos bilans et vos notes sont enregistrés <b>uniquement sur ce téléphone</b>. Il n'y a ni compte, ni serveur : je ne les vois pas et ne peux pas les récupérer. Seuls un nom de famille et des prénoms sont demandés : n'ajoutez pas d'informations sensibles.</p>
-        <p class="petit">Si vous changez de téléphone ou videz les données du navigateur, vous perdez l'historique, sauf si vous l'enregistrez avant.</p>
+        <p>Vos bilans et vos notes sont enregistrés <b>uniquement sur cet appareil</b> (ordinateur, tablette ou téléphone). Il n'y a ni compte, ni serveur : je ne les vois pas et ne peux pas les récupérer. Seuls un nom de famille et des prénoms sont demandés : n'ajoutez pas d'informations sensibles.</p>
+        <p class="petit">Si vous changez d'appareil ou videz les données du navigateur, vous perdez l'historique, sauf si vous l'enregistrez avant.</p>
         <button class="btn discret plein" id="exporter" type="button">Enregistrer une copie de mes données</button>
         <label class="btn discret plein" style="margin-top:12px">Récupérer une copie<input type="file" id="importer" accept="application/json,.json" hidden></label>
         <button class="btn discret plein" id="raz-etincelles" type="button" style="margin-top:12px">Remettre mes étincelles à zéro ✨</button>
@@ -951,7 +955,7 @@
       const blob = new Blob([JSON.stringify(charger(), null, 2)], { type: 'application/json' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `etincelle-mes-donnees-${iso(new Date())}.json`;
       document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-      msg('Copie enregistrée dans les fichiers de votre téléphone.');
+      msg('Copie enregistrée dans les fichiers de votre appareil.');
     });
     $app.querySelector('#importer').addEventListener('change', async e => {
       const f = e.target.files[0]; if (!f) return;
@@ -1171,7 +1175,7 @@
       $app.innerHTML = `<section class="vue acces"><div class="carte"><span class="etiquette">Essai gratuit · question ${etape + 1} sur ${Q.length}</span>
         <h1 class="essai-q">${esc(q.q)}</h1>
         <div class="essai-choix">${q.choix.map((c, i) => `<button type="button" class="btn essai-c" data-i="${i}">${esc(c.t)}</button>`).join('')}</div>
-        <p class="petit">Rien n'est envoyé : vos réponses restent dans votre téléphone.</p>${retour}</div></section>`;
+        <p class="petit">Rien n'est envoyé : vos réponses restent sur votre appareil.</p>${retour}</div></section>`;
       $app.querySelectorAll('.essai-c').forEach(b => b.addEventListener('click', () => {
         const c = q.choix[+b.dataset.i], sc = Object.assign({}, scores);
         if (c.petale) sc[c.petale] = (sc[c.petale] || 0) + (q.poids || 1);

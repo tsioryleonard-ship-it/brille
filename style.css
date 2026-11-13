@@ -545,3 +545,27 @@ body.verrouille .brand-nom { display: none; }
 .parent-lib { margin: 12px 0 0; font-size: .95rem; text-align: left; }
 #p2-ajouter { margin-top: 12px; }
 #p2-retirer { margin: 8px 0 2px; font-size: .86rem; color: var(--doux); }
+
+/* ===== v38 : bilan imprimé des familles nombreuses (jusqu'à 20 enfants) ===== */
+.bil-duo.large { grid-template-columns: 1fr; gap: 3mm; }
+.bil-duo.large .bil-bloc { padding: 3mm 4mm 3.5mm; gap: 1mm; }
+.impr-feuille .bil-duo.large p.bil-q { min-height: 0; }
+.bil-duo.large .bil-visage svg { width: 18mm; height: 18mm; }
+.bil-rangs.dense { grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr)); gap: 2mm 1.5mm; width: 100%; }
+.bil-rangs.dense .bil-rang svg { width: var(--fs, 14mm); height: var(--fs, 14mm); }
+.bil-rangs.dense .bil-rang b { font-size: 8.5pt; line-height: 1.1; overflow-wrap: anywhere; }
+.bil-rangs.dense .bil-rang span { font-size: 7pt; line-height: 1.1; }
+.bil.dense .bil-note, .bil.dense .bil-histo { margin-top: 3mm; font-size: 10pt; }
+.bil.dense .bil-note i { height: 6mm; }
+.bil.dense .bil-histo table { font-size: 9pt; }
+.bil.dense .bil-tete { margin-top: 2mm; }
+.bil.dense .bil-icone { height: 16mm; width: 16mm; }
+.bil-rangs.par { grid-template-columns: repeat(2, 42mm); justify-content: center; gap: 3mm 8mm; width: 100%; }
+.bil-duo.large .bil-visage svg, .bil-duo.large .bil-rangs.par .bil-rang svg { width: 15mm; height: 15mm; }
+.bil.dense .bil-cadre { padding: 4mm 10mm 4mm; }
+.bil.dense h1 { font-size: 26pt; }
+.impr-feuille .bil.dense p.bil-date, .bil.dense .bil-date { margin: 0 0 1.5mm; }
+.impr-feuille .bil.dense p.bil-famille, .bil.dense .bil-famille { font-size: 10pt; margin: 0 0 2.5mm; padding-bottom: 1.5mm; }
+.bil.dense .bil-note i:nth-of-type(2) { display: none; }
+.bil.dense .bil-rangs.dense { gap: 1.5mm 1.5mm; }
+.bil.dense .bil-pied { font-size: 8pt; }
