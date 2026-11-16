@@ -1,16 +1,282 @@
 [
-  { "id": "d01", "petale": "liens", "titre": "Dix minutes, c'est toi le chef", "duree": "10 min", "consigne": "Et si, pendant 10 minutes, l'enfant choisissait à quoi on joue ou ce qu'on fait ? Sans écran : vous suivez, il guide. S'il y a plusieurs enfants, chacun son tour (ou chacun 5 minutes).", "plus": "Pour finir, chacun dit en un seul mot ce qu'il a préféré." },
-  { "id": "d02", "petale": "emotions", "titre": "La météo de la famille", "duree": "2 min", "consigne": "Et si, ce soir, chacun donnait sa météo du jour ? ☀️ soleil, ☁️ nuages, ⛈️ orage… avec une seule phrase pour dire pourquoi. Le plus jeune commence !", "plus": "Bonus : devinez la météo de l'autre avant qu'il la dise." },
-  { "id": "d03", "petale": "briller", "titre": "La petite victoire du soir", "duree": "2 min", "consigne": "Et si, avant de dormir, chacun racontait une petite victoire de sa journée ? Même minuscule : avoir osé lever la main, avoir fait sourire quelqu'un, avoir essayé.", "plus": "On applaudit à chaque victoire, même la plus petite." },
-  { "id": "d04", "petale": "organisation", "titre": "La chanson du matin", "duree": "5 min", "consigne": "Et si le moment qui coince (matin, retour de l'école, coucher) avait sa propre chanson ? Choisissez un morceau ensemble : quand il se termine, tout le monde est prêt !", "plus": "L'enfant choisit la chanson, vous choisissez le moment." },
-  { "id": "d05", "petale": "apprentissages", "titre": "La question surprise", "duree": "2 min", "consigne": "Et si, au retour de l'école, on demandait : « Quelle est la chose la plus drôle ou la plus surprenante que tu as apprise aujourd'hui ? » Les grands répondent aussi !", "plus": "Si la réponse est « rien », racontez d'abord quelque chose que vous avez appris vous-même." },
-  { "id": "d06", "petale": "droits", "titre": "Une règle, une idée", "duree": "10 min", "consigne": "Et si on choisissait une règle de la maison et qu'on cherchait ensemble comment la rendre plus facile, ou plus drôle, à respecter ? Chacun a droit à la parole.", "plus": "Si une bonne idée en ressort, on change la règle et on l'essaie." },
-  { "id": "d07", "petale": "equilibre", "titre": "Chacun sa pause", "duree": "10 min", "consigne": "Et si chacun choisissait sa façon de souffler pendant 10 minutes : dessiner, écouter de la musique, s'étirer, lire ? Parent compris, sans culpabilité, et on se retrouve ensuite.", "plus": "Après, chacun dit si ça lui a fait du bien." },
-  { "id": "d08", "petale": "liens", "titre": "Le jeu du perroquet", "duree": "2 min", "consigne": "Et si, pendant un repas, on jouait au perroquet ? Avant de répondre, on répète avec ses propres mots ce que l'autre vient de dire : « Si j'ai bien compris… ». Les fous rires sont permis.", "plus": "Observez si on s'est senti plus écouté." },
-  { "id": "d09", "petale": "emotions", "titre": "Le ballon qui se dégonfle", "duree": "1 min", "consigne": "Et si, quand ça chauffe, on gonflait un énorme ballon imaginaire (on inspire par le nez), puis on le dégonflait doucement (on souffle par la bouche) ? Trois fois, ensemble.", "plus": "L'enfant peut dire « ballon ! » quand il pense qu'on en a besoin, vous aussi." },
-  { "id": "d10", "petale": "briller", "titre": "Les petits mots piochés", "duree": "5 min", "consigne": "Et si chacun écrivait sur de petits papiers ce qu'il aime chez les autres (« j'aime quand tu… »), puis qu'on pioche et lise à voix haute, un papier chacun ?", "plus": "Gardez les papiers dans un bocal pour les jours moins faciles." },
-  { "id": "d11", "petale": "organisation", "titre": "Le chef du jour", "duree": "5 min", "consigne": "Et si, aujourd'hui, chaque enfant était « chef » d'une petite mission (mettre la table, choisir la musique, préparer le sac…) ? Montrez une fois, puis laissez faire. Demain, on change de chef.", "plus": "On félicite l'effort, pas le résultat." },
-  { "id": "d12", "petale": "droits", "titre": "On décide ensemble", "duree": "10 min", "consigne": "Et si on décidait ensemble du menu du week-end ou d'une petite sortie ? Chacun propose une idée, on écoute tout le monde, puis on choisit.", "plus": "Expliquez ce qui reste de la responsabilité des parents, avec calme et simplicité." },
-  { "id": "d13", "petale": "apprentissages", "titre": "Le professeur, c'est toi", "duree": "10 min", "consigne": "Et si l'enfant devenait le professeur ? Il vous apprend quelque chose qu'il aime ou qu'il vient d'apprendre. Vous êtes l'élève curieux, et vous avez le droit de vous tromper.", "plus": "Remerciez le professeur pour sa leçon." },
-  { "id": "d14", "petale": "equilibre", "titre": "Une soirée lumière douce", "duree": "1 soirée", "consigne": "Et si, un soir, on éteignait les écrans pour une soirée lumière douce ? Une histoire, un jeu de société ou des chansons. Quand vous voulez, sans pression : une fois suffit.", "plus": "Regardez ensemble comment s'est passé le coucher." }
+ {
+  "id": "organisation-1",
+  "petale": "organisation",
+  "titre": "Le sac prêt la veille",
+  "duree": "3 min",
+  "consigne": "Et si, ce soir, chacun préparait une seule chose pour demain (son sac, ses vêtements, sa gourde) ? Parent compris : vous le faites en même temps.",
+  "plus": "Demain matin, regardez ensemble si ça a aidé."
+ },
+ {
+  "id": "organisation-2",
+  "petale": "organisation",
+  "titre": "La chanson du matin",
+  "duree": "5 min",
+  "consigne": "Et si le moment qui coince (matin, retour de l'école, coucher) avait sa propre chanson ? Choisissez un morceau ensemble : quand il se termine, tout le monde est prêt !",
+  "plus": "L'enfant choisit la chanson, vous choisissez le moment."
+ },
+ {
+  "id": "organisation-3",
+  "petale": "organisation",
+  "titre": "Le minuteur copain",
+  "duree": "5 min",
+  "consigne": "Et si on réglait un minuteur de 5 minutes pour une seule petite tâche (ranger les chaussures, plier un pull) ? Le but n'est pas de se presser : c'est de voir ce qu'on arrive à faire ensemble.",
+  "plus": "On fête la fin du minuteur, même s'il reste un peu à faire."
+ },
+ {
+  "id": "organisation-4",
+  "petale": "organisation",
+  "titre": "Chacun sa place",
+  "duree": "5 min",
+  "consigne": "Et si chaque objet important (clés, cartable, chaussures) avait sa place bien à lui ? Choisissez-en trois, et l'enfant décide où ils vivent.",
+  "plus": "Demain, regardez qui retrouve le plus vite sa place."
+ },
+ {
+  "id": "organisation-5",
+  "petale": "organisation",
+  "titre": "Le mini-bravo",
+  "duree": "2 min",
+  "consigne": "Et si, ce soir, chacun disait une chose qu'il a faite tout seul aujourd'hui, même minuscule ?",
+  "plus": "On applaudit chaque chose, sans commentaire."
+ },
+ {
+  "id": "emotions-1",
+  "petale": "emotions",
+  "titre": "La météo de la famille",
+  "duree": "2 min",
+  "consigne": "Et si, ce soir, chacun donnait sa météo du jour ? ☀️ soleil, ☁️ nuages, ⛈️ orage… avec une seule phrase pour dire pourquoi. Le plus jeune commence !",
+  "plus": "Bonus : devinez la météo de l'autre avant qu'il la dise."
+ },
+ {
+  "id": "emotions-2",
+  "petale": "emotions",
+  "titre": "Le ballon qui se dégonfle",
+  "duree": "1 min",
+  "consigne": "Et si, quand ça chauffe, on gonflait un énorme ballon imaginaire (on inspire par le nez), puis on le dégonflait doucement (on souffle par la bouche) ? Trois fois, ensemble.",
+  "plus": "L'enfant peut dire « ballon ! » quand il pense qu'on en a besoin, vous aussi."
+ },
+ {
+  "id": "emotions-3",
+  "petale": "emotions",
+  "titre": "Mon humeur en couleur",
+  "duree": "3 min",
+  "consigne": "Et si chacun choisissait une couleur pour dire son humeur du moment ? Pas besoin d'expliquer : la couleur suffit.",
+  "plus": "Si l'envie est là, chacun dit en une phrase pourquoi cette couleur."
+ },
+ {
+  "id": "emotions-4",
+  "petale": "emotions",
+  "titre": "Câlin, espace ou blague ?",
+  "duree": "1 min",
+  "consigne": "Et si, quand quelqu'un est de mauvaise humeur, on lui demandait : « Tu veux un câlin, de l'espace ou une blague ? » Chacun a le droit de choisir.",
+  "plus": "L'enfant peut aussi poser la question au parent."
+ },
+ {
+  "id": "emotions-5",
+  "petale": "emotions",
+  "titre": "La chanson qui fait du bien",
+  "duree": "5 min",
+  "consigne": "Et si chacun choisissait une chanson qui lui change l'humeur ? On les écoute ensemble, et on peut bouger ou chanter si l'envie vient.",
+  "plus": "Gardez-les dans une petite liste « chansons qui font du bien »."
+ },
+ {
+  "id": "apprentissages-1",
+  "petale": "apprentissages",
+  "titre": "Le professeur, c'est toi",
+  "duree": "10 min",
+  "consigne": "Et si l'enfant devenait le professeur ? Il vous apprend quelque chose qu'il aime ou qu'il vient d'apprendre. Vous êtes l'élève curieux, et vous avez le droit de vous tromper.",
+  "plus": "Remerciez le professeur pour sa leçon."
+ },
+ {
+  "id": "apprentissages-2",
+  "petale": "apprentissages",
+  "titre": "Le mot du jour",
+  "duree": "3 min",
+  "consigne": "Et si chacun apportait un mot nouveau ou rigolo, et que les autres devinent ce qu'il veut dire ?",
+  "plus": "On cherche ensuite le vrai sens dans un livre ou sur un appareil."
+ },
+ {
+  "id": "apprentissages-3",
+  "petale": "apprentissages",
+  "titre": "Vrai ou faux ?",
+  "duree": "5 min",
+  "consigne": "Et si chacun inventait un « vrai ou faux » sur un sujet qu'il aime (un animal, un jeu, un pays) ? Les autres devinent, puis on vérifie ensemble.",
+  "plus": "Le plus surprenant gagne un grand bravo."
+ },
+ {
+  "id": "apprentissages-4",
+  "petale": "apprentissages",
+  "titre": "Lire côte à côte",
+  "duree": "10 min",
+  "consigne": "Et si chacun lisait son propre livre, tout près des autres, pendant 10 minutes ? Un livre, un magazine ou une BD, au choix.",
+  "plus": "Après, chacun dit en une phrase ce qu'il a lu."
+ },
+ {
+  "id": "apprentissages-5",
+  "petale": "apprentissages",
+  "titre": "Pas encore !",
+  "duree": "3 min",
+  "consigne": "Et si, chaque fois que quelqu'un dit « je n'y arrive pas », on ajoutait ensemble le mot « encore » ? « Je n'y arrive pas… encore ! »",
+  "plus": "Racontez une chose qu'il vous a fallu du temps pour réussir."
+ },
+ {
+  "id": "liens-1",
+  "petale": "liens",
+  "titre": "Dix minutes, c'est toi le chef",
+  "duree": "10 min",
+  "consigne": "Et si, pendant 10 minutes, l'enfant choisissait à quoi on joue ou ce qu'on fait ? Sans écran : vous suivez, il guide. S'il y a plusieurs enfants, chacun son tour (ou chacun 5 minutes).",
+  "plus": "Pour finir, chacun dit en un seul mot ce qu'il a préféré."
+ },
+ {
+  "id": "liens-2",
+  "petale": "liens",
+  "titre": "Les questions rigolotes",
+  "duree": "3 min",
+  "consigne": "Et si, pendant le repas, chacun posait une question rigolote aux autres (« si tu étais un animal, lequel ? ») ?",
+  "plus": "Gardez les réponses les plus drôles pour une prochaine fois."
+ },
+ {
+  "id": "liens-3",
+  "petale": "liens",
+  "titre": "Un repas sans écran",
+  "duree": "20 min",
+  "consigne": "Et si, un repas, on posait tous les écrans dans une autre pièce ? Une fois suffit.",
+  "plus": "Chacun dit ce qu'il a préféré dans ce repas."
+ },
+ {
+  "id": "liens-4",
+  "petale": "liens",
+  "titre": "L'histoire d'une photo",
+  "duree": "5 min",
+  "consigne": "Et si chacun choisissait une photo qui lui plaît et racontait ce qui s'y passait ? Les autres posent une question curieuse.",
+  "plus": "On peut aussi imprimer ou afficher la photo préférée."
+ },
+ {
+  "id": "liens-5",
+  "petale": "liens",
+  "titre": "Le petit secret rigolo",
+  "duree": "3 min",
+  "consigne": "Et si chacun disait une petite chose que les autres ne savent pas sur lui (un rêve, une peur drôle, un talent caché) ?",
+  "plus": "On écoute sans se moquer, et on remercie pour la confiance."
+ },
+ {
+  "id": "droits-1",
+  "petale": "droits",
+  "titre": "Deux choix possibles",
+  "duree": "2 min",
+  "consigne": "Et si, pour une petite chose (le dessert, un vêtement, un jeu), vous donniez à votre enfant deux options au lieu d'un ordre ? Il choisit, vous respectez.",
+  "plus": "Dites-lui merci d'avoir choisi."
+ },
+ {
+  "id": "droits-2",
+  "petale": "droits",
+  "titre": "On décide ensemble",
+  "duree": "10 min",
+  "consigne": "Et si on décidait ensemble du menu du week-end ou d'une petite sortie ? Chacun propose une idée, on écoute tout le monde, puis on choisit.",
+  "plus": "Expliquez ce qui reste de la responsabilité des parents, avec calme et simplicité."
+ },
+ {
+  "id": "droits-3",
+  "petale": "droits",
+  "titre": "Notre mot « stop »",
+  "duree": "3 min",
+  "consigne": "Et si on choisissait un mot ou un geste « stop » pour arrêter un jeu ou des chatouilles ? Tout le monde s'arrête tout de suite, à chaque fois.",
+  "plus": "Entraînez-vous avec un petit jeu pour de faux."
+ },
+ {
+  "id": "droits-4",
+  "petale": "droits",
+  "titre": "Mon corps, mon choix",
+  "duree": "1 min",
+  "consigne": "Et si, avant un câlin ou un bisou, on demandait : « Tu veux un câlin ? » Un « non » est une réponse qu'on accepte, sans froncer les sourcils.",
+  "plus": "L'enfant peut aussi demander au parent."
+ },
+ {
+  "id": "droits-5",
+  "petale": "droits",
+  "titre": "Merci de m'avoir écouté",
+  "duree": "2 min",
+  "consigne": "Et si, ce soir, chacun remerciait quelqu'un qui l'a écouté aujourd'hui ? Une phrase suffit.",
+  "plus": "Dites aussi comment on a su qu'on était écouté."
+ },
+ {
+  "id": "equilibre-1",
+  "petale": "equilibre",
+  "titre": "Chacun sa pause",
+  "duree": "10 min",
+  "consigne": "Et si chacun choisissait sa façon de souffler pendant 10 minutes : dessiner, écouter de la musique, s'étirer, lire ? Parent compris, sans culpabilité, et on se retrouve ensuite.",
+  "plus": "Après, chacun dit si ça lui a fait du bien."
+ },
+ {
+  "id": "equilibre-2",
+  "petale": "equilibre",
+  "titre": "Dix minutes dehors",
+  "duree": "10 min",
+  "consigne": "Et si on sortait 10 minutes, juste pour respirer ? Un tour du pâté de maisons, un coin d'herbe, un banc.",
+  "plus": "Chacun dit une chose qu'il a vue ou entendue."
+ },
+ {
+  "id": "equilibre-3",
+  "petale": "equilibre",
+  "titre": "Les étirements du chat",
+  "duree": "3 min",
+  "consigne": "Et si, au réveil, on s'étirait comme des chats ? On s'allonge, on bâille, on fait le dos rond. Tous ensemble.",
+  "plus": "L'enfant choisit le prochain animal à imiter."
+ },
+ {
+  "id": "equilibre-4",
+  "petale": "equilibre",
+  "titre": "Un trajet sans écran",
+  "duree": "10 min",
+  "consigne": "Et si, pour un trajet (école, courses), on laissait les écrans dans la poche ? On regarde autour de nous, on parle ou on se tait.",
+  "plus": "Repérez ensemble trois choses jolies sur le chemin."
+ },
+ {
+  "id": "equilibre-5",
+  "petale": "equilibre",
+  "titre": "Dodo un peu plus tôt",
+  "duree": "1 soirée",
+  "consigne": "Et si, un soir, on se couchait 15 minutes plus tôt que d'habitude ? Une fois suffit, sans pression.",
+  "plus": "Regardez ensemble comment s'est passé le lendemain matin."
+ },
+ {
+  "id": "briller-1",
+  "petale": "briller",
+  "titre": "La petite victoire du soir",
+  "duree": "2 min",
+  "consigne": "Et si, avant de dormir, chacun racontait une petite victoire de sa journée ? Même minuscule : avoir osé lever la main, avoir fait sourire quelqu'un, avoir essayé.",
+  "plus": "On applaudit à chaque victoire, même la plus petite."
+ },
+ {
+  "id": "briller-2",
+  "petale": "briller",
+  "titre": "J'ai essayé !",
+  "duree": "2 min",
+  "consigne": "Et si chacun disait une chose qu'il a essayée aujourd'hui, même si ça n'a pas marché ? Essayer, c'est déjà une victoire.",
+  "plus": "Les autres répondent : « bravo d'avoir essayé ! »"
+ },
+ {
+  "id": "briller-3",
+  "petale": "briller",
+  "titre": "Ma fierté racontée",
+  "duree": "5 min",
+  "consigne": "Et si l'enfant racontait une fierté à une personne qu'il aime (un proche, un grand-parent) par un appel, un message ou un dessin ?",
+  "plus": "Vous aussi, racontez-lui une de vos fiertés."
+ },
+ {
+  "id": "briller-4",
+  "petale": "briller",
+  "titre": "La pose de super-héros",
+  "duree": "2 min",
+  "consigne": "Et si, avant un moment difficile (devoirs, rendez-vous), chacun prenait une pose de super-héros pendant 10 secondes ? Les mains sur les hanches, le menton haut !",
+  "plus": "Les fous rires sont bienvenus."
+ },
+ {
+  "id": "briller-5",
+  "petale": "briller",
+  "titre": "Mon super-pouvoir du jour",
+  "duree": "3 min",
+  "consigne": "Et si chacun donnait un nom de super-pouvoir à ce qu'il a bien fait aujourd'hui (« le pouvoir de la patience ») ?",
+  "plus": "Gardez-les pour la fête des victoires."
+ }
 ]

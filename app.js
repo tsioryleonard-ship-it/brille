@@ -814,7 +814,7 @@
     const n = D.defis.length; if (!n) return vueIntrouvable();
     const base = indexDefi(), idx = indexDemande(param);
     const d = D.defis[idx], p = petale(d.petale);
-    const plusieurs = famille().enfants.length > 1, cleFait = d.id, ens = p && p.ensemble;
+    const cleFait = d.id, ens = p && p.ensemble;
     const fait = !!charger().defisFaits[cleFait];
     const blocDefi = `<div class="defi" style="background:${p?.couleur || 'var(--jaune)'}">
         <span class="etiquette">${idx === base ? 'Le défi de la semaine' : `Défi ${idx + 1} sur ${n}`}${p ? ` · ${esc(p.titre)}` : ''} · pour toute la famille</span>
@@ -822,13 +822,6 @@
         <p class="duree">⏱ ${esc(d.duree)}</p>
         <p style="margin:0">${esc(d.consigne)}</p>
         ${d.plus ? `<p class="plus"><b>Pour aller plus loin :</b> ${esc(d.plus)}</p>` : ''}
-        ${ens ? `<hr style="border:0;border-top:2px dashed rgba(0,0,0,.25);margin:14px 0">
-        <span class="etiquette">À vivre ensemble, ${plusieurs ? 'parents et enfants' : 'parent et enfant'}</span>
-        <h3 style="margin:.3em 0">${esc(ens.titre)}</h3>
-        <p class="duree">⏱ ${esc(ens.duree)}${ens.materiel ? ' · ' + esc(ens.materiel) : ''}</p>
-        <ol class="etapes">${ens.etapes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
-        <div class="parler"><b>Pour en parler ensuite</b><ul>${ens.enParler.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
-        ${p.questionEnfant ? `<p class="plus"><b>À la fin de la semaine, chacun se demande :</b> « ${esc(p.questionEnfant)} »</p>` : ''}` : ''}
         <label class="coche"><input type="checkbox" id="fait" data-cle="${esc(cleFait)}" ${fait ? 'checked' : ''}> Nous l'avons vécu en famille</label>
       </div>`;
     return `<section class="vue">
@@ -1035,6 +1028,7 @@
         <label for="duree" class="petit" style="display:block;margin-top:6px"><b>Durée de l'accès</b> (compte à partir d'aujourd'hui)</label>
         <select id="duree" style="width:100%;padding:10px 14px;border:2px solid #e4dcec;border-radius:16px;font:inherit;background:#fff;margin:4px 0 12px">
           <option value="">Sans limite (familles du centre social)</option>
+          <option value="1m">1 mois (découverte pour une structure partenaire)</option>
           <option value="3m">3 mois (familles du centre, un pétale)</option>
           <option value="12m" selected>12 mois (fleur entière, un pétale)</option>
           <option value="5a">5 ans (accès longue durée)</option>
@@ -1075,7 +1069,7 @@
       const base = $app.querySelector('#nouveau-nom').value.trim() || 'Famille';
       const crees = []; for (let i = 0; i < n; i++) crees.push(Acces.ajouterFamille(carnet, n > 1 ? `${base} ${String(i + 1).padStart(2, '0')}` : base, sel));
       const dr = $app.querySelector('#duree').value;
-      if (dr) { const d = new Date(); if (dr === '3m') d.setMonth(d.getMonth() + 3); else d.setFullYear(d.getFullYear() + (dr === '5a' ? 5 : 1)); crees.forEach(f => { f.fin = iso(d); }); }
+      if (dr) { const d = new Date(); if (dr === '1m') d.setMonth(d.getMonth() + 1); else if (dr === '3m') d.setMonth(d.getMonth() + 3); else d.setFullYear(d.getFullYear() + (dr === '5a' ? 5 : 1)); crees.forEach(f => { f.fin = iso(d); }); }
       if ($app.querySelector('#lot-vente').checked) crees.forEach(f => { f.vente = true; });
       ecrireCarnet(carnet); rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = (n === 1 ? 'Code créé : ' + crees[0].code : n + ' codes créés') + '. Pensez à publier (bouton « Préparer les fichiers »).'; }
     });
