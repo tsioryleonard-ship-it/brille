@@ -1040,6 +1040,9 @@
       <div class="carte"><h2>Ajouter les parcours d'un mois</h2>
         <p class="petit">Choisissez le fichier <b>parcours-mensuels-PRIVE.json</b> (sur votre ordinateur, jamais sur GitHub). Les parcours sont ajoutés aux pétales, puis chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
         <input type="file" id="f-parcours" accept=".json"><p class="erreur" id="st-parcours" role="status"></p></div>
+      <div class="carte"><h2>Remplacer les défis de la semaine</h2>
+        <p class="petit">Choisissez le fichier <b>defis.json</b> (sur votre ordinateur, jamais sur GitHub). Les défis remplacent les anciens dans chaque pétale, puis sont chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
+        <input type="file" id="f-defis" accept=".json"><p class="erreur" id="st-defis" role="status"></p></div>
       ${essaiServeur() ? '' : `<div class="carte"><h2>Codes d'essai gratuit</h2>
         <p class="petit">Une seule fois : crée 7 codes d'essai (un par pétale). Ensuite, les familles qui n'ont pas suivi d'atelier testent un pétale pendant ${essaiJours()} jours, tout seul, sans rien à faire de ton côté. Le bloc copié est à coller dans <b>config.json</b> (ligne <code>"codes"</code>), puis publie les fichiers.</p>
         <button type="button" class="btn plein" id="creer-essai">Créer les codes d'essai</button>
@@ -1140,6 +1143,19 @@
         Object.keys(d).forEach(id => { if (D.details[id] && d[id] && Array.isArray(d[id].semaines) && d[id].semaines.length === 4) { D.details[id].parcours = d[id]; const x = D.petales.find(q => q.id === id); if (x) x.parcours = d[id]; n++; } });
         if (!n) throw new Error('vide');
         m.style.color = ''; m.textContent = n + ' parcours ajoutés. Cliquez maintenant sur « Préparer les fichiers à publier ».';
+      } catch { m.style.color = '#a33'; m.textContent = 'Ce fichier n\'est pas valide.'; }
+    });
+    const fd = $app.querySelector('#f-defis');
+    if (fd) fd.addEventListener('change', async e => {
+      const f = e.target.files[0], m = $app.querySelector('#st-defis'); if (!f) return;
+      try {
+        const d = JSON.parse(await f.text()); if (!Array.isArray(d)) throw new Error('format');
+        const par = {};
+        d.forEach(x => { if (x && x.id && x.petale && x.titre && x.consigne && D.details[x.petale]) (par[x.petale] = par[x.petale] || []).push(x); });
+        const ids = Object.keys(par); if (!ids.length) throw new Error('vide');
+        ids.forEach(id => { D.details[id].defis = par[id]; const p = D.petales.find(q => q.id === id); if (p) p.defis = par[id]; });
+        D.defis = D.petales.filter(p => p.ouvert).flatMap(p => p.defis || []).sort((a, b) => a.id.localeCompare(b.id));
+        m.style.color = ''; m.textContent = ids.reduce((t, id) => t + par[id].length, 0) + ' défis ajoutés (' + ids.length + ' pétales). Cliquez maintenant sur « Préparer les fichiers à publier ».';
       } catch { m.style.color = '#a33'; m.textContent = 'Ce fichier n\'est pas valide.'; }
     });
     $app.querySelector('#sauver-carnet').addEventListener('click', () => telecharger('carnet-familles.json', carnet));
