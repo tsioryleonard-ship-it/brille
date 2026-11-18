@@ -991,7 +991,7 @@
     if (n >= tot) return j > 1500 ? 'fleur5' : (j > 300 && j < 400 ? 'fleur12' : '');
     return '';
   };
-  const dossiersOuverts = new Set(['paiement']);
+  const dossiersOuverts = new Set(['paiement', 'familles']);
   let dossierActif = '';
   const stockDe = (carnet, fm) => carnet.familles.filter(f => f.actif && f.vente && f.publie && !f.envoye && formuleDe(f) === fm);
   function vueGestion() {
@@ -1046,7 +1046,7 @@
     const contenuDossier = dossierActif ? `<div id="contenu-dossier" style="margin-top:16px"><h3 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px">📁 ${esc(dossiers[dossierActif].titre)} <button type="button" class="btn petit-btn gris" id="fermer-dossier">Fermer le dossier</button></h3><div class="grille-cartes">${dossiers[dossierActif].items.map(([f, i]) => ligneFam(f, i, /^3/.test(dossierActif) ? dossiers[dossierActif].col : '')).join('')}</div></div>` : '<p class="petit" style="margin-top:12px">Touchez un dossier pour voir ses codes.</p>';
     return `<section class="vue"><a class="retour" href="#/plus">← Plus</a>
       <h1><span class="surligne" style="--hl:var(--vert)">Gérer les familles</span></h1>
-      <div style="display:flex;flex-direction:column;gap:14px;max-width:820px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;align-items:start"><div style="display:flex;flex-direction:column;gap:14px">
       ${actives.some(f => f.vente) ? `<details class="carte teinte" data-b="paiement" ${dossiersOuverts.has('paiement') ? 'open' : ''} style="background:var(--vert)"><summary>Après un paiement</summary>
         <p class="petit">Codes disponibles pour la vente : <b>${stock}</b>${stock <= 3 ? '. Pensez à créer un nouveau lot.' : '.'}${aPublier ? ` ${aPublier} code(s) ne sont pas encore publiés : cliquez sur « Préparer les fichiers » puis déposez-les sur GitHub.` : ''}</p>
         <p class="petit">En stock : fleur entière 12 mois <b>${stockDe(carnet, 'fleur12').length}</b> · accès 5 ans <b>${stockDe(carnet, 'fleur5').length}</b> · 1 pétale <b>${stockDe(carnet, 'petale').length}</b> (un code 1 pétale est créé à la demande).</p>
@@ -1079,7 +1079,8 @@
         <label class="coche" style="margin:10px 0"><input type="checkbox" id="lot-vente"> Ces codes sont pour la vente (stock)</label>
         <div class="chips">${cases('ajout', [])}</div>
         <button type="button" class="btn plein" id="creer">Créer le code</button></details>
-        <p class="erreur" id="st" role="status"></p></div>
+        <p class="erreur" id="st" role="status" style="margin:6px 0 0;min-height:0"></p></div>
+      </div><div style="display:flex;flex-direction:column;gap:14px">
       ${plie('parcours', 'Ajouter les parcours d\'un mois')}
         <p class="petit">Choisissez le fichier <b>parcours-mensuels-PRIVE.json</b> (sur votre ordinateur, jamais sur GitHub). Les parcours sont ajoutés aux pétales, puis chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
         <input type="file" id="f-parcours" accept=".json"><p class="erreur" id="st-parcours" role="status"></p></details>
@@ -1096,9 +1097,9 @@
         <button type="button" class="btn plein gris" id="sauver-carnet" style="margin-top:10px">Télécharger une copie de mon carnet</button>
         <label class="btn plein gris" style="margin-top:10px;display:block;text-align:center;cursor:pointer">Remplacer mon carnet par un fichier<input type="file" id="remplacer-carnet" accept="application/json,.json" hidden></label>
         <p class="petit">${actives.length} accès actif(s). Gardez la copie du carnet en lieu sûr : sans elle, vous ne pouvez plus gérer les codes.</p></details>
-      </div>
-      <h2 class="titre-section">Mes familles et groupes</h2>
-      ${cles.length ? tuiles + contenuDossier : '<p>Aucune famille pour le moment.</p>'}
+      </div></div>
+      <div style="margin-top:14px">${plie('familles', 'Mes familles et groupes')}
+      ${cles.length ? tuiles + contenuDossier : '<p>Aucune famille pour le moment.</p>'}</details></div>
     </section>`;
   }
   function lierGestion() {
