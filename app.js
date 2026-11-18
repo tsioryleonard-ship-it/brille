@@ -366,15 +366,15 @@
     }).join('');
     const pDefi = defi ? petale(defi.petale) : null;
     return `<section class="vue">
-      <aside class="aventure-banniere" aria-label="L'aventure BRILLE continue ici">
+      <aside class="aventure-banniere" aria-label="Bienvenue">
         ${etoileDeco('#f49f4c', 'g')}${etoileDeco('#a8dbeb', 'd')}
-        <h2 class="av-titre"><span class="av-mot">L'aventure</span><span class="av-brille" aria-label="BRILLE">${[...'BRILLE'].map((l, i) => `<b aria-hidden="true" style="--c:${['#f49f4c', '#a4c2e7', '#f5abaf', '#cbe1b6', '#b8aed7', '#a8dbeb'][i]};--i:${i}">${l}</b>`).join('')}</span><span class="av-mot">continue ici</span></h2>
-        <div class="av-bas">
+        <h2 class="av-titre"><span class="av-brille av-bienvenue" aria-label="Bienvenue">${[...'Bienvenue'].map((l, i) => `<b aria-hidden="true" style="--c:${['#f49f4c', '#a4c2e7', '#f5abaf', '#cbe1b6', '#b8aed7', '#a8dbeb'][i % 6]};--i:${i}">${l}</b>`).join('')}</span></h2>
+        <div class="av-bas av-bas-col">
           <img class="av-logo" src="logo-etincelle.png" alt="" width="320" height="320">
-          ${D.config.messageHorsAtelier ? `<p class="av-petit">${esc(D.config.messageHorsAtelier)}</p>` : ''}
+          <p class="av-lien">Le lien d'abord,<br>l'épanouissement ensuite.</p>
         </div>
       </aside>
-      ${motIngenieure()}
+      
 
       <div class="grille">
       <div class="col-gauche">
