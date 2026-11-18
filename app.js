@@ -981,6 +981,17 @@
   const telecharger = (nom, obj) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 1)], { type: 'application/json' })); a.download = nom; a.click(); };
   const chargerScript = src => new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
 
+  /* Formule d'un code du stock : fleur12 (fleur entière 12 mois), fleur5 (accès 5 ans), petale (1 pétale, 12 mois). */
+  const FORMULES = { fleur12: 'Fleur entière 12 mois', fleur5: 'Accès 5 ans', petale: '1 pétale (12 mois)' };
+  const formuleDe = f => {
+    if (f.formule) return f.formule;
+    if (!f.fin || !f.ajout) return '';
+    const j = (new Date(f.fin) - new Date(f.ajout)) / 864e5, n = (f.petales || []).length, tot = (D.vitrine || []).length || 7;
+    if (n === 1 && j > 300 && j < 400) return 'petale';
+    if (n >= tot) return j > 1500 ? 'fleur5' : (j > 300 && j < 400 ? 'fleur12' : '');
+    return '';
+  };
+  const stockDe = (carnet, fm) => carnet.familles.filter(f => f.actif && f.vente && f.publie && !f.envoye && formuleDe(f) === fm);
   function vueGestion() {
     if (!D.admin) return vueIntrouvable();
     const carnet = lireCarnet();
@@ -1017,9 +1028,20 @@
       <div class="grille-cartes">
       ${actives.some(f => f.vente) ? `<div class="carte teinte" style="background:var(--vert)"><h2>Après un paiement</h2>
         <p class="petit">Codes disponibles pour la vente : <b>${stock}</b>${stock <= 3 ? '. Pensez à créer un nouveau lot.' : '.'}${aPublier ? ` ${aPublier} code(s) ne sont pas encore publiés : cliquez sur « Préparer les fichiers » puis déposez-les sur GitHub.` : ''}</p>
+        <p class="petit">En stock : fleur entière 12 mois <b>${stockDe(carnet, 'fleur12').length}</b> · accès 5 ans <b>${stockDe(carnet, 'fleur5').length}</b> · 1 pétale <b>${stockDe(carnet, 'petale').length}</b> (un code 1 pétale est créé à la demande).</p>
+        <label for="formule" class="petit" style="display:block"><b>Formule achetée</b></label>
+        <select id="formule" style="width:100%;padding:10px 14px;border:2px solid #e4dcec;border-radius:16px;font:inherit;background:#fff;margin:4px 0 8px">
+          <option value="fleur12">Fleur entière 12 mois</option>
+          <option value="fleur5">Accès 5 ans</option>
+          <option value="petale">1 pétale (12 mois)</option>
+        </select>
+        <select id="petale-choix" style="display:none;width:100%;padding:10px 14px;border:2px solid #e4dcec;border-radius:16px;font:inherit;background:#fff;margin:0 0 8px">
+          <option value="">Quel pétale a été acheté ?</option>
+          ${D.vitrine.map(v => `<option value="${v.id}">${esc(v.titre)}</option>`).join('')}
+        </select>
         <input type="text" id="acheteur" placeholder="Nom ou e-mail de l'acheteur (pour vos notes)">
         <button type="button" class="btn plein" id="prochain">Copier le message du prochain code</button>
-        <p class="petit">Le code est marqué « envoyé ». Collez ensuite le message dans un e-mail adressé à l'acheteur.</p></div>` : ''}
+        <p class="petit">Le code est marqué « envoyé » et sa date de fin part d'aujourd'hui. Collez ensuite le message dans un e-mail adressé à l'acheteur.</p></div>` : ''}
       <div class="carte"><h2>Ajouter une famille ou un groupe</h2>
         <p class="petit">Un seul code pour tout un groupe d'atelier, c'est le plus simple. Cochez les pétales vécus en atelier. Pour la vente, créez un lot de codes « fleur complète » à l'avance : après chaque paiement, vous envoyez simplement un code du lot.</p>
         <input type="text" id="nouveau-nom" placeholder="Nom (ex. Atelier mars, famille Martin)">
@@ -1073,7 +1095,11 @@
       const crees = []; for (let i = 0; i < n; i++) crees.push(Acces.ajouterFamille(carnet, n > 1 ? `${base} ${String(i + 1).padStart(2, '0')}` : base, sel));
       const dr = $app.querySelector('#duree').value;
       if (dr) { const d = new Date(); if (dr === '1m') d.setMonth(d.getMonth() + 1); else if (dr === '3m') d.setMonth(d.getMonth() + 3); else d.setFullYear(d.getFullYear() + (dr === '5a' ? 5 : 1)); crees.forEach(f => { f.fin = iso(d); }); }
-      if ($app.querySelector('#lot-vente').checked) crees.forEach(f => { f.vente = true; });
+      if ($app.querySelector('#lot-vente').checked) {
+        const tot = (D.vitrine || []).length || 7;
+        const fm = dr === '5a' && sel.length >= tot ? 'fleur5' : dr === '12m' && sel.length >= tot ? 'fleur12' : dr === '12m' && sel.length === 1 ? 'petale' : '';
+        crees.forEach(f => { f.vente = true; if (fm) f.formule = fm; });
+      }
       ecrireCarnet(carnet); rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = (n === 1 ? 'Code créé : ' + crees[0].code : n + ' codes créés') + '. Pensez à publier (bouton « Préparer les fichiers »).'; }
     });
     const cE = $app.querySelector('#creer-essai');
@@ -1091,13 +1117,25 @@
       catch { prompt('Copiez ce bloc pour config.json :', bloc); }
     });
     const prochain = $app.querySelector('#prochain');
+    const selForm = $app.querySelector('#formule');
+    if (selForm) selForm.addEventListener('change', () => { $app.querySelector('#petale-choix').style.display = selForm.value === 'petale' ? 'block' : 'none'; });
     if (prochain) prochain.addEventListener('click', async () => {
-      const f = carnet.familles.find(x => x.actif && x.vente && x.publie && !x.envoye);
-      if (!f) { st('Plus de code disponible : créez un nouveau lot (case « pour la vente »), puis publiez les fichiers.'); return; }
-      const ach = ($app.querySelector('#acheteur').value || '').trim();
-      f.envoye = iso(new Date()); if (ach) f.acheteur = ach; ecrireCarnet(carnet);
+      const fm = selForm.value, ach = ($app.querySelector('#acheteur').value || '').trim();
+      const dureeAns = fm === 'fleur5' ? 5 : 1;
+      const finDans = () => { const d = new Date(); d.setFullYear(d.getFullYear() + dureeAns); return iso(d); };
+      let f, cree = false;
+      if (fm === 'petale') {
+        const pid = $app.querySelector('#petale-choix').value;
+        if (!pid) { st('Choisissez le pétale acheté.'); return; }
+        f = carnet.familles.find(x => x.actif && x.vente && x.publie && !x.envoye && formuleDe(x) === 'petale' && (x.petales || []).length === 1 && x.petales[0] === pid);
+        if (!f) { f = Acces.ajouterFamille(carnet, ('1 pétale ' + ach).trim(), [pid]); f.vente = true; f.formule = 'petale'; cree = true; }
+      } else {
+        f = stockDe(carnet, fm)[0];
+        if (!f) { st('Plus de code « ' + FORMULES[fm] + ' » en stock : créez un nouveau lot de cette formule (case « pour la vente »), puis publiez les fichiers.'); return; }
+      }
+      f.fin = finDans(); f.envoye = iso(new Date()); if (ach) f.acheteur = ach; ecrireCarnet(carnet);
       await copier(msgAchat(f), '');
-      rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Message copié (code ' + f.code + '). Collez-le dans un e-mail à l\'acheteur.'; }
+      rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Message copié (code ' + f.code + ', ' + FORMULES[fm] + ', fin le ' + f.fin + '). ' + (cree ? 'Code créé à l\'instant : cliquez sur « Préparer les fichiers » et publiez sur GitHub AVANT d\'envoyer le message, sinon il ne fonctionnera pas.' : 'Pensez à republier (« Préparer les fichiers ») pour que la date de fin soit à jour.'); }
     });
     $app.querySelectorAll('.fam').forEach(bloc => {
       const f = carnet.familles[+bloc.dataset.i];
