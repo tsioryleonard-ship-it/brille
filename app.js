@@ -929,14 +929,17 @@
     const sel = D.apercu || D.vitrine.map(v => v.id);
     return `<div class="carte teinte" style="background:var(--vert)" id="carte-ing">
       <span class="etiquette">Espace conceptrice</span>
-      <h2>Aperçu « comme une famille »</h2>
-      <p>Vous voyez tous les pétales. Cochez ceux qu'une famille a vécus en atelier pour voir exactement son application :</p>
-      <div class="apercu">${D.vitrine.map(v => `<label class="coche"><input type="checkbox" data-id="${v.id}" ${sel.includes(v.id) ? 'checked' : ''}> ${esc(v.titre)}</label>`).join('')}</div>
-      <a class="btn plein" href="#/gestion">Gérer les familles et les codes</a>
+      <a class="btn plein" href="#/gestion" style="margin-top:12px">Gérer les familles et les codes</a>
+      <details class="carte" data-b="apercu" ${dossiersOuverts.has('apercu') ? 'open' : ''} style="background:transparent;box-shadow:none;padding:0;margin:14px 0 0"><summary>Aperçu « comme une famille »</summary>
+        <p>Vous voyez tous les pétales. Cochez ceux qu'une famille a vécus en atelier pour voir exactement son application :</p>
+        <div class="apercu">${D.vitrine.map(v => `<label class="coche"><input type="checkbox" data-id="${v.id}" ${sel.includes(v.id) ? 'checked' : ''}> ${esc(v.titre)}</label>`).join('')}</div>
+      </details>
     </div>`;
   }
   function lierPlus() {
     const ci = $app.querySelector('#carte-ing');
+    const dap = $app.querySelector('details[data-b="apercu"]');
+    if (dap) dap.addEventListener('toggle', () => { if (dap.open) dossiersOuverts.add('apercu'); else dossiersOuverts.delete('apercu'); });
     if (ci) ci.addEventListener('change', () => {
       const ids = [...ci.querySelectorAll('input:checked')].map(x => x.dataset.id);
       D.apercu = ids.length === D.vitrine.length ? null : ids; composer(ids.length ? ids : D.vitrine.map(v => v.id));
