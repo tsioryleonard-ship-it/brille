@@ -1003,6 +1003,7 @@
       <div class="carte"><h2>Importer mon carnet</h2>
         <p>Le carnet est le fichier <b>carnet-familles.json</b> de votre dossier privé. Il contient les codes et les clés : il reste uniquement sur cet appareil, jamais en ligne.</p>
         <input type="file" id="f-carnet" accept=".json"><p class="erreur" id="st" role="status"></p></div></section>`;
+    const plie = (cle, titre) => `<details class="carte" data-b="${cle}" ${dossiersOuverts.has(cle) ? 'open' : ''}><summary>${titre}</summary>`;
     const actives = carnet.familles.filter(f => f.actif);
     const stock = carnet.familles.filter(f => f.actif && f.vente && f.publie && !f.envoye).length;
     const aPublier = carnet.familles.filter(f => f.actif && f.vente && !f.publie).length;
@@ -1062,7 +1063,7 @@
         <input type="text" id="acheteur" placeholder="Nom ou e-mail de l'acheteur (pour vos notes)">
         <button type="button" class="btn plein" id="prochain">Copier le message du prochain code</button>
         <p class="petit">Le code est marqué « envoyé » et sa date de fin part d'aujourd'hui. Collez ensuite le message dans un e-mail adressé à l'acheteur.</p></div>` : ''}
-      <div class="carte"><details id="bloc-ajout" ${dossiersOuverts.has('ajout') ? 'open' : ''}><summary style="cursor:pointer;list-style:none"><h2 style="display:inline">Ajouter une famille ou un groupe</h2> <span class="petit">▾ toucher pour déplier</span></summary>
+      <div>${plie('ajout', 'Ajouter une famille ou un groupe')}
         <p class="petit">Un seul code pour tout un groupe d'atelier, c'est le plus simple. Cochez les pétales vécus en atelier. Pour la vente, créez un lot de codes « fleur complète » à l'avance : après chaque paiement, vous envoyez simplement un code du lot.</p>
         <input type="text" id="nouveau-nom" placeholder="Nom (ex. Atelier mars, famille Martin)">
         <label class="petit" for="nb-codes">Nombre de codes à créer (un lot de 20 est pratique pour les ventes)</label>
@@ -1079,21 +1080,21 @@
         <div class="chips">${cases('ajout', [])}</div>
         <button type="button" class="btn plein" id="creer">Créer le code</button></details>
         <p class="erreur" id="st" role="status"></p></div>
-      <div class="carte"><h2>Ajouter les parcours d'un mois</h2>
+      ${plie('parcours', 'Ajouter les parcours d\'un mois')}
         <p class="petit">Choisissez le fichier <b>parcours-mensuels-PRIVE.json</b> (sur votre ordinateur, jamais sur GitHub). Les parcours sont ajoutés aux pétales, puis chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
-        <input type="file" id="f-parcours" accept=".json"><p class="erreur" id="st-parcours" role="status"></p></div>
-      <div class="carte"><h2>Remplacer les défis de la semaine</h2>
+        <input type="file" id="f-parcours" accept=".json"><p class="erreur" id="st-parcours" role="status"></p></details>
+      ${plie('defis', 'Remplacer les défis de la semaine')}
         <p class="petit">Choisissez le fichier <b>defis.json</b> (sur votre ordinateur, jamais sur GitHub). Les défis remplacent les anciens dans chaque pétale, puis sont chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
-        <input type="file" id="f-defis" accept=".json"><p class="erreur" id="st-defis" role="status"></p></div>
-      ${essaiServeur() ? '' : `<div class="carte"><h2>Codes d'essai gratuit</h2>
+        <input type="file" id="f-defis" accept=".json"><p class="erreur" id="st-defis" role="status"></p></details>
+      ${essaiServeur() ? '' : `${plie('essai', 'Codes d\'essai gratuit')}
         <p class="petit">Une seule fois : crée 7 codes d'essai (un par pétale). Ensuite, les familles qui n'ont pas suivi d'atelier testent un pétale pendant ${essaiJours()} jours, tout seul, sans rien à faire de ton côté. Le bloc copié est à coller dans <b>config.json</b> (ligne <code>"codes"</code>), puis publie les fichiers.</p>
         <button type="button" class="btn plein" id="creer-essai">Créer les codes d'essai</button>
-        <p class="erreur" id="st-essai" role="status"></p></div>`}
-      <div class="carte"><h2>Publier les changements</h2>
+        <p class="erreur" id="st-essai" role="status"></p></details>`}
+      ${plie('publier', 'Publier les changements')}
         <p>Après chaque ajout ou retrait, téléchargez les deux fichiers, puis déposez-les sur GitHub (Add file → Upload files → Commit changes). Les familles les prennent en compte dans les minutes qui suivent.</p>
         <button type="button" class="btn plein" id="fabriquer">Préparer les fichiers à publier</button>
         <button type="button" class="btn plein gris" id="sauver-carnet" style="margin-top:10px">Télécharger une copie de mon carnet</button>
-        <p class="petit">${actives.length} accès actif(s). Gardez la copie du carnet en lieu sûr : sans elle, vous ne pouvez plus gérer les codes.</p></div>
+        <p class="petit">${actives.length} accès actif(s). Gardez la copie du carnet en lieu sûr : sans elle, vous ne pouvez plus gérer les codes.</p></details>
       </div>
       <h2 class="titre-section">Mes familles et groupes</h2>
       ${cles.length ? tuiles + contenuDossier : '<p>Aucune famille pour le moment.</p>'}
@@ -1157,8 +1158,7 @@
       await copier(msgAchat(f), '');
       rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Message copié (code ' + f.code + ', ' + FORMULES[fm] + ', fin le ' + f.fin + '). ' + (cree ? 'Code créé à l\'instant : cliquez sur « Préparer les fichiers » et publiez sur GitHub AVANT d\'envoyer le message, sinon il ne fonctionnera pas.' : 'Pensez à republier (« Préparer les fichiers ») pour que la date de fin soit à jour.'); }
     });
-    const ba = $app.querySelector('#bloc-ajout');
-    if (ba) ba.addEventListener('toggle', () => { if (ba.open) dossiersOuverts.add('ajout'); else dossiersOuverts.delete('ajout'); });
+    $app.querySelectorAll('details[data-b]').forEach(d => d.addEventListener('toggle', () => { if (d.open) dossiersOuverts.add(d.dataset.b); else dossiersOuverts.delete(d.dataset.b); }));
     $app.querySelectorAll('.tuile').forEach(t => t.addEventListener('click', () => { dossierActif = dossierActif === t.dataset.k ? '' : t.dataset.k; rendre(); const c = $app.querySelector('#contenu-dossier'); if (c) c.scrollIntoView({ block: 'nearest' }); }));
     const fermD = $app.querySelector('#fermer-dossier'); if (fermD) fermD.addEventListener('click', () => { dossierActif = ''; rendre(); });
     $app.querySelectorAll('.fam').forEach(bloc => {
