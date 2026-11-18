@@ -1007,7 +1007,7 @@
     const actives = carnet.familles.filter(f => f.actif);
     const stock = carnet.familles.filter(f => f.actif && f.vente && f.publie && !f.envoye).length;
     const aPublier = carnet.familles.filter(f => f.actif && f.vente && !f.publie).length;
-    const ligneFam = (f, i) => f.actif ? `<div class="carte fam${f.admin ? ' fam-admin' : ''}${f.essai ? ' fam-essai' : ''}" data-i="${i}">
+    const ligneFam = (f, i, col) => f.actif ? `<div class="carte fam${f.admin ? ' fam-admin' : ''}${f.essai ? ' fam-essai' : ''}" data-i="${i}"${col ? ` style="background:${col}"` : ''}>
         ${f.admin ? '<span class="badge-admin">Mon accès conceptrice · protégé</span>' : ''}${f.essai ? '<span class="badge-admin" style="background:#f49f4c;color:#2b2b2b">🔒 Code d\'essai · protégé · à ne jamais envoyer à une famille</span>' : ''}
         <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe"${f.admin || f.essai ? ' disabled' : ''}>
         <p>Code : <code>${f.essai ? '••••-••••' : esc(f.code)}</code></p>
@@ -1043,7 +1043,7 @@
     if (dossierActif && !dossiers[dossierActif]) dossierActif = '';
     const resumeDe = d => { const vend = d.items.some(([f]) => f.vente), envoyes = d.items.filter(([f]) => f.envoye).length, dispo = d.items.length - envoyes; return vend ? `<b>${dispo}</b> dispo · ${envoyes} envoyé${envoyes > 1 ? 's' : ''}` : `<b>${d.items.length}</b> accès`; };
     const tuiles = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px">` + cles.map(k => { const d = dossiers[k]; return `<button type="button" class="tuile" data-k="${k}" aria-pressed="${dossierActif === k}" style="text-align:left;border:0;cursor:pointer;font:inherit;color:${d.col === '#1a1a1a' ? '#fff' : '#000'};padding:12px 14px;border-radius:16px;background:${d.col || '#fff'};box-shadow:0 2px 8px rgba(0,0,0,.08);${dossierActif === k ? 'outline:3px solid #f49f4c;outline-offset:2px' : ''}"><span style="display:block;font-weight:700;font-size:.92em">📁 ${esc(d.titre)}</span><span class="petit" style="display:block;margin-top:4px;color:inherit;opacity:.85">${resumeDe(d)}</span></button>`; }).join('') + `</div>`;
-    const contenuDossier = dossierActif ? `<div id="contenu-dossier" style="margin-top:16px"><h3 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px">📁 ${esc(dossiers[dossierActif].titre)} <button type="button" class="btn petit-btn gris" id="fermer-dossier">Fermer le dossier</button></h3><div class="grille-cartes">${dossiers[dossierActif].items.map(([f, i]) => ligneFam(f, i)).join('')}</div></div>` : '<p class="petit" style="margin-top:12px">Touchez un dossier pour voir ses codes.</p>';
+    const contenuDossier = dossierActif ? `<div id="contenu-dossier" style="margin-top:16px"><h3 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px">📁 ${esc(dossiers[dossierActif].titre)} <button type="button" class="btn petit-btn gris" id="fermer-dossier">Fermer le dossier</button></h3><div class="grille-cartes">${dossiers[dossierActif].items.map(([f, i]) => ligneFam(f, i, /^3/.test(dossierActif) ? dossiers[dossierActif].col : '')).join('')}</div></div>` : '<p class="petit" style="margin-top:12px">Touchez un dossier pour voir ses codes.</p>';
     return `<section class="vue"><a class="retour" href="#/plus">← Plus</a>
       <h1><span class="surligne" style="--hl:var(--vert)">Gérer les familles</span></h1>
       <div style="display:flex;flex-direction:column;gap:14px;max-width:820px">
