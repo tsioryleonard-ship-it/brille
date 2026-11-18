@@ -991,7 +991,7 @@
     if (n >= tot) return j > 1500 ? 'fleur5' : (j > 300 && j < 400 ? 'fleur12' : '');
     return '';
   };
-  const dossiersOuverts = new Set();
+  const dossiersOuverts = new Set(['paiement']);
   let dossierActif = '';
   const stockDe = (carnet, fm) => carnet.familles.filter(f => f.actif && f.vente && f.publie && !f.envoye && formuleDe(f) === fm);
   function vueGestion() {
@@ -1030,24 +1030,24 @@
       if (f.essai) return ['9', 'Codes d\'essai gratuit'];
       if (f.vente) {
         const fm = formuleDe(f);
-        if (fm === 'fleur12') return ['1', 'Fleur entière · 12 mois'];
-        if (fm === 'fleur5') return ['2', 'Accès 5 ans'];
+        if (fm === 'fleur12') return ['1', 'Fleur entière · 12 mois', '#bdbdbd'];
+        if (fm === 'fleur5') return ['2', 'Accès 5 ans', '#1a1a1a'];
         if (fm === 'petale' || (f.petales || []).length === 1) { const id = f.petales[0], k = (D.vitrine || []).findIndex(v => v.id === id); return ['3' + String(k < 0 ? 99 : k).padStart(2, '0'), '1 pétale · ' + titreEnfant(id), k < 0 ? '' : D.vitrine[k].couleur]; }
         return ['4', 'Autres codes de vente'];
       }
-      return ['5', 'Ateliers, familles et groupes'];
+      return ['5', 'Ateliers, familles et groupes', '#e9e9e9'];
     };
     const dossiers = {};
     carnet.familles.forEach((f, i) => { if (!f.actif) return; const [k, t, col] = categorie(f); (dossiers[k] = dossiers[k] || { titre: t, col: col || '', items: [] }).items.push([f, i]); });
     const cles = Object.keys(dossiers).sort();
     if (dossierActif && !dossiers[dossierActif]) dossierActif = '';
     const resumeDe = d => { const vend = d.items.some(([f]) => f.vente), envoyes = d.items.filter(([f]) => f.envoye).length, dispo = d.items.length - envoyes; return vend ? `<b>${dispo}</b> dispo · ${envoyes} envoyé${envoyes > 1 ? 's' : ''}` : `<b>${d.items.length}</b> accès`; };
-    const tuiles = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px">` + cles.map(k => { const d = dossiers[k]; return `<button type="button" class="tuile" data-k="${k}" aria-pressed="${dossierActif === k}" style="text-align:left;border:0;cursor:pointer;font:inherit;color:#000;padding:12px 14px;border-radius:16px;background:${d.col || '#fff'};box-shadow:${dossierActif === k ? 'inset 0 0 0 3px #2b2b2b' : '0 2px 8px rgba(0,0,0,.08)'}"><span style="display:block;font-weight:700;font-size:.92em">📁 ${esc(d.titre)}</span><span class="petit" style="display:block;margin-top:4px">${resumeDe(d)}</span></button>`; }).join('') + `</div>`;
+    const tuiles = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px">` + cles.map(k => { const d = dossiers[k]; return `<button type="button" class="tuile" data-k="${k}" aria-pressed="${dossierActif === k}" style="text-align:left;border:0;cursor:pointer;font:inherit;color:${d.col === '#1a1a1a' ? '#fff' : '#000'};padding:12px 14px;border-radius:16px;background:${d.col || '#fff'};box-shadow:0 2px 8px rgba(0,0,0,.08);${dossierActif === k ? 'outline:3px solid #f49f4c;outline-offset:2px' : ''}"><span style="display:block;font-weight:700;font-size:.92em">📁 ${esc(d.titre)}</span><span class="petit" style="display:block;margin-top:4px;color:inherit;opacity:.85">${resumeDe(d)}</span></button>`; }).join('') + `</div>`;
     const contenuDossier = dossierActif ? `<div id="contenu-dossier" style="margin-top:16px"><h3 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px">📁 ${esc(dossiers[dossierActif].titre)} <button type="button" class="btn petit-btn gris" id="fermer-dossier">Fermer le dossier</button></h3><div class="grille-cartes">${dossiers[dossierActif].items.map(([f, i]) => ligneFam(f, i)).join('')}</div></div>` : '<p class="petit" style="margin-top:12px">Touchez un dossier pour voir ses codes.</p>';
     return `<section class="vue"><a class="retour" href="#/plus">← Plus</a>
       <h1><span class="surligne" style="--hl:var(--vert)">Gérer les familles</span></h1>
-      <div class="grille-cartes">
-      ${actives.some(f => f.vente) ? `<div class="carte teinte" style="background:var(--vert)"><h2>Après un paiement</h2>
+      <div style="display:flex;flex-direction:column;gap:14px;max-width:820px">
+      ${actives.some(f => f.vente) ? `<details class="carte teinte" data-b="paiement" ${dossiersOuverts.has('paiement') ? 'open' : ''} style="background:var(--vert)"><summary>Après un paiement</summary>
         <p class="petit">Codes disponibles pour la vente : <b>${stock}</b>${stock <= 3 ? '. Pensez à créer un nouveau lot.' : '.'}${aPublier ? ` ${aPublier} code(s) ne sont pas encore publiés : cliquez sur « Préparer les fichiers » puis déposez-les sur GitHub.` : ''}</p>
         <p class="petit">En stock : fleur entière 12 mois <b>${stockDe(carnet, 'fleur12').length}</b> · accès 5 ans <b>${stockDe(carnet, 'fleur5').length}</b> · 1 pétale <b>${stockDe(carnet, 'petale').length}</b> (un code 1 pétale est créé à la demande).</p>
         <label for="formule" class="petit" style="display:block"><b>Formule achetée</b></label>
@@ -1062,7 +1062,7 @@
         </select>
         <input type="text" id="acheteur" placeholder="Nom ou e-mail de l'acheteur (pour vos notes)">
         <button type="button" class="btn plein" id="prochain">Copier le message du prochain code</button>
-        <p class="petit">Le code est marqué « envoyé » et sa date de fin part d'aujourd'hui. Collez ensuite le message dans un e-mail adressé à l'acheteur.</p></div>` : ''}
+        <p class="petit">Le code est marqué « envoyé » et sa date de fin part d'aujourd'hui. Collez ensuite le message dans un e-mail adressé à l'acheteur.</p></details>` : ''}
       <div>${plie('ajout', 'Ajouter une famille ou un groupe')}
         <p class="petit">Un seul code pour tout un groupe d'atelier, c'est le plus simple. Cochez les pétales vécus en atelier. Pour la vente, créez un lot de codes « fleur complète » à l'avance : après chaque paiement, vous envoyez simplement un code du lot.</p>
         <input type="text" id="nouveau-nom" placeholder="Nom (ex. Atelier mars, famille Martin)">
