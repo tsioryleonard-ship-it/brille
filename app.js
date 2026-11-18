@@ -501,11 +501,47 @@
       </div>
 
       <div class="carte"><h2>Pour y voir plus clair</h2><p style="margin:0">${esc(p.intro)}</p></div>
-      <div class="carte"><h2>Petites pratiques à essayer</h2><ul class="pratiques">${p.pratiques.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
-      <div class="carte"><h3>Une phrase à essayer</h3><p class="phrase">${esc(p.phrase)}</p>${p.note ? `<div class="note-soutien">${esc(p.note)}</div>` : ''}</div>
+      ${blocPratiques(p)}
       </div></div>
       ${suivant && suivant !== p ? `<a class="btn discret plein" href="#/petale/${suivant.id}">Pétale suivant : ${esc(suivant.titre)} →</a>` : ''}
     </section>`;
+  }
+
+  /* ---------- Petites pratiques : tuiles à icône + phrase en bulle ----------
+     Contenu attendu dans petales.json (fichier privé), pour chaque pétale :
+       "pratiquesCourtes": [ { "i": "regles", "t": "2 règles, pas plus" }, ... ]   (3 tuiles, 2 à 4 mots chacune)
+     Icônes disponibles : regles, avis, coeur, ecoute, temps, soleil, etoile, maison, sourire, idee, calendrier, souffle, main.
+     Sans "pratiquesCourtes", l'ancienne liste de pratiques s'affiche comme avant. */
+  const ICONES = {
+    regles: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/>',
+    avis: '<path d="M4 5h16v10H12l-5 4v-4H4z"/><path d="M8 9h8M8 12h5"/>',
+    coeur: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+    ecoute: '<path d="M7 9a5 5 0 0 1 10 0c0 3-2 4-3 6a3 3 0 0 1-6 0"/><path d="M12 9a1.5 1.5 0 0 1 1.5 1.5"/>',
+    temps: '<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>',
+    soleil: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>',
+    etoile: '<path d="M12 4l2.5 5 5.5.8-4 3.9.9 5.5L12 16.5 7.1 19.2 8 13.7 4 9.8 9.5 9z"/>',
+    maison: '<path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/>',
+    sourire: '<circle cx="12" cy="12" r="8"/><path d="M9 10h.01M15 10h.01"/><path d="M8.5 14a4.5 4.5 0 0 0 7 0"/>',
+    idee: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+    calendrier: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+    souffle: '<path d="M4 9h9a2.5 2.5 0 1 0-2.5-2.5"/><path d="M4 14h12a2.5 2.5 0 1 1-2.5 2.5"/>',
+    main: '<path d="M8 12V6a1.5 1.5 0 0 1 3 0v5m0-2V4.5a1.5 1.5 0 0 1 3 0V11m0-4.5a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-1a5 5 0 0 1-4-2l-2-3a1.5 1.5 0 0 1 2.5-1.5L8 14"/>'
+  };
+  const icone = (n, px) => `<svg width="${px || 22}" height="${px || 22}" viewBox="0 0 24 24" fill="none" stroke="#1d3557" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[n] || ICONES.etoile}</svg>`;
+  function blocPratiques(p) {
+    const fond = 'color-mix(in srgb, var(--puce, #f49f4c) 24%, #fff)';
+    const court = Array.isArray(p.pratiquesCourtes) && p.pratiquesCourtes.length;
+    if (!court) return `<div class="carte"><h2>Petites pratiques à essayer</h2><ul class="pratiques">${p.pratiques.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div class="carte"><h3>Une phrase à essayer</h3><p class="phrase">${esc(p.phrase)}</p>${p.note ? `<div class="note-soutien">${esc(p.note)}</div>` : ''}</div>`;
+    const tuiles = p.pratiquesCourtes.slice(0, 3).map(x => `<div style="background:${fond};border-radius:16px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;color:#1d3557">
+        <span style="width:40px;height:40px;border-radius:50%;background:var(--puce, #f49f4c);display:flex;align-items:center;justify-content:center">${icone(x.i)}</span>
+        <b style="font-size:.86rem;line-height:1.3;font-weight:500">${esc(x.t)}</b></div>`).join('');
+    return `<div class="carte"><h2>À essayer</h2>
+        <div style="display:grid;grid-template-columns:repeat(${Math.min(3, p.pratiquesCourtes.length)},minmax(0,1fr));gap:8px">${tuiles}</div>
+        <div style="background:var(--puce, #f49f4c);border-radius:16px;padding:16px;margin-top:12px;color:#1d3557">
+          <span style="font-size:1.6rem;line-height:1;display:block;font-family:serif">«</span>
+          <p style="margin:2px 0 0;font-size:1.1rem;line-height:1.4;font-weight:500;font-style:normal">${esc(p.phrase)}</p></div>
+        ${p.note ? `<div class="note-soutien" style="margin-top:12px">${esc(p.note)}</div>` : ''}</div>`;
   }
 
   /* ---------- Parcours d'un mois (4 semaines, suivi dans le téléphone) ---------- */
@@ -1090,6 +1126,9 @@
       ${plie('defis', 'Remplacer les défis de la semaine')}
         <p class="petit">Choisissez le fichier <b>defis.json</b> (sur votre ordinateur, jamais sur GitHub). Les défis remplacent les anciens dans chaque pétale, puis sont chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
         <input type="file" id="f-defis" accept=".json"><p class="erreur" id="st-defis" role="status"></p></details>
+      ${plie('pratiques', 'Ajouter les tuiles « À essayer »')}
+        <p class="petit">Choisissez le fichier <b>pratiques-courtes-PRIVE.json</b> (sur votre ordinateur, jamais sur GitHub). Les tuiles courtes sont ajoutées à chaque pétale, puis chiffrées avec les autres contenus. Vos codes ne changent pas.</p>
+        <input type="file" id="f-pratiques" accept=".json"><p class="erreur" id="st-pratiques" role="status"></p></details>
       ${essaiServeur() ? '' : `${plie('essai', 'Codes d\'essai gratuit')}
         <p class="petit">Une seule fois : crée 7 codes d'essai (un par pétale). Ensuite, les familles qui n'ont pas suivi d'atelier testent un pétale pendant ${essaiJours()} jours, tout seul, sans rien à faire de ton côté. Le bloc copié est à coller dans <b>config.json</b> (ligne <code>"codes"</code>), puis publie les fichiers.</p>
         <button type="button" class="btn plein" id="creer-essai">Créer les codes d'essai</button>
@@ -1223,6 +1262,16 @@
         ids.forEach(id => { D.details[id].defis = par[id]; const p = D.petales.find(q => q.id === id); if (p) p.defis = par[id]; });
         D.defis = D.petales.filter(p => p.ouvert).flatMap(p => p.defis || []).sort((a, b) => a.id.localeCompare(b.id));
         m.style.color = ''; m.textContent = ids.reduce((t, id) => t + par[id].length, 0) + ' défis ajoutés (' + ids.length + ' pétales). Cliquez maintenant sur « Préparer les fichiers à publier ».';
+      } catch { m.style.color = '#a33'; m.textContent = 'Ce fichier n\'est pas valide.'; }
+    });
+    const fpr = $app.querySelector('#f-pratiques');
+    if (fpr) fpr.addEventListener('change', async e => {
+      const f = e.target.files[0], m = $app.querySelector('#st-pratiques'); if (!f) return;
+      try {
+        const d = JSON.parse(await f.text()); let n = 0;
+        Object.keys(d).forEach(id => { if (D.details[id] && Array.isArray(d[id]) && d[id].length && d[id].every(x => x && x.t)) { D.details[id].pratiquesCourtes = d[id]; const x = D.petales.find(q => q.id === id); if (x) x.pratiquesCourtes = d[id]; n++; } });
+        if (!n) throw new Error('vide');
+        m.style.color = ''; m.textContent = n + ' pétales mis à jour. Cliquez maintenant sur « Préparer les fichiers à publier ».';
       } catch { m.style.color = '#a33'; m.textContent = 'Ce fichier n\'est pas valide.'; }
     });
     $app.querySelector('#sauver-carnet').addEventListener('click', () => telecharger('carnet-familles.json', carnet));
