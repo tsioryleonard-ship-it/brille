@@ -1094,6 +1094,7 @@
         <p>Après chaque ajout ou retrait, téléchargez les deux fichiers, puis déposez-les sur GitHub (Add file → Upload files → Commit changes). Les familles les prennent en compte dans les minutes qui suivent.</p>
         <button type="button" class="btn plein" id="fabriquer">Préparer les fichiers à publier</button>
         <button type="button" class="btn plein gris" id="sauver-carnet" style="margin-top:10px">Télécharger une copie de mon carnet</button>
+        <label class="btn plein gris" style="margin-top:10px;display:block;text-align:center;cursor:pointer">Remplacer mon carnet par un fichier<input type="file" id="remplacer-carnet" accept="application/json,.json" hidden></label>
         <p class="petit">${actives.length} accès actif(s). Gardez la copie du carnet en lieu sûr : sans elle, vous ne pouvez plus gérer les codes.</p></details>
       </div>
       <h2 class="titre-section">Mes familles et groupes</h2>
@@ -1221,6 +1222,19 @@
       } catch { m.style.color = '#a33'; m.textContent = 'Ce fichier n\'est pas valide.'; }
     });
     $app.querySelector('#sauver-carnet').addEventListener('click', () => telecharger('carnet-familles.json', carnet));
+    const remC = $app.querySelector('#remplacer-carnet');
+    if (remC) remC.addEventListener('change', () => {
+      const fic = remC.files[0]; if (!fic) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const c = JSON.parse(r.result); if (c.v !== 2 || !c.cles || !c.familles) throw 0;
+          if (!confirm('Remplacer le carnet de cet appareil (' + carnet.familles.filter(f => f.actif).length + ' accès) par ce fichier (' + c.familles.filter(f => f.actif).length + ' accès) ?')) { remC.value = ''; return; }
+          ecrireCarnet(c); rendre();
+        } catch { alert('Ce fichier n\'est pas un carnet valide.'); remC.value = ''; }
+      };
+      r.readAsText(fic);
+    });
   }
   const actives_ok = c => c.familles.some(f => f.actif && f.petales.length);
 
