@@ -991,6 +991,7 @@
     if (n >= tot) return j > 1500 ? 'fleur5' : (j > 300 && j < 400 ? 'fleur12' : '');
     return '';
   };
+  const dossiersOuverts = new Set();
   const stockDe = (carnet, fm) => carnet.familles.filter(f => f.actif && f.vente && f.publie && !f.envoye && formuleDe(f) === fm);
   function vueGestion() {
     if (!D.admin) return vueIntrouvable();
@@ -1022,7 +1023,25 @@
           <button type="button" class="btn petit-btn gris" data-a="qr">QR code</button>
           ${f.admin ? '' : '<button type="button" class="btn petit-btn alerte" data-a="retirer">Retirer</button>'}
         </div>`}</div>` : '';
-    const lignes = carnet.familles.map((f, i) => f.admin ? ligneFam(f, i) : '').join('') + carnet.familles.map((f, i) => f.admin || f.essai ? '' : ligneFam(f, i)).join('') + carnet.familles.map((f, i) => f.essai && !f.admin ? ligneFam(f, i) : '').join('');
+    const categorie = f => {
+      if (f.admin) return ['0', 'Mon accès conceptrice'];
+      if (f.essai) return ['9', 'Codes d\'essai gratuit'];
+      if (f.vente) {
+        const fm = formuleDe(f);
+        if (fm === 'fleur12') return ['1', 'Fleur entière · 12 mois'];
+        if (fm === 'fleur5') return ['2', 'Accès 5 ans'];
+        if (fm === 'petale' || (f.petales || []).length === 1) { const id = f.petales[0], k = (D.vitrine || []).findIndex(v => v.id === id); return ['3' + String(k < 0 ? 99 : k).padStart(2, '0'), '1 pétale · ' + titreEnfant(id), k < 0 ? '' : D.vitrine[k].couleur]; }
+        return ['4', 'Autres codes de vente'];
+      }
+      return ['5', 'Ateliers, familles et groupes'];
+    };
+    const dossiers = {};
+    carnet.familles.forEach((f, i) => { if (!f.actif) return; const [k, t, col] = categorie(f); (dossiers[k] = dossiers[k] || { titre: t, col: col || '', items: [] }).items.push([f, i]); });
+    const lignes = Object.keys(dossiers).sort().map(k => {
+      const d = dossiers[k], vend = d.items.some(([f]) => f.vente), envoyes = d.items.filter(([f]) => f.envoye).length, dispo = d.items.length - envoyes;
+      const resume = vend ? `<b>${dispo}</b> disponible${dispo > 1 ? 's' : ''} · ${envoyes} envoyé${envoyes > 1 ? 's' : ''}` : `<b>${d.items.length}</b> accès`;
+      return `<details class="dossier" data-k="${k}" ${dossiersOuverts.has(k) ? 'open' : ''} style="grid-column:1/-1;margin:6px 0"><summary style="cursor:pointer;font-weight:700;padding:14px 18px;background:${d.col || '#fff'};border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);list-style-position:inside">📁 ${esc(d.titre)} <span class="petit" style="font-weight:400">· ${resume}</span></summary><div class="grille-cartes" style="margin-top:10px">${d.items.map(([f, i]) => ligneFam(f, i)).join('')}</div></details>`;
+    }).join('');
     return `<section class="vue"><a class="retour" href="#/plus">← Plus</a>
       <h1><span class="surligne" style="--hl:var(--vert)">Gérer les familles</span></h1>
       <div class="grille-cartes">
@@ -1137,6 +1156,7 @@
       await copier(msgAchat(f), '');
       rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Message copié (code ' + f.code + ', ' + FORMULES[fm] + ', fin le ' + f.fin + '). ' + (cree ? 'Code créé à l\'instant : cliquez sur « Préparer les fichiers » et publiez sur GitHub AVANT d\'envoyer le message, sinon il ne fonctionnera pas.' : 'Pensez à republier (« Préparer les fichiers ») pour que la date de fin soit à jour.'); }
     });
+    $app.querySelectorAll('details.dossier').forEach(d => d.addEventListener('toggle', () => { if (d.open) dossiersOuverts.add(d.dataset.k); else dossiersOuverts.delete(d.dataset.k); }));
     $app.querySelectorAll('.fam').forEach(bloc => {
       const f = carnet.familles[+bloc.dataset.i];
       const fi = bloc.querySelector('.finf');
