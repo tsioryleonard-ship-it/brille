@@ -539,8 +539,7 @@
     return `<div class="carte"><h2>À essayer</h2>
         <div style="display:grid;grid-template-columns:repeat(${Math.min(3, p.pratiquesCourtes.length)},minmax(0,1fr));gap:8px">${tuiles}</div>
         <div style="background:var(--puce, #f49f4c);border-radius:16px;padding:16px;margin-top:12px;color:#1d3557">
-          <span style="font-size:1.6rem;line-height:1;display:block;font-family:serif">«</span>
-          <p style="margin:2px 0 0;font-size:1.1rem;line-height:1.4;font-weight:500;font-style:normal">${esc(p.phrase)}</p></div>
+          <p style="margin:0;font-size:1.1rem;line-height:1.4;font-weight:500;font-style:normal">${esc(p.phrase)}</p></div>
         ${p.note ? `<div class="note-soutien" style="margin-top:12px">${esc(p.note)}</div>` : ''}</div>`;
   }
 
