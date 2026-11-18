@@ -465,28 +465,28 @@
         <p class="ss">${esc(p.sousTitre)}</p>
       </div>
 
-      ${e ? `<div class="carte ensemble teinte" style="background:${p.couleur}">
-        <span class="etiquette">À faire ensemble</span>
+      ${e ? `<details class="carte ensemble teinte" data-sec="ensemble"${ouv(id, 'ensemble')} style="background:${p.couleur}">
+        <summary>À faire ensemble</summary>
         <h2>${esc(e.titre)}</h2>
         <div class="meta"><span>⏱ ${esc(e.duree)}</span><span>Il vous faut : ${esc(e.materiel)}</span></div>
         <ol class="etapes">${e.etapes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
         <div class="parler"><b>Pour en parler ensuite</b><ul>${e.enParler.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
         <label class="coche"><input type="checkbox" id="fait" ${fait ? 'checked' : ''}> Nous l'avons fait ensemble</label>
-      </div>` : ''}
+      </details>` : ''}
 
-      ${p.parcours ? `<div class="carte parcours teinte" id="parcours" style="background:${p.couleur}">${parcoursHtml(p)}</div>` : (D.essai ? `<div class="carte"><span class="etiquette">🔒 Parcours d'un mois</span><p style="margin:0">Le parcours d'un mois (4 semaines, une mission par semaine) est réservé aux familles qui ont un accès complet à ce pétale.</p></div>` : '')}
+      ${p.parcours ? `<details class="carte parcours teinte" data-sec="parcours"${ouv(id, 'parcours')} style="background:${p.couleur}"><summary>Parcours d'un mois</summary><div id="parcours">${parcoursHtml(p)}</div></details>` : (D.essai ? `<div class="carte"><span class="etiquette">🔒 Parcours d'un mois</span><p style="margin:0">Le parcours d'un mois (4 semaines, une mission par semaine) est réservé aux familles qui ont un accès complet à ce pétale.</p></div>` : '')}
 
-      ${D.essai ? '' : `<div class="carte transmettre">
-        <span class="etiquette">Je transmets</span>
+      ${D.essai ? '' : `<details class="carte transmettre" data-sec="transmettre"${ouv(id, 'transmettre')}>
+        <summary>Je transmets</summary>
         <h2>Ce que j'ai reçu, je le partage</h2>
         <p>Vous avez vécu ce pétale en atelier : vous êtes un pionnier BRILLE. Ce qui compte, c'est ce que vous en faites ensuite, autour de vous.</p>
         <ul class="transmettre-idees"><li>Racontez à un frère, une sœur ou un grand-parent ce que vous avez préféré.</li><li>Laissez votre enfant expliquer ce pétale à un ami, avec ses mots à lui.</li><li>Gardez un petit rituel en famille et invitez quelqu'un à le vivre avec vous.</li></ul>
         <button type="button" class="btn" data-partager="${esc(p.id)}">💌 Envoyer un petit mot à un proche</button>
-      </div>`}
+      </details>`}
 
       </div><div>
-      <div class="carte" id="bilan">
-        <h2>Notre bilan de la semaine</h2>
+      <details class="carte" id="bilan" data-sec="bilan"${ouv(id, 'bilan')}>
+        <summary>Notre bilan de la semaine</summary>
         ${bilanBloc('parent', p, actP)}
         ${bilanBloc('enfant', p, actE)}
         <label for="note" class="aide">Un mot pour nous, si vous en avez envie (facultatif, il reste sur votre appareil)</label>
@@ -498,9 +498,9 @@
         ${graphique(id, 'parent', 'Mon évolution')}
         ${graphique(id, 'enfant', 'Son évolution')}
         ${notes ? `<ul class="liste-notes">${notes}</ul>` : ''}
-      </div>
+      </details>
 
-      <div class="carte"><h2>Pour y voir plus clair</h2><p style="margin:0">${esc(p.intro)}</p></div>
+      <details class="carte" data-sec="intro"${ouv(id, 'intro')}><summary>Pour y voir plus clair</summary><p style="margin:0">${esc(p.intro)}</p></details>
       ${blocPratiques(p)}
       </div></div>
       ${suivant && suivant !== p ? `<a class="btn discret plein" href="#/petale/${suivant.id}">Pétale suivant : ${esc(suivant.titre)} →</a>` : ''}
@@ -512,6 +512,8 @@
        "pratiquesCourtes": [ { "i": "regles", "t": "2 règles, pas plus" }, ... ]   (3 tuiles, 2 à 4 mots chacune)
      Icônes disponibles : regles, avis, coeur, ecoute, temps, soleil, etoile, maison, sourire, idee, calendrier, souffle, main.
      Sans "pratiquesCourtes", l'ancienne liste de pratiques s'affiche comme avant. */
+  const sectionsOuvertes = new Set();
+  const ouv = (id, k) => sectionsOuvertes.has(id + ':' + k) ? ' open' : '';
   const ICONES = {
     regles: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/>',
     avis: '<path d="M4 5h16v10H12l-5 4v-4H4z"/><path d="M8 9h8M8 12h5"/>',
@@ -531,8 +533,8 @@
   function blocPratiques(p) {
     const fond = 'color-mix(in srgb, var(--puce, #f49f4c) 24%, #fff)';
     const court = Array.isArray(p.pratiquesCourtes) && p.pratiquesCourtes.length;
-    if (!court) return `<div class="carte"><h2>Petites pratiques à essayer</h2><ul class="pratiques">${p.pratiques.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
-      <div class="carte"><h3>Une phrase à essayer</h3><p class="phrase">${esc(p.phrase)}</p>${p.note ? `<div class="note-soutien">${esc(p.note)}</div>` : ''}</div>`;
+    if (!court) return `<details class="carte" data-sec="pratiques"${ouv(p.id, 'pratiques')}><summary>Petites pratiques à essayer</summary><ul class="pratiques">${p.pratiques.map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>
+      <details class="carte" data-sec="phrase"${ouv(p.id, 'phrase')}><summary>Une phrase à essayer</summary><p class="phrase">${esc(p.phrase)}</p>${p.note ? `<div class="note-soutien">${esc(p.note)}</div>` : ''}</details>`;
     const tuiles = p.pratiquesCourtes.slice(0, 3).map(x => `<div style="background:${fond};border-radius:16px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;color:#1d3557">
         <span style="width:40px;height:40px;border-radius:50%;background:var(--puce, #f49f4c);display:flex;align-items:center;justify-content:center">${icone(x.i)}</span>
         <b style="font-size:.86rem;line-height:1.3;font-weight:500">${esc(x.t)}</b></div>`).join('');
@@ -762,6 +764,7 @@
   }
 
   function lierPetale(id) {
+    $app.querySelectorAll('details[data-sec]').forEach(d => d.addEventListener('toggle', () => { const k = id + ':' + d.dataset.sec; if (d.open) sectionsOuvertes.add(k); else sectionsOuvertes.delete(k); }));
     const sem = debutSemaine();
     const choix = { parent: bilansDe(id, 'parent').find(b => b.w === sem)?.s || null, parent2: bilansDe(id, 'parent').find(b => b.w === sem)?.s2 || null, enfant: bilansDe(id, 'enfant').find(b => b.w === sem)?.s || null };
     $app.querySelectorAll('.echelle[data-qui]').forEach(ech => {
