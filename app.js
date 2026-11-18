@@ -896,6 +896,7 @@
     try { invitationInstall.prompt(); await invitationInstall.userChoice; } catch { }
     invitationInstall = null; bt.hidden = true;
   });
+  const dejaInstallee = () => { try { return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; } catch { return false; } };
   function vuePlus() {
     const c = D.config.contact || {};
     return `<section class="vue">
@@ -909,12 +910,12 @@
         <p>Vous voulez prolonger d'autres thèmes à la maison ? Découvrez les accès disponibles.</p>
         <a class="btn plein" href="#/acces">Voir les accès</a>
       </details>` : ''}
-      <details class="carte" open><summary>Installer Étincelle sur mon téléphone</summary>
+      ${dejaInstallee() ? '' : `<details class="carte"><summary>Installer Étincelle sur mon téléphone</summary>
         <p>Pour la retrouver comme une application, sans passer par un magasin d'applications :</p>
         <button class="btn plein" id="btn-install" type="button" hidden>Installer Étincelle</button>
         <p class="petit"><b>iPhone</b> (Safari) : touchez le bouton Partager, puis « Sur l'écran d'accueil ».<br><b>Android</b> (Chrome) : touchez le menu ⋮, puis « Installer l'application » ou « Ajouter à l'écran d'accueil ».</p>
         <p class="petit">Si l'application vous redemande votre code après l'installation, saisissez-le simplement une fois de plus.</p>
-      </details>
+      </details>`}
 
       <details class="carte"><summary>Besoin d'un soutien ?</summary>
         <p>Vous n'avez pas à tout porter seul·e. Un professionnel de la structure qui vous accueille (référent famille, animateur, enseignant) peut vous écouter et vous orienter. En cas de besoin immédiat :</p>
