@@ -575,3 +575,6 @@ body.verrouille .brand-nom { display: none; }
 .av-bas-col { flex-direction: column !important; margin-top: 16px; }
 .av-lien { margin: 6px 0 0; font-size: clamp(1.1rem, 4.8vw, 1.35rem); font-weight: 500; line-height: 1.4; color: #2E2A2A; text-align: center; hyphens: none; -webkit-hyphens: none; }
 @media (min-width: 900px) { .av-bienvenue { font-size: 4.6rem; } .av-bas-col .av-logo { width: 150px; } .av-lien { font-size: 1.5rem; text-align: center; } }
+
+/* Essai gratuit : question centrée, comme les réponses */
+.essai-q{text-align:center}

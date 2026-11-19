@@ -479,7 +479,7 @@
       ${D.essai ? '' : `<details class="carte transmettre" data-sec="transmettre"${ouv(id, 'transmettre')}>
         <summary>Je transmets</summary>
         <h2>Ce que j'ai reçu, je le partage</h2>
-        <p>Vous avez vécu ce pétale en atelier : vous êtes un pionnier BRILLE. Ce qui compte, c'est ce que vous en faites ensuite, autour de vous.</p>
+        <p>Vous avez vécu ce pétale en atelier : vous faites partie des brilleurs·euses pionnier·ères de l'aventure BRILLE. Ce qui compte, c'est ce que vous en faites ensuite, autour de vous.</p>
         <ul class="transmettre-idees"><li>Racontez à un frère, une sœur ou un grand-parent ce que vous avez préféré.</li><li>Laissez votre enfant expliquer ce pétale à un ami, avec ses mots à lui.</li><li>Gardez un petit rituel en famille et invitez quelqu'un à le vivre avec vous.</li></ul>
         <button type="button" class="btn" data-partager="${esc(p.id)}">💌 Envoyer un petit mot à un proche</button>
       </details>`}
@@ -904,7 +904,7 @@
       <div class="grille-cartes">
       ${D.admin ? vueIngenieure() : ''}
       ${D.essai && D.fin ? `<div class="carte"><span class="etiquette">Mon essai gratuit</span><p style="margin:0">Votre essai dure jusqu'au <b>${dateLongue(D.fin)}</b> (${joursRestants(D.fin) <= 1 ? 'dernier jour' : joursRestants(D.fin) + ' jours restants'}). Ce que vous notez reste sur votre appareil. Il vous a plu ? ${achatActif() ? 'Retrouvez les accès ci-dessous.' : `Écrivez à <a href="mailto:${esc((D.config.contact || {}).email || '')}">${esc((D.config.contact || {}).email || 'BRILLE')}</a> pour continuer.`}</p></div>` : ''}
-      ${!D.admin && !D.essai && D.petales.some(x => x.ouvert) ? `<div class="carte transmettre"><span class="etiquette">🔥 Pionniers BRILLE</span><h2>À vous de transmettre</h2><p style="margin:0 0 10px">Vous avez vécu l'atelier : à votre tour, partagez ce que vous avez appris et reçu avec votre famille et vos proches. Votre accès reste personnel et limité aux pétales que vous avez vécus. Ceux que vous inspirez pourront, eux, ${essaiDispo() ? 'tester gratuitement une semaine' : 'découvrir BRILLE'}.</p><button type="button" class="btn plein" data-partager="">💌 Partager ce que j'ai vécu</button></div>` : ''}
+      ${!D.admin && !D.essai && D.petales.some(x => x.ouvert) ? `<div class="carte transmettre"><span class="etiquette">🔥 Brilleurs·euses pionnier·ères</span><h2>À vous de transmettre</h2><p style="margin:0 0 10px">Vous avez vécu l'atelier : à votre tour, partagez ce que vous avez appris et reçu avec votre famille et vos proches. Votre accès reste personnel et limité aux pétales que vous avez vécus. Ceux que vous inspirez pourront, eux, ${essaiDispo() ? 'tester gratuitement une semaine' : 'découvrir BRILLE'}.</p><button type="button" class="btn plein" data-partager="">💌 Partager ce que j'ai vécu</button></div>` : ''}
       ${!D.admin && !D.essai && D.fin ? `<div class="carte"><span class="etiquette">Mon accès</span><p style="margin:0">Votre accès est valable jusqu'au <b>${dateLongue(D.fin)}</b>. Pour le renouveler, écrivez à <a href="mailto:${esc((D.config.contact || {}).email || '')}">${esc((D.config.contact || {}).email || 'BRILLE')}</a>.</p></div>` : ''}
       ${achatActif() ? `<details class="carte"><summary>Ouvrir d'autres pétales</summary>
         <p>Vous voulez prolonger d'autres thèmes à la maison ? Découvrez les accès disponibles.</p>
