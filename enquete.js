@@ -1,5 +1,5 @@
 /* Étincelle · BRILLE — petit questionnaire d'avis (lancement)
-   Affiché seulement entre les dates « debut » et « fin » de enquete.json (incluses), puis il disparaît tout seul.
+   Affiché à partir de la date « debut » de enquete.json. Sans date « fin », il reste ouvert en permanence (si « fin » est ajoutée, il disparaît après).
    Réponses anonymes (ni nom, ni e-mail), envoyées vers la feuille Google de BRILLE.
    Sans « serveur » dans enquete.json, le questionnaire n'apparaît pas. */
 (() => {
@@ -16,7 +16,7 @@
     { id: 'activite', q: 'Avez-vous fait l\'activité de la semaine en famille ?', choix: ['Oui', 'En partie', 'Pas encore'] },
     { id: 'temps', q: 'Le temps demandé vous a semblé…', choix: ['Trop court', 'Juste bien', 'Trop long'] },
     { id: 'suite', q: 'Avez-vous envie de continuer avec la suite ?', choix: ['Oui', 'Peut-être', 'Non'] },
-    { id: 'prix', q: 'Pour un pétale à 12 € (prix de lancement), vous trouveriez ça…', choix: ['Trop cher', 'Correct', 'Pas cher'] }
+    { id: 'prix', q: iso(new Date()) <= '2026-12-18' ? 'Pour un pétale à 12 € (prix de lancement), vous trouveriez ça…' : 'Pour un pétale à 18 €, vous trouveriez ça…', choix: ['Trop cher', 'Correct', 'Pas cher'] }
   ];
 
   let cfg = null;
@@ -32,7 +32,7 @@
   const actif = () => {
     if (!cfg || cfg.actif === false || !String(cfg.serveur || '').trim()) return false;
     const auj = iso(new Date());
-    if (auj > (cfg.fin || '2026-12-18')) return false;       // après la date de fin : plus rien ne s'affiche
+    if (cfg.fin && auj > cfg.fin) return false;               // date de fin facultative : sans elle, le questionnaire reste ouvert
     if (cfg.debut && auj < cfg.debut) return false;           // avant la date de début : rien non plus
     const e = lireEtat();
     if (e.fait || e.plusTard === auj) return false;
@@ -57,7 +57,7 @@
   const html = () => `
     <span class="etiquette">💬 Votre avis compte</span>
     <h2>Aidez-moi à améliorer Étincelle</h2>
-    <p class="petit" style="margin:0 0 6px">5 petites questions, environ 1 minute. Réponses anonymes : je ne demande ni nom ni adresse e-mail. Ce questionnaire disparaît après le ${esc(dateLongue(cfg.fin || '2026-12-18'))}.</p>
+    <p class="petit" style="margin:0 0 6px">5 petites questions, environ 1 minute. Réponses anonymes : je ne demande ni nom ni adresse e-mail. ${cfg.fin ? `Ce questionnaire disparaît après le ${esc(dateLongue(cfg.fin))}.` : ''}</p>
     <button type="button" class="btn plein" data-enq="ouvrir">Je réponds</button>
     <form data-enq="form" hidden novalidate>
       ${QUESTIONS.map(x => `<fieldset><legend>${esc(x.q)}</legend>${x.choix.map(c => `<label class="opt"><input type="radio" name="${x.id}" value="${esc(c)}"> ${esc(c)}</label>`).join('')}</fieldset>`).join('')}
