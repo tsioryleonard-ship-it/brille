@@ -1120,7 +1120,7 @@
         <input type="text" id="nouveau-nom" placeholder="Nom (ex. Atelier mars, famille Martin)">
         <label class="petit" for="nb-codes">Nombre de codes à créer (un lot de 20 est pratique pour les ventes)</label>
         <input type="number" id="nb-codes" min="1" max="50" value="1">
-        <label for="duree" class="petit" style="display:block;margin-top:6px"><b>Durée de l'accès</b> (compte à partir d'aujourd'hui)</label>
+        <label for="duree" class="petit" style="display:block;margin-top:6px"><b>Durée de l'accès</b><br>Codes « pour la vente » (case ci-dessous) : la durée démarre à la <b>première ouverture du code</b> par la famille. Autres codes (partenaires, ateliers) : elle compte à partir d'aujourd'hui.</label>
         <select id="duree" style="width:100%;padding:10px 14px;border:2px solid #e4dcec;border-radius:16px;font:inherit;background:#fff;margin:4px 0 12px">
           <option value="">Sans limite (familles du centre social)</option>
           <option value="1m">1 mois (découverte pour une structure partenaire)</option>

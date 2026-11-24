@@ -235,4 +235,4 @@ Dans la barre du haut, « Étincelle » est maintenant centré, dans la police G
 - Chaque code doit être activé dans les 12 mois suivant son envoi (« à activer avant le … » sur la fiche de la famille). Passé ce délai, un message l'indique.
 - La date de première ouverture est gardée dans le navigateur de l'appareil : sur un autre appareil, ou après avoir vidé le navigateur, le compteur repart.
 - Les anciens codes avec date de fin fixe et les codes partenaires (1 ou 3 mois) ne changent pas.
-- Fichiers à publier : `acces-lib.js`, `app.js`, `sw.js`, `legal.html` (article 7), puis « Préparer les fichiers » pour `acces.json` et `contenu.enc.json`.
+- Fichiers à publier : `acces-lib.js`, `app.js`, `sw.js` (v83), `legal.html` (article 7), puis « Préparer les fichiers » pour `acces.json` et `contenu.enc.json`.
