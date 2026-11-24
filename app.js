@@ -134,6 +134,15 @@
       else if (!s || (!s.actif && !s.bloque)) { ecrireEssai({ p: ess, d: iso(new Date()) }); s = essaiEtat(); }     // sans serveur : démarrage local
       r.fin = s.fin;
     }
+    if (r.duree && !r.admin && !ess) {                  // accès dont la durée démarre à la 1re ouverture du code (sur cet appareil)
+      const cleDeb = 'brille-etincelle-debut-' + Acces.norm(code);
+      let deb = ''; try { deb = localStorage.getItem(cleDeb) || ''; } catch { }
+      if (!deb) {
+        if (r.limite && iso(new Date()) > r.limite) { const e = new Error('expire'); e.fin = r.limite; e.limite = true; throw e; }   // jamais activé à temps
+        deb = iso(new Date()); try { localStorage.setItem(cleDeb, deb); } catch { }
+      }
+      const dd = new Date(deb + 'T12:00:00'); dd.setFullYear(dd.getFullYear() + (r.duree === '5a' ? 5 : 1)); r.fin = iso(dd);
+    }
     if (r.fin && !r.admin && iso(new Date()) > r.fin) { const e = new Error('expire'); e.fin = r.fin; e.essai = !!ess; throw e; }
     document.body.dataset.admin = r.admin ? '1' : ''; D.details = ess ? Object.fromEntries(Object.entries(r.details || {}).map(([k, v]) => { const w = Object.assign({}, v); delete w.parcours; return [k, w]; })) : r.details;   // essai : pas de parcours d'un mois
     D.admin = r.admin; D.nom = ess ? 'Essai BRILLE' : r.nom; D.fin = r.admin ? '' : r.fin; D.essai = ess; D.apercu = null;
@@ -151,6 +160,7 @@
     ? `Vous avez déjà un essai en cours sur « ${titreEnfant(x.p)} », jusqu'au ${dateLongue(x.fin)}. Un seul pétale à la fois : reprenez-le avec son code.`
     : x && x.message === 'expire'
     ? (x.essai ? `Votre semaine d'essai s'est terminée le ${dateLongue(x.fin)}. Merci d'avoir testé Étincelle ! Pour continuer ce pétale, ${achatActif() ? 'touchez « Obtenir un accès » ci-dessous' : 'écrivez à ' + ((D.config.contact || {}).email || 'BRILLE')}.`
+      : x.limite ? `Ce code devait être activé avant le ${dateLongue(x.fin)}. Écrivez à ${(D.config.contact || {}).email || 'BRILLE'}, je vous aide.`
       : `Votre accès s'est terminé le ${dateLongue(x.fin)}. Pour le renouveler, écrivez à ${(D.config.contact || {}).email || 'BRILLE'}.`)
     : '';
   function verrouiller() {
@@ -1054,7 +1064,7 @@
         <input type="text" class="nomf" value="${esc(f.nom)}" aria-label="Nom de la famille ou du groupe"${f.admin || f.essai ? ' disabled' : ''}>
         <p>Code : <code>${f.essai ? '••••-••••' : esc(f.code)}</code></p>
         ${f.essai ? '<p class="petit" style="margin:2px 0 10px">Ce code est utilisé automatiquement par l\'essai gratuit (après la vérification par e-mail). Ne le modifiez pas, ne le retirez pas.</p>' : ''}
-        ${f.admin || f.essai ? '' : `<label class="petit" style="display:block">Fin d'accès ${f.fin && iso(new Date()) > f.fin ? '<b style="color:#a33">(terminée)</b>' : ''}
+        ${f.admin || f.essai ? '' : f.duree ? `<p class="petit" style="margin:2px 0 10px">⏳ Accès de ${f.duree === '5a' ? '5 ans' : '12 mois'} à partir de la première ouverture du code, à activer avant le <b>${f.limite ? dateLongue(f.limite) : '—'}</b>.</p>` : `<label class="petit" style="display:block">Fin d'accès ${f.fin && iso(new Date()) > f.fin ? '<b style="color:#a33">(terminée)</b>' : ''}
           <input type="date" class="finf" value="${esc(f.fin || '')}" style="padding:6px 10px;border:2px solid #e4dcec;border-radius:12px;font:inherit;margin-left:6px"></label>
         <p class="petit" style="margin:2px 0 10px">${f.fin ? '' : 'Sans limite de durée. '}Laissez vide pour un accès sans date de fin.</p>`}
         <p class="petit">Ajouté le ${esc(f.ajout || '')}${f.vente ? ' · ' + (f.envoye ? 'envoyé le ' + esc(f.envoye) + (f.acheteur ? ' à ' + esc(f.acheteur) : '') : (f.publie ? 'disponible pour la vente' : 'à publier')) : ''}</p>
@@ -1190,7 +1200,7 @@
     if (prochain) prochain.addEventListener('click', async () => {
       const fm = selForm.value, ach = ($app.querySelector('#acheteur').value || '').trim();
       const dureeAns = fm === 'fleur5' ? 5 : 1;
-      const finDans = () => { const d = new Date(); d.setFullYear(d.getFullYear() + dureeAns); return iso(d); };
+      const limiteDans = () => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); return iso(d); };   // dernier jour pour activer le code
       let f, cree = false;
       if (fm === 'petale') {
         const pid = $app.querySelector('#petale-choix').value;
@@ -1201,9 +1211,9 @@
         f = stockDe(carnet, fm)[0];
         if (!f) { st('Plus de code « ' + FORMULES[fm] + ' » en stock : créez un nouveau lot de cette formule (case « pour la vente »), puis publiez les fichiers.'); return; }
       }
-      f.fin = finDans(); f.envoye = iso(new Date()); if (ach) f.acheteur = ach; ecrireCarnet(carnet);
+      f.duree = dureeAns === 5 ? '5a' : '12m'; f.limite = limiteDans(); f.fin = ''; f.envoye = iso(new Date()); if (ach) f.acheteur = ach; ecrireCarnet(carnet);
       await copier(msgAchat(f), '');
-      rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Message copié (code ' + f.code + ', ' + FORMULES[fm] + ', fin le ' + f.fin + '). ' + (cree ? 'Code créé à l\'instant : cliquez sur « Préparer les fichiers » et publiez sur GitHub AVANT d\'envoyer le message, sinon il ne fonctionnera pas.' : 'Pensez à republier (« Préparer les fichiers ») pour que la date de fin soit à jour.'); }
+      rendre(); const e = $app.querySelector('#st'); if (e) { e.style.color = '#2f6b2f'; e.textContent = 'Message copié (code ' + f.code + ', ' + FORMULES[fm] + ', ' + (f.duree === '5a' ? '5 ans' : '12 mois') + ' à partir de la première ouverture, à activer avant le ' + f.limite + '). ' + (cree ? 'Code créé à l\'instant : cliquez sur « Préparer les fichiers » et publiez sur GitHub AVANT d\'envoyer le message, sinon il ne fonctionnera pas.' : 'Pensez à republier (« Préparer les fichiers ») pour que ce code soit à jour.'); }
     });
     $app.querySelectorAll('details[data-b]').forEach(d => d.addEventListener('toggle', () => { if (d.open) dossiersOuverts.add(d.dataset.b); else dossiersOuverts.delete(d.dataset.b); }));
     $app.querySelectorAll('.tuile').forEach(t => t.addEventListener('click', () => { dossierActif = dossierActif === t.dataset.k ? '' : t.dataset.k; rendre(); const c = $app.querySelector('#contenu-dossier'); if (c) c.scrollIntoView({ block: 'nearest' }); }));

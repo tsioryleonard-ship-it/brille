@@ -228,3 +228,11 @@ Dans « Gérer les familles », les 7 lignes « Essai · … » sont en **orange
 ## Version 45-46 : titre « Étincelle » centré, police Gruppo, surligné en vert
 
 Dans la barre du haut, « Étincelle » est maintenant centré, dans la police Gruppo des titres (contour noir), avec le surlignage vert de la charte, entre le logo BRILLE à gauche et le bouton son à droite.
+
+## Version 82 : la durée d'accès démarre à la première ouverture du code
+
+- Les codes d'achat (bouton « Prochain code ») ne portent plus de date de fin fixe : ils ouvrent 12 mois (ou 5 ans pour l'accès longue durée) à partir de la **première ouverture** du code, sur l'appareil de la famille. Utile pour les cartes cadeaux : le temps ne s'écoule qu'une fois le cadeau utilisé.
+- Chaque code doit être activé dans les 12 mois suivant son envoi (« à activer avant le … » sur la fiche de la famille). Passé ce délai, un message l'indique.
+- La date de première ouverture est gardée dans le navigateur de l'appareil : sur un autre appareil, ou après avoir vidé le navigateur, le compteur repart.
+- Les anciens codes avec date de fin fixe et les codes partenaires (1 ou 3 mois) ne changent pas.
+- Fichiers à publier : `acces-lib.js`, `app.js`, `sw.js`, `legal.html` (article 7), puis « Préparer les fichiers » pour `acces.json` et `contenu.enc.json`.

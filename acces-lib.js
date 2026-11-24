@@ -54,6 +54,7 @@
       if (f.admin) cles._admin = '1';
       cles._nom = f.nom || '';
       if (f.fin && !f.admin) cles._fin = f.fin;
+      if (f.duree && !f.admin) { cles._duree = f.duree; if (f.limite) cles._limite = f.limite; }   // durée comptée à partir de la 1re ouverture du code
       const iv = alea(12);
       const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wk, enc.encode(JSON.stringify(cles))));
       familles.push({ id, iv: b64(iv), k: b64(ct) });
@@ -82,7 +83,7 @@
       try { details[p] = JSON.parse(dec.decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(c.iv) }, await cleAES(unb64(cles[p]), ['decrypt']), unb64(c.data)))); } catch { }
     }
     if (!Object.keys(details).length) throw new Error('vide');
-    return { details, admin: cles._admin === '1', nom: cles._nom || '', fin: cles._fin || '' };
+    return { details, admin: cles._admin === '1', nom: cles._nom || '', fin: cles._fin || '', duree: cles._duree || '', limite: cles._limite || '' };
   }
 
   g.Acces = { nouveauCode, nouveauCarnet, ajouterFamille, renouvelerCles, fabriquer, ouvrir, norm };
