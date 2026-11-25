@@ -1,8 +1,8 @@
 // Service worker : permet d'ouvrir l'application même sans réseau.
 // Quand vous modifiez index.html, app.js ou style.css, changez simplement le numéro de VERSION ci-dessous.
-const VERSION = 'etincelle-v86';
+const VERSION = 'etincelle-v87';
 const FICHIERS = [
-  './', 'index.html', 'legal.html', 'merci.html', 'style.css', 'jeu.css', 'app.js', 'jeu.js', 'enquete.js', 'enquete.json', 'manifest.webmanifest',
+  './', 'index.html', 'legal.html', 'merci.html', 'style.css', 'jeu.css', 'app.js', 'jeu.js', 'enquete.js', 'noel.js', 'enquete.json', 'manifest.webmanifest',
   'acces-lib.js', 'qrcode.js', 'config.json', 'vitrine.json', 'acces.json', 'contenu.enc.json', 'formes.json', 'centre.png',
   'logo-brille.png', 'logo-etincelle.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'favicon.png', 'apple-touch-icon.png',
   'p-emotions.png', 'p-apprentissages.png', 'p-liens.png', 'p-droits.png',
