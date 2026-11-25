@@ -30,7 +30,7 @@
         "poids": 2,
         "choix": [
           {
-            "t": "Le temps qui file : les matins, les devoirs, les routines",
+            "t": "Le temps qui file : les matins, les routines, l'organisation",
             "petale": "organisation"
           },
           {
@@ -38,7 +38,7 @@
             "petale": "emotions"
           },
           {
-            "t": "L'école : la motivation, le stress, les apprentissages",
+            "t": "Les apprentissages : la curiosité, la motivation, le stress",
             "petale": "apprentissages"
           },
           {
@@ -67,7 +67,7 @@
             "petale": "organisation"
           },
           {
-            "t": "Après l'école, les devoirs",
+            "t": "Les moments d'apprentissage (jeu, école, devoirs)",
             "petale": "apprentissages"
           },
           {

@@ -236,3 +236,10 @@ Dans la barre du haut, « Étincelle » est maintenant centré, dans la police G
 - La date de première ouverture est gardée dans le navigateur de l'appareil : sur un autre appareil, ou après avoir vidé le navigateur, le compteur repart.
 - Les anciens codes avec date de fin fixe et les codes partenaires (1 ou 3 mois) ne changent pas.
 - Fichiers à publier : `acces-lib.js`, `app.js`, `sw.js` (v83), `legal.html` (article 7), puis « Préparer les fichiers » pour `acces.json` et `contenu.enc.json`.
+
+## Variantes d'âge (moins de 6 ans · 6-12 ans · 13-18 ans)
+
+- Le contenu d'origine reste celui des 6-12 ans. Les variantes « moins de 6 ans » et « 13-18 ans » sont dans le fichier privé `variantes-ages-PRIVE.json` (jamais sur GitHub).
+- Dans l'application, la famille choisit l'âge dans la carte « Notre famille » (« Âge de l'enfant avec qui vous vivez l'aventure »). Les textes des pétales, les tuiles « À essayer », les 35 défis, l'activité à faire ensemble et les parcours d'un mois s'adaptent. Le choix reste sur l'appareil.
+- Pour publier : ouvrez l'application avec votre accès de gestion, « Plus », « Gérer les familles ». Chargez dans l'ordre les parcours, les défis, les tuiles « À essayer », puis la carte « Ajouter les variantes d'âge » avec `variantes-ages-PRIVE.json`. Puis « Préparer les fichiers à publier » et déposez `acces.json` et `contenu.enc.json` sur GitHub avec `app.js`, `sw.js`, `config.json` et `vitrine.json`.
+- Les familles en essai gardent l'essai sans parcours d'un mois, quel que soit l'âge.

@@ -93,8 +93,19 @@
   };
   const joursRestants = fin => Math.max(0, Math.round((new Date(fin + 'T00:00:00') - jour(new Date())) / 86400000) + 1);
   const titreEnfant = id => { const v = (D.vitrine || []).find(x => x.id === id); return v ? (v.miroir || v.titre) : id; };
+  /* Âge des enfants : p = moins de 6 ans, e = 6 à 12 ans (contenu de base), a = 13 à 18 ans. Choisi par la famille, gardé sur l'appareil. */
+  const AGES = [['p', 'Moins de 6 ans'], ['e', '6 à 12 ans'], ['a', '13 à 18 ans']];
+  const ageFamille = () => { try { const a = ((charger().famille || {}).age); return a === 'p' || a === 'a' ? a : 'e'; } catch { return 'e'; } };
+  function varier(det) {                              // applique la variante d'âge (sans jamais modifier D.details)
+    const v = det && det.v && det.v[ageFamille()]; if (!v) return det;
+    const o = Object.assign({}, det); delete o.v;
+    Object.keys(v).forEach(k => { if (k !== 'defis' && k !== 'parcours') o[k] = v[k]; });
+    if (v.defis && Array.isArray(o.defis)) o.defis = o.defis.map(d => (v.defis[d.id] ? Object.assign({}, d, v.defis[d.id]) : d));
+    if (v.parcours && o.parcours) o.parcours = Object.assign({}, o.parcours, v.parcours);
+    return o;
+  }
   function composer(ouverts) {                        // ouverts : liste d'identifiants de pétales ouverts
-    D.petales = D.vitrine.map(v => Object.assign({}, v, D.details[v.id] || {}, { ouvert: ouverts.includes(v.id) && !!D.details[v.id] }));
+    D.petales = D.vitrine.map(v => Object.assign({}, v, varier(D.details[v.id]) || {}, { ouvert: ouverts.includes(v.id) && !!D.details[v.id] }));
     D.defis = D.petales.filter(p => p.ouvert).flatMap(p => p.defis || []).sort((a, b) => a.id.localeCompare(b.id));
   }
   /* Protection : filigrane au nom de la famille + freins au copier-coller / à l'impression (dissuasion : une capture d'écran reste possible) */
@@ -144,7 +155,7 @@
       const dd = new Date(deb + 'T12:00:00'); dd.setFullYear(dd.getFullYear() + (r.duree === '5a' ? 5 : 1)); r.fin = iso(dd);
     }
     if (r.fin && !r.admin && iso(new Date()) > r.fin) { const e = new Error('expire'); e.fin = r.fin; e.essai = !!ess; throw e; }
-    document.body.dataset.admin = r.admin ? '1' : ''; D.details = ess ? Object.fromEntries(Object.entries(r.details || {}).map(([k, v]) => { const w = Object.assign({}, v); delete w.parcours; return [k, w]; })) : r.details;   // essai : pas de parcours d'un mois
+    document.body.dataset.admin = r.admin ? '1' : ''; D.details = ess ? Object.fromEntries(Object.entries(r.details || {}).map(([k, v]) => { const w = Object.assign({}, v); delete w.parcours; if (w.v) { w.v = Object.assign({}, w.v); Object.keys(w.v).forEach(b => { const x = Object.assign({}, w.v[b]); delete x.parcours; w.v[b] = x; }); } return [k, w]; })) : r.details;   // essai : pas de parcours d'un mois
     D.admin = r.admin; D.nom = ess ? 'Essai BRILLE' : r.nom; D.fin = r.admin ? '' : r.fin; D.essai = ess; D.apercu = null;
     appliquerProtection();
     composer(Object.keys(r.details));
@@ -333,8 +344,11 @@
       <p class="petit">L'aventure se vit ensemble. Indiquez le nom de famille et les prénoms de tous les enfants : ils seront sur vos cartes souvenirs, pour que personne ne soit oublié. Ces informations restent sur cet appareil.</p>
       <label for="fam-parents" class="aide">Le nom de famille</label>
       <input type="text" id="fam-parents" maxlength="60" value="${esc(f.parents)}" placeholder="Ex. Martin" autocomplete="off">
-      <label for="fam-enfant" class="aide">Les enfants de 6 à 12 ans : jusqu'à ${MAX_ENFANTS}</label>
+      <label for="fam-enfant" class="aide">Les enfants de la famille (moins de 18 ans) : jusqu'à ${MAX_ENFANTS}</label>
       <ul class="puces-enfants" aria-label="Enfants de la famille">${puces}</ul>
+      <label for="fam-age" class="aide">Âge de l'enfant avec qui vous vivez l'aventure</label>
+      <select id="fam-age" aria-describedby="fam-age-aide">${AGES.map(([k, t]) => `<option value="${k}"${ageFamille() === k ? ' selected' : ''}>${t}</option>`).join('')}</select>
+      <p class="petit" id="fam-age-aide">Les défis, les parcours et les conseils s'adaptent à cet âge. Plusieurs enfants d'âges différents ? Choisissez celui avec qui vous vivez le défi, et changez quand vous voulez.</p>
       <div class="fam-ajout"><input type="text" id="fam-enfant" maxlength="24" placeholder="Prénom d'un enfant" autocomplete="off"><button type="button" class="btn plein" id="fam-ajouter">Ajouter</button></div>
       <p class="ok" id="fam-ok" role="status"></p>
     </details>`;
@@ -357,6 +371,10 @@
       const c = $app.querySelector('#fam-enfant'); if (c) c.focus({ preventScroll: true });
       const o = $app.querySelector('#fam-ok'); if (o) o.textContent = ok ? `${nom} est dans l'aventure !` : 'Impossible d\'enregistrer sur cet appareil.';
     };
+    zone.querySelector('#fam-age').addEventListener('change', e => {
+      const v = e.target.value; famille().age = (v === 'p' || v === 'a') ? v : 'e'; sauver();
+      composer(D.petales.filter(p => p.ouvert).map(p => p.id)); familleOuverte = true; rendre();
+    });
     zone.querySelector('#fam-ajouter').addEventListener('click', ajouter);
     zone.querySelector('#fam-enfant').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ajouter(); } });
     zone.querySelectorAll('.puces-enfants .x').forEach(b => b.addEventListener('click', () => { famille().enfants.splice(Number(b.dataset.i), 1); sauver(); redessiner(); }));
@@ -1136,6 +1154,9 @@
       ${plie('parcours', 'Ajouter les parcours d\'un mois')}
         <p class="petit">Choisissez le fichier <b>parcours-mensuels-PRIVE.json</b> (sur votre ordinateur, jamais sur GitHub). Les parcours sont ajoutés aux pétales, puis chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
         <input type="file" id="f-parcours" accept=".json"><p class="erreur" id="st-parcours" role="status"></p></details>
+      ${plie('variantes', 'Ajouter les variantes d\'âge (moins de 6 ans, 13-18 ans)')}
+        <p class="petit">Choisissez le fichier <b>variantes-ages-PRIVE.json</b> (sur votre ordinateur, jamais sur GitHub). Les variantes sont ajoutées aux pétales, puis chiffrées avec les autres contenus. Chargez-le <b>après</b> les parcours, les défis et les tuiles. Vos codes ne changent pas.</p>
+        <input type="file" id="f-variantes" accept=".json"><p class="erreur" id="st-variantes" role="status"></p></details>
       ${plie('defis', 'Remplacer les défis de la semaine')}
         <p class="petit">Choisissez le fichier <b>defis.json</b> (sur votre ordinateur, jamais sur GitHub). Les défis remplacent les anciens dans chaque pétale, puis sont chiffrés avec les autres contenus. Vos codes ne changent pas.</p>
         <input type="file" id="f-defis" accept=".json"><p class="erreur" id="st-defis" role="status"></p></details>
@@ -1262,6 +1283,30 @@
         Object.keys(d).forEach(id => { if (D.details[id] && d[id] && Array.isArray(d[id].semaines) && d[id].semaines.length === 4) { D.details[id].parcours = d[id]; const x = D.petales.find(q => q.id === id); if (x) x.parcours = d[id]; n++; } });
         if (!n) throw new Error('vide');
         m.style.color = ''; m.textContent = n + ' parcours ajoutés. Cliquez maintenant sur « Préparer les fichiers à publier ».';
+      } catch { m.style.color = '#a33'; m.textContent = 'Ce fichier n\'est pas valide.'; }
+    });
+    const fv = $app.querySelector('#f-variantes');
+    if (fv) fv.addEventListener('change', async e => {
+      const f = e.target.files[0], m = $app.querySelector('#st-variantes'); if (!f) return;
+      try {
+        const d = JSON.parse(await f.text()); let n = 0;
+        const ids = Object.keys(D.details || {});
+        ids.forEach(id => {
+          const v = {};
+          ['p', 'a'].forEach(b => {
+            const o = {};
+            const pet = d.petales && d.petales[id] && d.petales[id][b]; if (pet && typeof pet === 'object') Object.assign(o, pet);
+            const pc = d.pratiquesCourtes && d.pratiquesCourtes[id] && d.pratiquesCourtes[id][b]; if (Array.isArray(pc) && pc.every(x => x && x.t)) o.pratiquesCourtes = pc;
+            const par = d.parcours && d.parcours[id] && d.parcours[id][b]; if (par && Array.isArray(par.semaines) && par.semaines.length === 4) o.parcours = par;
+            const df = {}; Object.keys(d.defis || {}).forEach(k => { if (k.split('-')[0] === id && d.defis[k][b] && d.defis[k][b].titre && d.defis[k][b].consigne) df[k] = d.defis[k][b]; });
+            if (Object.keys(df).length) o.defis = df;
+            if (Object.keys(o).length) v[b] = o;
+          });
+          if (Object.keys(v).length) { D.details[id].v = v; n++; }
+        });
+        if (!n) throw new Error('vide');
+        composer(D.petales.filter(p => p.ouvert).map(p => p.id));
+        m.style.color = ''; m.textContent = n + ' pétales avec variantes d\'âge. Cliquez maintenant sur « Préparer les fichiers à publier ».';
       } catch { m.style.color = '#a33'; m.textContent = 'Ce fichier n\'est pas valide.'; }
     });
     const fd = $app.querySelector('#f-defis');
