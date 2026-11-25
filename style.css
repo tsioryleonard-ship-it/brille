@@ -578,3 +578,7 @@ body.verrouille .brand-nom { display: none; }
 
 /* Essai gratuit : question centrée, comme les réponses */
 .essai-q{text-align:center}
+
+/* Choix de l'âge (Notre famille) : même police et même style que les champs */
+#fam-age { width: 100%; font: inherit; font-family: 'Quicksand', sans-serif; font-weight: 600; color: inherit; padding: 11px 12px; border: 2px solid #e4dcec; border-radius: 14px; margin: 2px 0 10px; background: #fff; }
+#fam-age option { font-family: 'Quicksand', sans-serif; }
