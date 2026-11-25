@@ -26,7 +26,7 @@
     "codes": {},
     "questions": [
       {
-        "q": "Ces temps-ci, qu'est-ce qui pèse le plus dans votre quotidien de famille ?",
+        "q": "Ces temps-ci, qu'est-ce qui pèse le plus dans le quotidien de votre famille ?",
         "poids": 2,
         "choix": [
           {
@@ -34,11 +34,11 @@
             "petale": "organisation"
           },
           {
-            "t": "Les colères, les larmes, les débordements",
+            "t": "Les émotions fortes : colères, larmes, portes qui claquent",
             "petale": "emotions"
           },
           {
-            "t": "Les apprentissages : la curiosité, la motivation, le stress",
+            "t": "Les apprentissages : l'école, les devoirs, la motivation, le stress",
             "petale": "apprentissages"
           },
           {
@@ -46,7 +46,7 @@
             "petale": "liens"
           },
           {
-            "t": "Les règles, les limites, les disputes sur le cadre",
+            "t": "Les règles, les limites, les négociations (écrans, sorties…)",
             "petale": "droits"
           },
           {
@@ -60,43 +60,43 @@
         ]
       },
       {
-        "q": "Quel moment de la journée aimeriez-vous rendre plus doux ?",
+        "q": "Quel moment de la journée aimeriez-vous rendre plus doux, en famille ?",
         "choix": [
           {
             "t": "Le matin, avant de partir",
             "petale": "organisation"
           },
           {
-            "t": "Les moments d'apprentissage (jeu, école, devoirs)",
+            "t": "Les temps d'apprentissage (jeux, école, devoirs, révisions)",
             "petale": "apprentissages"
           },
           {
-            "t": "Le repas et les conversations",
+            "t": "Les repas et les conversations",
             "petale": "liens"
           },
           {
-            "t": "Le soir, le coucher",
+            "t": "Le soir : coucher, écrans, fin de journée",
             "petale": "equilibre"
           }
         ]
       },
       {
-        "q": "Pour votre enfant, vous aimeriez surtout...",
+        "q": "Pour vos enfants, quel que soit leur âge, vous aimeriez surtout…",
         "choix": [
           {
-            "t": "Qu'il dise ce qu'il ressent, sans tout garder pour lui",
+            "t": "Qu'ils disent ce qu'ils ressentent, sans tout garder pour eux",
             "petale": "emotions"
           },
           {
-            "t": "Qu'il se sente écouté et respecté",
+            "t": "Qu'ils se sentent écoutés et respectés",
             "petale": "droits"
           },
           {
-            "t": "Qu'il prenne confiance en lui",
+            "t": "Qu'ils prennent confiance en eux",
             "petale": "briller"
           },
           {
-            "t": "Qu'il se sente bien dans son quotidien",
+            "t": "Qu'ils se sentent bien dans leur quotidien",
             "petale": "equilibre"
           }
         ]
