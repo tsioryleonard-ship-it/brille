@@ -1,5 +1,5 @@
 /* Étincelle · BRILLE — habillage de Noël (automatique)
-   Visible du 25 novembre 2026 au 6 janvier 2027, puis disparaît tout seul. Aucune publication à refaire.
+   RETIRÉ le 26 nov. 2026 : n'apparaît plus nulle part (accueil, « Cette semaine », pétales). Pour le rétablir : remplacez « : false » par « : (auj >= DEBUT && auj <= FIN) » à la ligne « const actif ».
    Pour l'essayer à tout moment : ajoutez ?noel=1 à l'adresse de l'application (?noel=0 pour le cacher).
    Le vert Étincelle (#cbe1b6) reste la couleur principale : on ajoute seulement de la neige et un petit mot. */
 (() => {
@@ -9,7 +9,7 @@
   let force = null;
   try { const m = location.search.match(/[?&]noel=([01])/); if (m) force = m[1] === '1'; } catch { }
   const auj = iso(new Date());
-  const actif = force !== null ? force : (auj >= DEBUT && auj <= FIN);
+  const actif = force !== null ? force : false;   // désactivé par défaut (neige et mot de fêtes retirés) : ?noel=1 le réactive pour essayer
   if (!actif) return;
 
   const sobre = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;

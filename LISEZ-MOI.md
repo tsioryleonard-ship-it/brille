@@ -264,3 +264,7 @@ Dans la barre du haut, « Étincelle » est maintenant centré, dans la police G
 - Carte souvenir : message de la tranche d'âge quand elle est unique, message « famille » quand les âges sont mélangés.
 - Les familles qui avaient choisi un âge avant gardent leur choix tant qu'elles n'indiquent pas l'âge des enfants. Les âges restent sur l'appareil, avec les prénoms.
 - Fichiers à publier : `app.js`, `style.css`, `sw.js` (v92). Rien à régénérer pour les contenus. Anciennes versions dans `_avant-ages-enfants`.
+
+## Version 93 : habillage de Noël retiré
+
+- La neige et le mot « Joyeuses fêtes en famille ! » n'apparaissent plus nulle part (accueil, « Cette semaine », pétales). Fichiers à publier : `noel.js`, `sw.js` (v93). `?noel=1` à la fin de l'adresse permet de le revoir pour essayer ; la marche à suivre pour le rétablir est écrite en haut de `noel.js`. Anciennes versions dans `_avant-sans-neige`.
