@@ -78,6 +78,10 @@
   const debloquer = () => { ac(); };
   ['pointerdown', 'touchstart', 'keydown'].forEach(ev => document.addEventListener(ev, debloquer, { once: true, passive: true }));
 
+  /* Couleur de fond pleine : on remonte les parents jusqu'à une couleur sans transparence (sinon la page se voit à travers la mission) */
+  const peuOpaque = c => { if (!c || c === 'transparent') return false; const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return true; const p = m[1].split(','); return p.length < 4 || parseFloat(p[3]) >= .95; };
+  function couleurSolide(el, repli) { for (let x = el; x && x.nodeType === 1; x = x.parentElement) { const c = getComputedStyle(x).backgroundColor; if (peuOpaque(c)) return c; } return repli || '#fdd5a5'; }
+
   /* ---------- Voix : lecture à voix haute des étapes ---------- */
   const VOIX_OK = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
   let VOIX = [], GARDE = [], AUTO = false;
@@ -85,7 +89,7 @@
   const chargerVoix = () => { try { VOIX = speechSynthesis.getVoices() || []; } catch { } };
   if (VOIX_OK) { chargerVoix(); try { speechSynthesis.onvoiceschanged = chargerVoix; } catch { } }
   const voixFr = () => { if (!VOIX.length) chargerVoix(); return VOIX.find(v => /^fr[-_]FR$/i.test(v.lang) && /(google|thomas|amelie|audrey|hortense|julie|denise|eloise)/i.test(v.name)) || VOIX.find(v => /^fr/i.test(v.lang)) || null; };
-  const nettoyer = t => String(t).replace(/[\u{1F300}-\u{1FAFF}☀-➿️✓✕]/gu, '').replace(/\s+/g, ' ').trim();
+  const nettoyer = t => String(t).replace(/[\u{1F300}-\u{1FAFF}☀-➿️✓✕]/gu, '').replace(/[·•]/g, ', ').replace(/\s+/g, ' ').trim();
   function arreter() { try { if (VOIX_OK && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel(); } catch { } GARDE = []; }
   function lire(texte) {
     if (!VOIX_OK) { bandeau('Lecture à voix haute indisponible', 'Essayez avec Chrome ou Safari.'); return false; }
@@ -234,7 +238,7 @@
     const titre = opts.titre || (carte.querySelector('h2') || {}).textContent || 'Mission';
     const meta = opts.meta || [...carte.querySelectorAll('.meta span')].map(s => s.textContent.trim());
     const questions = opts.questions || [...carte.querySelectorAll('.parler li')].map(li => li.textContent.trim()).filter(Boolean);
-    const couleur = opts.couleur || getComputedStyle(carte).backgroundColor;
+    const couleur = couleurSolide(carte);
     const total = etapes.length;
     let pos = 0, qi = -1, fini = false;
     const ov = document.createElement('div'); ov.className = 'jeu-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Mission : ' + titre);
@@ -270,12 +274,13 @@
       if (f) f.focus({ preventScroll: true });
       if (lecture && AUTO && SON) lire(lecture); else arreter();
     }
+    const phraseIntro = `${total} petites étapes, une à la fois. Prenez votre temps, il n'y a ni note ni chrono. Prêts ?`;
     function intro() {
       pos = 0;
       montrer(`<div class="jeu-gros" aria-hidden="true"><svg class="ico-puzzle" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z" fill="#cbe1b6" stroke="#2E2A2A" stroke-width="1.2" stroke-linejoin="round"/></svg></div><h2>Mission : ${esc(titre)}</h2>
         <p class="jeu-meta">${meta.map(esc).join('<br>')}</p>
-        <p>${total} petites étapes, une à la fois. Prenez votre temps, il n'y a ni note ni chrono. Prêts ?</p>
-        <button type="button" class="btn plein" id="j-go">C'est parti ! 🚀</button>`, null, `Mission : ${titre}. ${total} petites étapes, une à la fois. Prenez votre temps. Prêts ?`);
+        <p>${phraseIntro}</p>
+        <button type="button" class="btn plein" id="j-go">C'est parti ! 🚀</button>`, null, `Mission : ${titre}. ${meta.join('. ')}. ${phraseIntro}`);
       ecran.querySelector('#j-go').addEventListener('click', () => { sfx('etape', 0); etape(0); });
     }
     function etape(i) {
@@ -313,7 +318,7 @@
       montrer(`<div class="jeu-gros" aria-hidden="true">🏆</div><h2>Semaine vécue !</h2>
         <p>Bravo : vous avez avancé ensemble. La semaine suivante vient de s'ouvrir.</p>
         ${nouveau ? '<p class="jeu-gain">+6 ✨</p>' : ''}
-        <button type="button" class="btn plein" id="j-fermer">Retour au parcours 🌸</button>`, '#j-fermer', 'Semaine vécue ! Bravo, vous avez avancé ensemble. La semaine suivante vient de s\'ouvrir.');
+        <button type="button" class="btn plein" id="j-fermer">Retour au parcours 🌸</button>`, '#j-fermer', 'Semaine vécue ! Bravo : vous avez avancé ensemble. La semaine suivante vient de s\'ouvrir.');
       sfx('fanfare'); petalesVolants(innerWidth / 2, innerHeight / 3, 34);
       ecran.querySelector('#j-fermer').addEventListener('click', () => { sfx('pop'); fermer(); });
     }
@@ -328,7 +333,7 @@
       montrer(`<div class="jeu-gros" aria-hidden="true">🏆</div><h2>Mission accomplie !</h2>
         <p>Bravo : vous avez vécu ce moment ensemble. C'est ça, la qualité de vie de l'enfant qui grandit.</p>
         <p class="jeu-gain">+${gain} ✨</p>
-        <button type="button" class="btn plein" id="j-fermer">Retour à la fleur 🌸</button>`, '#j-fermer', 'Mission accomplie ! Bravo, vous avez vécu ce moment ensemble.');
+        <button type="button" class="btn plein" id="j-fermer">Retour à la fleur 🌸</button>`, '#j-fermer', 'Mission accomplie ! Bravo : vous avez vécu ce moment ensemble. C\'est ça, la qualité de vie de l\'enfant qui grandit.');
       sfx('fanfare'); petalesVolants(innerWidth / 2, innerHeight / 3, 34);
       gagner(gain, ecran.querySelector('.jeu-gain'), 'fin');
       ecran.querySelector('#j-fermer').addEventListener('click', () => { sfx('pop'); fermer(); location.hash = '#/'; });
@@ -389,7 +394,7 @@
     if (document.querySelector('.jeu-fete')) return;
     const zone = app.querySelector('#parcours');
     const titre = zone ? (zone.querySelector('h2') || {}).textContent : '';
-    const couleur = zone ? getComputedStyle(zone).backgroundColor : '#fdd5a5';
+    const couleur = zone ? couleurSolide(zone) : '#fdd5a5';
     const ov = document.createElement('div'); ov.className = 'jeu-ov jeu-fete'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Un mois ensemble');
     ov.style.setProperty('--c', couleur);
     ov.innerHTML = `<div class="jeu-ov-in"><div class="jeu-ecran entre">
