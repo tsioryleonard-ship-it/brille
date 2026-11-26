@@ -32,6 +32,7 @@ a.petale.pop { animation: jeu-lueur .7s ease; }
 .jeu-lancer small { font-weight: 500; opacity: .85; }
 .jeu-defi { background: #fff; margin: 12px 0 0; font-size: 1.1rem; }
 .jeu-defi.fait { background: #cbe1b6; }
+.defi .coche { display: none; }
 .jeu-saute { animation: jeu-saut .45s ease; }
 @keyframes jeu-saut { 0% { transform: scale(1); } 35% { transform: scale(1.22) rotate(-4deg); } 70% { transform: scale(.95); } 100% { transform: scale(1); } }
 

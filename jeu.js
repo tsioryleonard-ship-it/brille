@@ -345,8 +345,8 @@
   function ameliorerSemaine() {
     const defi = app.querySelector('.defi'), cb = document.getElementById('fait'); if (!defi || !cb || defi.querySelector('.jeu-defi')) return;
     const b = document.createElement('button'); b.type = 'button'; b.className = 'btn plein jeu-defi';
-    const maj = () => { b.innerHTML = cb.checked ? '✅ Défi relevé, bravo !' : '🎯 J\'ai relevé le défi !'; b.classList.toggle('fait', cb.checked); };
-    b.addEventListener('click', () => { cb.click(); });
+    const maj = () => { b.innerHTML = cb.checked ? '✅ Défi relevé en famille, bravo !' : '🎯 On a relevé le défi en famille'; b.classList.toggle('fait', cb.checked); b.setAttribute('aria-pressed', cb.checked); };
+    b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { cb.click(); });
     cb.addEventListener('change', maj); maj();
     defi.insertBefore(b, defi.querySelector('.coche'));
   }
