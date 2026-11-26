@@ -610,7 +610,7 @@
         <summary><span class="pc-num">${fait ? '✓' : n}</span><span><b>Semaine ${n}</b> · ${esc(w.titre)}${n === cur && !fait ? ' <em>(cette semaine)</em>' : ''}${fait ? `<br><small class="pc-mot-sem">${esc(MOTS_SEMAINE[i] || '')}</small>` : ''}</span></summary>
         <p class="pc-mission">${esc(w.mission)}</p>
         ${faconsHtml(w.facons)}
-        ${fait ? '' : `<button type="button" class="btn plein pc-lancer" data-n="${n}">🎮 Lancer la mission <small>(${w.etapes.length} étapes)</small></button><p class="jeu-aide">Ou lisez les étapes, vivez-les à votre rythme, puis cochez la case.</p>`}
+        ${fait ? '' : `<button type="button" class="btn plein pc-lancer" data-n="${n}"><svg class="ico-puzzle" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z" fill="#cbe1b6" stroke="#2E2A2A" stroke-width="1.2" stroke-linejoin="round"/></svg> Lancer la mission <small>(${w.etapes.length} étapes)</small></button><p class="jeu-aide">Ou lisez les étapes, vivez-les à votre rythme, puis cochez la case.</p>`}
         <ol class="etapes">${w.etapes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
         <div class="parler"><b>Pour en parler ensuite</b><ul>${w.enParler.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
         <label class="coche"><input type="checkbox" class="pc-fait" data-n="${n}" ${fait ? 'checked' : ''} ${pc.sem[n + 1] ? 'disabled' : ''}> Nous l'avons vécue ensemble</label>
@@ -625,7 +625,7 @@
       <p class="petit">${esc(CARTE_PIED.phrase)}<br>— ${esc(CARTE_PIED.signature)}, BRILLE</p></div>
       <div class="pc-impr"><button type="button" class="btn plein" id="pc-carte">🖨️ Imprimer mon pétale à coller</button>
         <button type="button" class="btn" id="pc-affiche">🌸 Imprimer ma fleur d'aventure</button>
-        ${parcoursTermines().length > 1 ? '<button type="button" class="btn" id="pc-tous">🖨️ Tous mes pétales gagnés (1 feuille)</button>' : ''}
+        ${parcoursTermines().length > 1 ? `<button type="button" class="btn" id="pc-tous">🖨️ Tous mes pétales gagnés (${parcoursTermines().length > 4 ? Math.ceil(parcoursTermines().length / 4) + ' feuilles' : '1 feuille'})</button>` : ''}
         <p class="petit">La fleur d'aventure (A4) s'imprime une seule fois. À chaque parcours terminé, imprimez votre pétale : découpez-le et collez-le à sa place.</p></div>
       <button type="button" class="btn gris" id="pc-reprendre">Recommencer un nouveau mois</button>` : '';
     const rituel = fini || pc.garde ? `<div class="pc-garde"><span class="etiquette">Ce que nous gardons</span><h3>${esc(garde.titre || 'Notre rituel')}</h3>
@@ -777,12 +777,13 @@
       </div></section>`;
   }
   const parcoursTermines = () => ORDRE.map(i => petale(i)).filter(q => q && q.parcours && Object.keys(parcoursDe(q.id).sem || {}).length === 4);
-  function htmlPetales() {                                // tous les pétales gagnés, sur une seule feuille
-    const l = parcoursTermines();
-    return `<section class="impr-feuille pl"><h1>Mes pétales gagnés</h1>
-      <p class="aff-sous">Découpez chaque pétale le long du trait et collez-le à sa place sur votre fleur d'aventure BRILLE.</p>
-      <div class="pl-grille">${l.map(q => `<figure>${autocollant(q, parcoursDe(q.id))}<figcaption>${esc(q.titre)}</figcaption></figure>`).join('')}</div>
-      <p class="aff-sous pl-pied">Un pétale à la fois, dans l'ordre que vous choisissez : la fleur se complète à votre rythme.</p></section>`;
+  function htmlPetales() {                                // tous les pétales gagnés, à l'échelle exacte de la fleur : 4 par feuille, sans rien couper
+    const l = parcoursTermines(), pages = [];
+    for (let i = 0; i < l.length; i += 4) pages.push(l.slice(i, i + 4));
+    return pages.map((pg, n) => `<section class="impr-feuille pl"><h1>Mes pétales gagnés</h1>
+      <p class="aff-sous">Découpez chaque pétale le long du trait et collez-le à sa place sur votre fleur d'aventure BRILLE.${pages.length > 1 ? ` (feuille ${n + 1} sur ${pages.length})` : ''}</p>
+      <div class="pl-grille">${pg.map(q => `<figure>${autocollant(q, parcoursDe(q.id))}<figcaption>${esc(q.titre)}</figcaption></figure>`).join('')}</div>
+      ${n === pages.length - 1 ? '<p class="aff-sous pl-pied">Un pétale à la fois, dans l\'ordre que vous choisissez : la fleur se complète à votre rythme.</p>' : ''}</section>`).join('');
   }
   function htmlAffiche() {
     const VB = '30 238 1380 1392';

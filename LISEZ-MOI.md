@@ -268,3 +268,15 @@ Dans la barre du haut, « Étincelle » est maintenant centré, dans la police G
 ## Version 93 : habillage de Noël retiré
 
 - La neige et le mot « Joyeuses fêtes en famille ! » n'apparaissent plus nulle part (accueil, « Cette semaine », pétales). Fichiers à publier : `noel.js`, `sw.js` (v93). `?noel=1` à la fin de l'adresse permet de le revoir pour essayer ; la marche à suivre pour le rétablir est écrite en haut de `noel.js`. Anciennes versions dans `_avant-sans-neige`.
+
+## Version 94 : impression de « Tous mes pétales gagnés » sans rien couper
+
+- Les pétales gardent leur échelle exacte (pour se coller sur la fleur A4) : ils sont donc répartis sur plusieurs feuilles, 4 par feuille en 2 colonnes. Avec 5 à 7 pétales, il y a 2 feuilles (« feuille 1 sur 2 »). Le bouton indique le nombre de feuilles. Fichiers à publier : `app.js`, `style.css`, `sw.js` (v94). Anciennes versions dans `_avant-impression-petales`.
+
+## Version 95 : emoji du bouton « Lancer la mission »
+
+- La manette 🎮 est remplacée par un dé 🎲 (bouton et écran de départ de la mission). Fichiers à publier : `app.js`, `jeu.js`, `sw.js` (v95). Pour changer d'emoji, remplacez 🎲 dans `app.js` et `jeu.js`. Anciennes versions dans `_avant-emoji-jeu`.
+
+## Version 96 : pièce de puzzle verte sur « Lancer la mission »
+
+- Le dé est remplacé par une pièce de puzzle dessinée en vert Étincelle (même couleur sur tous les appareils, contrairement à un emoji). Chaque mission est une pièce, les pièces se recollent à la fin. Fichiers à publier : `app.js`, `jeu.js`, `style.css`, `sw.js` (v96). Anciennes versions dans `_avant-puzzle`.

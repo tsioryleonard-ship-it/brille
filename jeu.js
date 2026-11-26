@@ -220,7 +220,7 @@
     const etapes = [...carte.querySelectorAll('.etapes li')].map(li => li.textContent.trim()).filter(Boolean);
     if (!etapes.length) return;
     const b = document.createElement('button'); b.type = 'button'; b.className = 'btn plein jeu-lancer';
-    b.innerHTML = `🎮 Lancer la mission <small>(${etapes.length} étapes)</small>`;
+    b.innerHTML = `<svg class="ico-puzzle" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z" fill="#cbe1b6" stroke="#2E2A2A" stroke-width="1.2" stroke-linejoin="round"/></svg> Lancer la mission <small>(${etapes.length} étapes)</small>`;
     b.addEventListener('click', () => { sfx('debut'); lancerMission(carte, etapes); });
     const liste = carte.querySelector('.etapes'); liste.parentNode.insertBefore(b, liste);
     const l = document.createElement('p'); l.className = 'jeu-aide'; l.textContent = 'Ou lisez toutes les étapes ci-dessous, à votre rythme.';
@@ -272,7 +272,7 @@
     }
     function intro() {
       pos = 0;
-      montrer(`<div class="jeu-gros" aria-hidden="true">🎮</div><h2>Mission : ${esc(titre)}</h2>
+      montrer(`<div class="jeu-gros" aria-hidden="true"><svg class="ico-puzzle" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z" fill="#cbe1b6" stroke="#2E2A2A" stroke-width="1.2" stroke-linejoin="round"/></svg></div><h2>Mission : ${esc(titre)}</h2>
         <p class="jeu-meta">${meta.map(esc).join('<br>')}</p>
         <p>${total} petites étapes, une à la fois. Prenez votre temps, il n'y a ni note ni chrono. Prêts ?</p>
         <button type="button" class="btn plein" id="j-go">C'est parti ! 🚀</button>`, null, `Mission : ${titre}. ${total} petites étapes, une à la fois. Prenez votre temps. Prêts ?`);
@@ -297,7 +297,7 @@
       const rend = () => {
         const k = tirer();
         montrer(`<span class="etiquette">Pour en parler ensemble</span><div class="jeu-carte-q" aria-live="polite">${esc(questions[k])}</div>
-          ${questions.length > 1 ? '<button type="button" class="btn discret plein" id="j-de">🎲 Une autre question</button>' : ''}
+          ${questions.length > 1 ? '<button type="button" class="btn discret plein" id="j-de"><svg class="ico-puzzle" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z" fill="#cbe1b6" stroke="#2E2A2A" stroke-width="1.2" stroke-linejoin="round"/></svg> Une autre question</button>' : ''}
           <button type="button" class="btn plein" id="j-fin">Terminer la mission 🎉</button>`, '#j-fin', `Pour en parler ensemble. ${questions[k]}`);
         sfx('carte');
         const de = ecran.querySelector('#j-de'); if (de) de.addEventListener('click', rend);

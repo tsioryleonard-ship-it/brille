@@ -601,3 +601,10 @@ body.verrouille .brand-nom { display: none; }
 .fam-ajout { flex-wrap: wrap; }
 .carte.famille .fam-ajout input[type=text] { flex: 1 1 100%; }
 .fam-ajout select { flex: 1 1 auto; font: inherit; font-family: 'Quicksand', sans-serif; font-weight: 600; padding: 11px 12px; border: 2px solid #e4dcec; border-radius: 14px; background: #fff; color: inherit; }
+
+/* Mes pétales gagnés : 2 colonnes, 4 pétales par feuille, à l'échelle exacte de la fleur (rien n'est coupé) (v94) */
+.pl-grille { grid-template-columns: repeat(2, auto); justify-content: center; gap: 8mm 10mm; width: auto; }
+
+/* Pièce de puzzle verte du bouton « Lancer la mission » (v96) */
+.ico-puzzle { width: 1.25em; height: 1.25em; vertical-align: -0.28em; margin-right: .2em; }
+.jeu-gros .ico-puzzle { width: 1em; height: 1em; vertical-align: baseline; margin: 0; filter: drop-shadow(0 2px 0 rgba(0,0,0,.12)); }
