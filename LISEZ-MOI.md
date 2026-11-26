@@ -250,3 +250,17 @@ Dans la barre du haut, « Étincelle » est maintenant centré, dans la police G
 - Pied de carte : « L'harmonie et l'épanouissement se vivent au quotidien. Merci d'avoir fait ce chemin ensemble. » signé Rindra Tsiory, avec « © BRILLE, tous droits réservés ».
 - Le pétale à coller garde « BRAVO ! » (place limitée).
 - Fichiers à publier : `app.js`, `style.css`, `sw.js` (v90). Aucun fichier privé n'est modifié, `acces.json` et `contenu.enc.json` ne changent pas. Les anciennes versions sont dans `_avant-cartes-messages`.
+
+## Version 91 : « À chacun sa façon » dans les parcours d'un mois
+
+- Chaque semaine d'un parcours peut avoir un champ `facons` (une ligne pour les moins de 6 ans, les 6-12 ans et les 13-18 ans). L'application l'affiche sous la mission, dans un volet « À chacun sa façon » fermé par défaut : toute la famille vit la même mission, chacun y participe à son âge.
+- Nouveau fichier privé : `etincelle-PRIVE-ne-jamais-publier/parcours-mensuels-facons-PRIVE.json` (tes parcours actuels + les 84 façons). À charger à la place de `parcours-mensuels-PRIVE.json` dans « Ajouter les parcours d'un mois », puis recharger dans l'ordre les défis, les tuiles et les variantes d'âge, et « Préparer les fichiers à publier ».
+- Fichiers à publier : `app.js`, `style.css`, `sw.js` (v91), `acces.json`, `contenu.enc.json`. Anciennes versions dans `_avant-facons`.
+
+## Version 92 : l'âge de chaque enfant, saisi avec son prénom
+
+- Dans « Notre famille », chaque enfant a maintenant son âge (moins de 6 ans, 6-12 ans, 13-18 ans), choisi à côté de son prénom, modifiable ensuite. L'ancien choix d'un seul âge disparaît.
+- Si tous les enfants ont le même âge, les textes des pétales, les défis et les parcours s'adaptent à cet âge. Si les âges sont mélangés, le contenu de base (6-12 ans) est utilisé, et chaque mission affiche « À chacun sa façon » avec seulement les âges présents, et les prénoms concernés.
+- Carte souvenir : message de la tranche d'âge quand elle est unique, message « famille » quand les âges sont mélangés.
+- Les familles qui avaient choisi un âge avant gardent leur choix tant qu'elles n'indiquent pas l'âge des enfants. Les âges restent sur l'appareil, avec les prénoms.
+- Fichiers à publier : `app.js`, `style.css`, `sw.js` (v92). Rien à régénérer pour les contenus. Anciennes versions dans `_avant-ages-enfants`.

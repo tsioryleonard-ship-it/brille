@@ -36,6 +36,7 @@
     if (typeof f.parents !== 'string') f.parents = '';
     return f;
   };
+  const alignerAges = () => { const f = famille(); if (!Array.isArray(f.ages)) f.ages = []; while (f.ages.length < f.enfants.length) f.ages.push(null); f.ages.length = f.enfants.length; };
   const MAX_ENFANTS = 20;                                   // nombre maximum d'enfants par famille
   const jointNoms = l => (l.length > 1 ? l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1] : (l[0] || ''));
   const nomDeFamille = () => { const p = famille().parents.trim().replace(/^famille\s+/i, ''); return p ? 'Famille ' + p : ''; };   // « parents » contient désormais le nom de famille
@@ -95,7 +96,11 @@
   const titreEnfant = id => { const v = (D.vitrine || []).find(x => x.id === id); return v ? (v.miroir || v.titre) : id; };
   /* Âge des enfants : p = moins de 6 ans, e = 6 à 12 ans (contenu de base), a = 13 à 18 ans. Choisi par la famille, gardé sur l'appareil. */
   const AGES = [['p', 'Moins de 6 ans'], ['e', '6 à 12 ans'], ['a', '13 à 18 ans']];
-  const ageFamille = () => { try { const a = ((charger().famille || {}).age); return a === 'p' || a === 'a' ? a : 'e'; } catch { return 'e'; } };
+  const ageValide = a => a === 'p' || a === 'e' || a === 'a';
+  const agesDistincts = () => { try { const f = charger().famille || {}; return [...new Set((f.enfants || []).map((_, i) => f.ages && f.ages[i]).filter(ageValide))]; } catch { return []; } };
+  /* Âge pour les textes principaux : l'âge des enfants s'il est unique ; si les âges sont mélangés, le contenu de base (6-12 ans), complété par « À chacun sa façon » et le message « famille » de la carte. */
+  const ageFamille = () => { try { const u = agesDistincts(); if (u.length === 1) return u[0]; if (u.length > 1) return 'e'; const a = ((charger().famille || {}).age); return a === 'p' || a === 'a' ? a : 'e'; } catch { return 'e'; } };
+  const prenomsParAge = k => { try { const f = charger().famille || {}; return (f.enfants || []).filter((_, i) => f.ages && f.ages[i] === k); } catch { return []; } };
   function varier(det) {                              // applique la variante d'âge (sans jamais modifier D.details)
     const v = det && det.v && det.v[ageFamille()]; if (!v) return det;
     const o = Object.assign({}, det); delete o.v;
@@ -338,7 +343,8 @@
   /* ---------- Notre famille (page d'accueil) ---------- */
   function carteFamille() {
     const f = famille(), vide = !f.parents.trim() && !f.enfants.length;
-    const puces = f.enfants.map((e, i) => `<li><span>${esc(e)}</span><button type="button" class="x" data-i="${i}" aria-label="Retirer ${esc(e)}">✕</button></li>`).join('');
+    const optAge = sel => AGES.map(([k, t]) => `<option value="${k}"${sel === k ? ' selected' : ''}>${t}</option>`).join('');
+    const puces = f.enfants.map((e, i) => `<li><span>${esc(e)}</span><select class="age-enf" data-i="${i}" aria-label="Âge de ${esc(e)}">${optAge(ageValide(f.ages && f.ages[i]) ? f.ages[i] : ageFamille())}</select><button type="button" class="x" data-i="${i}" aria-label="Retirer ${esc(e)}">✕</button></li>`).join('');
     return `<details class="carte famille" id="carte-famille"${vide || familleOuverte ? ' open' : ''}>
       <summary>👨‍👩‍👧‍👦 ${esc(nomDeFamille() || 'Notre famille')}</summary>
       <p class="petit">L'aventure se vit ensemble. Indiquez le nom de famille et les prénoms de tous les enfants : ils seront sur vos cartes souvenirs, pour que personne ne soit oublié. Ces informations restent sur cet appareil.</p>
@@ -346,10 +352,8 @@
       <input type="text" id="fam-parents" maxlength="60" value="${esc(f.parents)}" placeholder="Ex. Martin" autocomplete="off">
       <label for="fam-enfant" class="aide">Les enfants de la famille (moins de 18 ans) : jusqu'à ${MAX_ENFANTS}</label>
       <ul class="puces-enfants" aria-label="Enfants de la famille">${puces}</ul>
-      <label for="fam-age" class="aide">Âge de l'enfant avec qui vous vivez l'aventure</label>
-      <select id="fam-age" aria-describedby="fam-age-aide">${AGES.map(([k, t]) => `<option value="${k}"${ageFamille() === k ? ' selected' : ''}>${t}</option>`).join('')}</select>
-      <p class="petit" id="fam-age-aide">Les défis, les parcours et les conseils s'adaptent à cet âge. Plusieurs enfants d'âges différents ? Choisissez celui avec qui vous vivez le défi, et changez quand vous voulez.</p>
-      <div class="fam-ajout"><input type="text" id="fam-enfant" maxlength="24" placeholder="Prénom d'un enfant" autocomplete="off"><button type="button" class="btn plein" id="fam-ajouter">Ajouter</button></div>
+      <p class="petit" id="fam-age-aide">Indiquez l'âge de chaque enfant : chacun trouve sa place dans les missions (« À chacun sa façon »), et les textes s'adaptent à vos âges.</p>
+      <div class="fam-ajout"><input type="text" id="fam-enfant" maxlength="24" placeholder="Prénom d'un enfant" autocomplete="off"><select id="fam-enfant-age" aria-label="Âge de l'enfant">${optAge('e')}</select><button type="button" class="btn plein" id="fam-ajouter">Ajouter</button></div>
       <p class="ok" id="fam-ok" role="status"></p>
     </details>`;
   }
@@ -366,18 +370,18 @@
       const champ = zone.querySelector('#fam-enfant'), nom = champ.value.trim().replace(/\s+/g, ' ').slice(0, 24);
       if (!nom) return;
       if (famille().enfants.length >= MAX_ENFANTS) { const o = $app.querySelector('#fam-ok'); if (o) o.textContent = `Vous pouvez ajouter jusqu'à ${MAX_ENFANTS} enfants.`; return; }
-      famille().enfants.push(nom);
-      const ok = sauver(); redessiner();
+      alignerAges(); famille().enfants.push(nom); famille().ages.push((ageSel => ageValide(ageSel) ? ageSel : 'e')((zone.querySelector('#fam-enfant-age') || {}).value));
+      const ok = sauver(); redessiner(); composer(D.petales.filter(p => p.ouvert).map(p => p.id)); rendre();
       const c = $app.querySelector('#fam-enfant'); if (c) c.focus({ preventScroll: true });
       const o = $app.querySelector('#fam-ok'); if (o) o.textContent = ok ? `${nom} est dans l'aventure !` : 'Impossible d\'enregistrer sur cet appareil.';
     };
-    zone.querySelector('#fam-age').addEventListener('change', e => {
-      const v = e.target.value; famille().age = (v === 'p' || v === 'a') ? v : 'e'; sauver();
+    zone.querySelectorAll('.age-enf').forEach(sel => sel.addEventListener('change', e => {
+      alignerAges(); famille().ages[Number(sel.dataset.i)] = ageValide(e.target.value) ? e.target.value : 'e'; sauver();
       composer(D.petales.filter(p => p.ouvert).map(p => p.id)); familleOuverte = true; rendre();
-    });
+    }));
     zone.querySelector('#fam-ajouter').addEventListener('click', ajouter);
     zone.querySelector('#fam-enfant').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ajouter(); } });
-    zone.querySelectorAll('.puces-enfants .x').forEach(b => b.addEventListener('click', () => { famille().enfants.splice(Number(b.dataset.i), 1); sauver(); redessiner(); }));
+    zone.querySelectorAll('.puces-enfants .x').forEach(b => b.addEventListener('click', () => { alignerAges(); famille().enfants.splice(Number(b.dataset.i), 1); famille().ages.splice(Number(b.dataset.i), 1); sauver(); redessiner(); composer(D.petales.filter(p => p.ouvert).map(p => p.id)); rendre(); }));
   }
 
   /* ---------- Vues ---------- */
@@ -605,6 +609,7 @@
       return `<details class="pc-sem${fait ? ' fait' : ''}" data-n="${n}" ${n === cur && !fait ? 'open' : ''}>
         <summary><span class="pc-num">${fait ? '✓' : n}</span><span><b>Semaine ${n}</b> · ${esc(w.titre)}${n === cur && !fait ? ' <em>(cette semaine)</em>' : ''}${fait ? `<br><small class="pc-mot-sem">${esc(MOTS_SEMAINE[i] || '')}</small>` : ''}</span></summary>
         <p class="pc-mission">${esc(w.mission)}</p>
+        ${faconsHtml(w.facons)}
         ${fait ? '' : `<button type="button" class="btn plein pc-lancer" data-n="${n}">🎮 Lancer la mission <small>(${w.etapes.length} étapes)</small></button><p class="jeu-aide">Ou lisez les étapes, vivez-les à votre rythme, puis cochez la case.</p>`}
         <ol class="etapes">${w.etapes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
         <div class="parler"><b>Pour en parler ensuite</b><ul>${w.enParler.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
@@ -720,7 +725,10 @@
     }
   };
   const CARTE_PIED = {"phrase": "L'harmonie et l'épanouissement se vivent au quotidien. Merci d'avoir fait ce chemin ensemble.", "signature": "Rindra Tsiory"};
-  const carteMsg = id => { const m = CARTE_MSG[id] || {}; const a = ageFamille(); return { phrase: m.phrase || '', texte: m[a] || m.e || '' }; };
+  const carteMsg = id => { const m = CARTE_MSG[id] || {}; const a = agesDistincts().length > 1 ? 'f' : ageFamille(); return { phrase: m.phrase || '', texte: m[a] || m.e || '' }; };
+
+  /* « À chacun sa façon » : une ligne par tranche d'âge pour la mission de la semaine (champ facultatif `facons` des parcours) */
+  const faconsHtml = f => { if (!f) return ''; const pres = agesDistincts(), l = AGES.filter(([k]) => f[k] && (!pres.length || pres.includes(k))); return `<details class="pc-facons"><summary>À chacun sa façon</summary><ul>${l.map(([k, t]) => { const n = prenomsParAge(k); return `<li><b>${esc(t)}</b>${n.length ? ' (' + esc(jointNoms(n)) + ')' : ''} : ${esc(f[k])}</li>`; }).join('')}</ul></details>`; };
 
   /* ---------- Impression : carte souvenir et fleur à collectionner (A4) ---------- */
   const NS = 'http://www.w3.org/2000/svg';

@@ -589,3 +589,15 @@ body.verrouille .brand-nom { display: none; }
 .cl p.cl-recap { font-size: 11pt; margin: 3mm 0 2mm; }
 .cl p.cl-mot { font-size: 12pt; line-height: 1.5; font-weight: 600; margin: 1mm 0 3mm; }
 .cl p.cl-signe { font-size: 9.5pt; line-height: 1.4; color: #6f6767; margin: 0 0 4mm; }
+
+/* À chacun sa façon : mission de la semaine adaptée à chaque âge (v91) */
+.pc-facons { margin: 8px 0; border: 2px dashed rgba(0,0,0,.35); border-radius: 14px; padding: 6px 12px; background: rgba(255,255,255,.7); }
+.pc-facons summary { font-weight: 700; cursor: pointer; }
+.pc-facons ul { margin: 6px 0 2px; padding-left: 18px; }
+.pc-facons li { margin: 5px 0; }
+
+/* Âge de chaque enfant (v92) */
+.puces-enfants select.age-enf { font: inherit; font-family: 'Quicksand', sans-serif; font-weight: 600; font-size: .85rem; border: 0; border-radius: 999px; padding: 6px 8px; background: #fff; color: inherit; }
+.fam-ajout { flex-wrap: wrap; }
+.carte.famille .fam-ajout input[type=text] { flex: 1 1 100%; }
+.fam-ajout select { flex: 1 1 auto; font: inherit; font-family: 'Quicksand', sans-serif; font-weight: 600; padding: 11px 12px; border: 2px solid #e4dcec; border-radius: 14px; background: #fff; color: inherit; }
