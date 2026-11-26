@@ -582,3 +582,10 @@ body.verrouille .brand-nom { display: none; }
 /* Choix de l'âge (Notre famille) : même police et même style que les champs */
 #fam-age { width: 100%; font: inherit; font-family: 'Quicksand', sans-serif; font-weight: 600; color: inherit; padding: 11px 12px; border: 2px solid #e4dcec; border-radius: 14px; margin: 2px 0 10px; background: #fff; }
 #fam-age option { font-family: 'Quicksand', sans-serif; }
+
+/* Cartes souvenirs : message du pétale selon l'âge (v90) */
+.pc-phrase { font-size: 1.15rem; margin: 8px 0 2px; }
+.cl h1 { font-size: 24pt; line-height: 1.2; white-space: normal; text-align: center; padding: 0 4mm; margin-top: 2mm; }
+.cl p.cl-recap { font-size: 11pt; margin: 3mm 0 2mm; }
+.cl p.cl-mot { font-size: 12pt; line-height: 1.5; font-weight: 600; margin: 1mm 0 3mm; }
+.cl p.cl-signe { font-size: 9.5pt; line-height: 1.4; color: #6f6767; margin: 0 0 4mm; }

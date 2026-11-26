@@ -615,7 +615,9 @@
     const souvenir = fini ? `<div class="pc-souvenir"><span class="etiquette">Notre carte souvenir 🏅</span>
       <div class="pc-med"><img src="p-${esc(p.id)}.png" alt=""><div><b>${esc(pr.titre)}</b><br>Vécu ensemble du ${dateCourte(pc.debut)} au ${dateCourte(pc.fini || pc.debut)}${pc.nb > 1 ? ` · parcours n°${pc.nb}` : ''}</div></div>
       ${nomsCarte(pc) ? `<p class="pc-noms">${esc(nomsCarte(pc))}</p>` : ''}
-      <p>4 semaines pour vous retrouver, vous écouter et mieux vous comprendre. L'harmonie et l'épanouissement se vivent au quotidien : vous venez de le vivre ensemble.</p></div>
+      <p class="pc-phrase"><b>${esc(carteMsg(p.id).phrase)}</b></p>
+      <p>${esc(carteMsg(p.id).texte)}</p>
+      <p class="petit">${esc(CARTE_PIED.phrase)}<br>— ${esc(CARTE_PIED.signature)}, BRILLE</p></div>
       <div class="pc-impr"><button type="button" class="btn plein" id="pc-carte">🖨️ Imprimer mon pétale à coller</button>
         <button type="button" class="btn" id="pc-affiche">🌸 Imprimer ma fleur d'aventure</button>
         ${parcoursTermines().length > 1 ? '<button type="button" class="btn" id="pc-tous">🖨️ Tous mes pétales gagnés (1 feuille)</button>' : ''}
@@ -665,6 +667,61 @@
     });
   }
 
+  /* ---------- Messages des cartes souvenirs (un par pétale et par tranche d'âge : p = moins de 6 ans, e = 6-12 ans, a = 13-18 ans, f = âges mélangés) ---------- */
+  const CARTE_MSG = {
+    "apprentissages": {
+      "phrase": "En famille, apprendre a pris du sens.",
+      "p": "En famille, apprendre est devenu un jeu qu'on partage : chaque « pourquoi ? » a trouvé une oreille. Parents, vous êtes les premiers guides de leur curiosité, et ce mois-ci vous l'avez nourrie.",
+      "e": "En famille, vous avez cherché, essayé, compris ensemble : apprendre n'est pas qu'une affaire d'école. Parents, votre intérêt donne aux enfants l'envie d'aller plus loin.",
+      "a": "En famille, vous avez parlé de ce qu'on apprend et de pourquoi ça compte. Parents, vous avez écouté plutôt que dicté : c'est ce qui donne du sens.",
+      "f": "En famille, apprendre a pris du sens : chacun a cherché, essayé et partagé à sa façon. Parents, votre curiosité partagée est un moteur pour tous, des plus petits aux plus grands."
+    },
+    "droits": {
+      "phrase": "Chacun a sa place chez vous.",
+      "p": "Dans votre famille, chacun a sa place, même le plus petit, et il a été écouté. Parents, c'est vous qui lui apprenez qu'il compte, jour après jour.",
+      "e": "En famille, vous avez découvert que chacun a des droits et sa part de responsabilités. Parents, vous êtes les premiers à les faire vivre : merci de montrer l'exemple.",
+      "a": "Être écouté, respecté, avoir son mot à dire : en famille, vous l'avez mis en pratique. Parents, faire de la place à leur voix demande de l'écoute et de la confiance, et vous l'avez fait.",
+      "f": "Dans votre famille, chacun a sa place, du plus petit au plus grand, et chacun a été écouté. Parents, vous leur montrez que chaque voix compte."
+    },
+    "liens": {
+      "phrase": "Vous avez osé vous parler.",
+      "p": "En famille, le lien s'est tissé dans les petits gestes : un regard, un câlin, un mot doux. Parents, vous êtes leur refuge, et vous avez pris le temps d'en profiter.",
+      "e": "En famille, vous avez dit ce que vous pensiez et écouté vraiment. Parents, vous avez écouté avant de répondre : vos enfants s'en souviendront longtemps.",
+      "a": "En famille, vous avez gardé la conversation ouverte, et ce n'est pas simple. Parents, vous avez tendu la main sans forcer : c'est précieux.",
+      "f": "En famille, vous vous êtes parlé, écoutés, offert des mots et des gestes de lien. Parents, vous êtes le fil de ce lien, et ce mois-ci vous l'avez renforcé."
+    },
+    "organisation": {
+      "phrase": "Vous avez trouvé votre rythme.",
+      "p": "En famille, chacun a fait un pas de plus vers « je le fais tout seul ». Parents, vous êtes à côté, patients, prêts à aider sans faire à leur place : c'est ça, accompagner.",
+      "e": "En famille, vous avez vu qu'on s'organise mieux à plusieurs. Parents, vous leur laissez la place de faire seuls, et ça construit leur confiance.",
+      "a": "En famille, vous avez trouvé l'équilibre entre liberté et confiance. Parents, laisser grandir l'autonomie est un acte de confiance, et vous l'avez posé.",
+      "f": "En famille, vous avez trouvé votre rythme, et chacun a fait un pas vers plus d'autonomie, à son âge. Parents, vous êtes là sans faire à leur place : c'est de la confiance."
+    },
+    "equilibre": {
+      "phrase": "Vous avez pris soin de votre énergie.",
+      "p": "En famille, câlins, repos et jeux ont rechargé vos batteries. Parents, prendre soin de vous compte autant : un parent ressourcé, c'est une famille qui respire.",
+      "e": "En famille, vous avez trouvé ce qui vous recharge : bouger, se reposer, s'amuser. Parents, vous vous êtes aussi accordé du temps, et c'est un cadeau pour toute la famille.",
+      "a": "En famille, vous avez fait de la place au repos et à ce qui fait du bien. Parents, vous montrez qu'on a le droit de se ressourcer : ils s'en inspireront.",
+      "f": "En famille, vous avez pris soin de votre énergie, chacun à sa manière. Parents, vous vous êtes aussi accordé du temps : un parent ressourcé, c'est une famille qui respire."
+    },
+    "emotions": {
+      "phrase": "Vous avez apprivoisé vos émotions.",
+      "p": "En famille, la colère, la joie et la peur ont trouvé des mots. Parents, c'est vous qui accueillez et rassurez : c'est ce dont un petit a le plus besoin.",
+      "e": "En famille, vous avez appris qu'une émotion n'est ni bonne ni mauvaise : elle dit quelque chose. Parents, accueillir les vôtres comme les leurs, c'est le plus bel exemple.",
+      "a": "En famille, vous avez fait de la place à toutes les émotions, sans jugement. Parents, vous avez écouté sans chercher à tout régler : c'est ce qui aide à grandir.",
+      "f": "En famille, vous avez donné des mots aux émotions de chacun, du plus petit au plus grand. Parents, vous les avez accueillies sans jugement : c'est ce qui rassure."
+    },
+    "briller": {
+      "phrase": "Votre lumière à chacun brille.",
+      "p": "En famille, vous avez regardé ce qui fait briller vos petits. Parents, votre regard fier est leur premier miroir.",
+      "e": "En famille, vous avez mis vos talents en lumière, les petits comme les grands. Parents, vous êtes le premier regard qui leur dit : « tu comptes, tu brilles ».",
+      "a": "En famille, vous avez reconnu vos forces et ce qui vous rend uniques. Parents, voir briller vos enfants, c'est la preuve de tout ce que vous avez semé.",
+      "f": "En famille, vous avez fait briller chacun à sa façon, du plus petit au plus grand. Parents, votre regard sur eux est leur premier miroir."
+    }
+  };
+  const CARTE_PIED = {"phrase": "L'harmonie et l'épanouissement se vivent au quotidien. Merci d'avoir fait ce chemin ensemble.", "signature": "Rindra Tsiory"};
+  const carteMsg = id => { const m = CARTE_MSG[id] || {}; const a = ageFamille(); return { phrase: m.phrase || '', texte: m[a] || m.e || '' }; };
+
   /* ---------- Impression : carte souvenir et fleur à collectionner (A4) ---------- */
   const NS = 'http://www.w3.org/2000/svg';
   const MM = 190 / 1380;                                  // mm par unité de la fleur : sur l'affiche, la fleur fait 190 mm de large
@@ -699,11 +756,13 @@
       <div class="cert-cadre">
         <div class="cert-bandeau">${D.petales.map(x => `<i style="background:${x.couleur}"></i>`).join('')}</div>
         <img class="cl-logo" src="logo-brille.png" alt="BRILLE">
-        <h1>Bravo !</h1>
+        <h1>${esc(carteMsg(p.id).phrase)}</h1>
         <p class="cl-sous">Un pétale de plus sur votre fleur d'aventure BRILLE</p>
         <div class="cl-colle">${autocollant(p, pc)}</div>
         <p class="cl-ciseaux">✂ Découpez le long du trait et collez-le sur l'emplacement « ${esc(p.titre)} » de votre fleur.</p>
-        <p class="cl-recap"><b>${esc(noms)}</b> ont vécu ensemble, du ${dateCourte(pc.debut)} au ${dateCourte(pc.fini || pc.debut)}, le parcours <b>« ${esc(pr.titre)} »</b>.<br>L'harmonie et l'épanouissement se vivent au quotidien.</p>
+        <p class="cl-recap"><b>${esc(noms)}</b> ont vécu ensemble, du ${dateCourte(pc.debut)} au ${dateCourte(pc.fini || pc.debut)}, le parcours <b>« ${esc(pr.titre)} »</b>.</p>
+        <p class="cl-mot">${esc(carteMsg(p.id).texte)}</p>
+        <p class="cl-signe">${esc(CARTE_PIED.phrase)}<br><b>${esc(CARTE_PIED.signature)}</b> · BRILLE · © BRILLE, tous droits réservés</p>
         <div class="cl-carnet"><b>Notre souvenir du mois</b>
           <span>Ce qui a changé chez nous : <i></i></span>
           <span>Ce que nous gardons${pc.garde ? ' : ' + esc(pc.garde) : ' : '} ${pc.garde ? '' : '<i></i>'}</span></div>

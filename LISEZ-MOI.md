@@ -243,3 +243,10 @@ Dans la barre du haut, « Étincelle » est maintenant centré, dans la police G
 - Dans l'application, la famille choisit l'âge dans la carte « Notre famille » (« Âge de l'enfant avec qui vous vivez l'aventure »). Les textes des pétales, les tuiles « À essayer », les 35 défis, l'activité à faire ensemble et les parcours d'un mois s'adaptent. Le choix reste sur l'appareil.
 - Pour publier : ouvrez l'application avec votre accès de gestion, « Plus », « Gérer les familles ». Chargez dans l'ordre les parcours, les défis, les tuiles « À essayer », puis la carte « Ajouter les variantes d'âge » avec `variantes-ages-PRIVE.json`. Puis « Préparer les fichiers à publier » et déposez `acces.json` et `contenu.enc.json` sur GitHub avec `app.js`, `sw.js`, `config.json` et `vitrine.json`.
 - Les familles en essai gardent l'essai sans parcours d'un mois, quel que soit l'âge.
+
+## Version 90 : messages des cartes souvenirs (par pétale et par âge)
+
+- La carte souvenir (à l'écran et à imprimer) ne dit plus seulement « Bravo ! » : chaque pétale a sa phrase-titre et un message qui s'adresse à toute la famille et reconnaît la place des parents. Il change selon l'âge choisi dans « Notre famille » (moins de 6 ans, 6-12 ans, 13-18 ans). Les messages sont dans `app.js` (bloc `CARTE_MSG`), version « âges mélangés » (`f`) prête pour plus tard.
+- Pied de carte : « L'harmonie et l'épanouissement se vivent au quotidien. Merci d'avoir fait ce chemin ensemble. » signé Rindra Tsiory, avec « © BRILLE, tous droits réservés ».
+- Le pétale à coller garde « BRAVO ! » (place limitée).
+- Fichiers à publier : `app.js`, `style.css`, `sw.js` (v90). Aucun fichier privé n'est modifié, `acces.json` et `contenu.enc.json` ne changent pas. Les anciennes versions sont dans `_avant-cartes-messages`.
