@@ -977,7 +977,7 @@
     const cleFait = d.id, ens = p && p.ensemble;
     const fait = !!charger().defisFaits[cleFait];
     const blocDefi = `<div class="defi" style="background:${p?.couleur || 'var(--jaune)'}">
-        <span class="etiquette">${idx === base ? 'Le défi de la semaine' : `Défi ${idx + 1} sur ${n}`}${p ? ` · ${esc(p.titre)}` : ''} · pour toute la famille</span>
+        <span class="etiquette">${idx === base ? 'Le défi de la semaine' : `Défi ${idx + 1} sur ${n}`}${p ? ` · ${esc(p.titre)}` : ''}</span>
         <h2>${esc(d.titre)}</h2>
         <p class="duree">⏱ ${esc(d.duree)}</p>
         <p style="margin:0">${esc(d.consigne)}</p>
@@ -996,8 +996,8 @@
         <a class="btn discret" href="#/semaine/${(idx + 1) % n}">Suivant →</a>
       </div>
       ${ens ? `<a class="carte teinte" href="#/petale/${p.id}" style="display:block;text-decoration:none;background:${p.couleur}">
-        <span class="etiquette">Le pétale « ${esc(p.titre)} »</span>
-        <p style="margin:0">Faire le bilan de la famille : le parent, puis chaque enfant. Touchez pour y aller.</p></a>` : ''}
+        <span class="etiquette">Bilan du pétale</span>
+        <p style="margin:0">Le parent, puis chaque enfant. Touchez pour y aller.</p></a>` : ''}
       <p class="petit">Un seul défi à la fois suffit. Si ce n'est pas le bon moment, passez au suivant, sans culpabilité.</p>
       </div></div>
     </section>`;
