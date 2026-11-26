@@ -290,3 +290,9 @@ Dans la barre du haut, « Étincelle » est maintenant centré, dans la police G
 ## Version 98 : retour au dé 🎲
 
 - Le dé 🎲 remplace la pièce de puzzle sur « Lancer la mission », l'écran de départ de la mission et « Une autre question ». Fichiers à publier : `app.js`, `jeu.js`, `sw.js` (v98). Anciennes versions dans `_avant-retour-de`.
+
+## Version 99 : le pétale à coller ne déborde plus
+
+- Sur le pétale à découper, « BRAVO ! » est retiré. L'icône est plus grande, et le nom de famille puis les prénoms des enfants sont placés dans la forme réelle du pétale : la taille du texte s'adapte (jusqu'à 20 enfants) et rien ne touche le contour. Fichiers à publier : `app.js`, `sw.js` (v99). Anciennes versions dans `_avant-sticker`.
+
+- v100 : les défis de la semaine ont un volet « À chacun sa façon » (parents + tranches d'âge). Charger defis-facons-PRIVE.json à la place de defis.json.

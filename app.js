@@ -728,7 +728,7 @@
   const carteMsg = id => { const m = CARTE_MSG[id] || {}; const a = agesDistincts().length > 1 ? 'f' : ageFamille(); return { phrase: m.phrase || '', texte: m[a] || m.e || '' }; };
 
   /* « À chacun sa façon » : une ligne par tranche d'âge pour la mission de la semaine (champ facultatif `facons` des parcours) */
-  const faconsHtml = f => { if (!f) return ''; const pres = agesDistincts(), l = AGES.filter(([k]) => f[k] && (!pres.length || pres.includes(k))); return `<details class="pc-facons"><summary>À chacun sa façon</summary><ul>${l.map(([k, t]) => { const n = prenomsParAge(k); return `<li><b>${esc(t)}</b>${n.length ? ' (' + esc(jointNoms(n)) + ')' : ''} : ${esc(f[k])}</li>`; }).join('')}</ul></details>`; };
+  const faconsHtml = f => { if (!f) return ''; const pres = agesDistincts(), l = AGES.filter(([k]) => f[k] && (!pres.length || pres.includes(k))); const pa = f.pa ? `<li><b>Parents</b> : ${esc(f.pa)}</li>` : ''; return `<details class="pc-facons"><summary>À chacun sa façon</summary><ul>${pa}${l.map(([k, t]) => { const n = prenomsParAge(k); return `<li><b>${esc(t)}</b>${n.length ? ' (' + esc(jointNoms(n)) + ')' : ''} : ${esc(f[k])}</li>`; }).join('')}</ul></details>`; };
 
   /* ---------- Impression : carte souvenir et fleur à collectionner (A4) ---------- */
   const NS = 'http://www.w3.org/2000/svg';
@@ -747,15 +747,41 @@
     for (let i = 0; i < NIV.length; i++) { const n = NIV[i], l = coupe(t, n.max, 99); if (l.length <= n.nl) return { l, fs: n.fs, niv: i }; }
     const n = NIV[NIV.length - 1]; return { l: coupe(t, n.max, 99), fs: n.fs, niv: NIV.length - 1 };
   }
+  /* Le pétale à découper : l'icône et les prénoms sont placés À L'INTÉRIEUR du pétale (on teste la forme réelle, rien ne touche le contour) */
+  const _tst = {};
+  function testeurPetale(id) {                            // dit si un point est bien dans le pétale
+    if (_tst[id]) return _tst[id];
+    const sv = document.createElementNS(NS, 'svg'); sv.setAttribute('style', 'position:absolute;left:-9999px;width:0;height:0');
+    const pa = document.createElementNS(NS, 'path'); pa.setAttribute('d', D.formes[id].d); sv.appendChild(pa); document.body.appendChild(sv);
+    return (_tst[id] = (x, y) => { try { return pa.isPointInFill(new DOMPoint(x, y)); } catch { return true; } });
+  }
+  function lignesSticker(pc, max) {                       // « Famille Martin » sur sa ligne, puis les prénoms des enfants (tous, sans en couper)
+    const man = ((pc && pc.noms) || '').trim();
+    if (man) return coupe(man, max, 99);
+    const fam = nomDeFamille(), enf = jointNoms(famille().enfants), l = [];
+    if (fam) l.push(fam);
+    if (enf) l.push(...coupe(enf, max, 99));
+    return l.length ? l : ['Notre famille'];
+  }
+  function miseEnPageSticker(p, pc) {
+    const f = D.formes[p.id], ic = f.icone, dedans = testeurPetale(p.id), M = 16;
+    const tient = (cx, haut, w, h) => [[cx - w / 2, haut], [cx + w / 2, haut], [cx - w / 2, haut + h], [cx + w / 2, haut + h], [cx, haut], [cx, haut + h]].every(([a, b]) => dedans(a, b));
+    const NIV = [{ fs: 30, max: 14 }, { fs: 26, max: 16 }, { fs: 22, max: 19 }, { fs: 19, max: 22 }, { fs: 16, max: 26 }, { fs: 14, max: 30 }, { fs: 12, max: 34 }];
+    const ICO = [.7, .55, .42, .32];
+    const essai = (n, k, dy) => {
+      const L = lignesSticker(pc, n.max), iw = ic.w * k, ih = ic.h * k, lh = n.fs * 1.18, H = ih + 12 + L.length * lh, y0 = f.cy - H / 2 + dy;
+      const base = y0 + ih + 12 - n.fs * 0.2;
+      return { L, iw, ih, y0, lh, base, fs: n.fs, ok: tient(f.cx, y0, iw + 2 * M, ih) && L.every((t, i) => tient(f.cx, base + (i + 1) * lh - n.fs * 0.85, t.length * n.fs * 0.6 + 2 * M, n.fs * 1.05)) };
+    };
+    for (const n of NIV) for (const k of ICO) for (const dy of [0, -24, 24, -48, 48, -72, 72]) { const r = essai(n, k, dy); if (r.ok) return r; }
+    return essai(NIV[NIV.length - 1], ICO[ICO.length - 1], 0);
+  }
   function autocollant(p, pc) {                           // le pétale à découper, à l'échelle exacte de la fleur à collectionner
-    const f = D.formes[p.id], b = bboxPetale(p.id), pad = 10, ic = f.icone;
-    const { l: noms, fs, niv } = lignesNoms(nomsCarte(pc)), k = niv >= 2 ? 0.42 : 0.62, ny = niv >= 2 ? 26 : 78;
-    const iw = ic.w * k, ih = ic.h * k;
+    const f = D.formes[p.id], b = bboxPetale(p.id), pad = 10, m = miseEnPageSticker(p, pc);
     return `<svg class="impr-colle" xmlns="${NS}" viewBox="${b.x - pad} ${b.y - pad} ${b.w + 2 * pad} ${b.h + 2 * pad}" style="width:${((b.w + 2 * pad) * MM).toFixed(1)}mm;height:${((b.h + 2 * pad) * MM).toFixed(1)}mm" role="img" aria-label="Pétale à découper">
       <path d="${f.d}" fill="${p.couleur}" stroke="#2E2A2A" stroke-width="5" stroke-linejoin="round"/>
-      <text x="${f.cx}" y="${f.cy - 92}" text-anchor="middle" font-family="Gruppo, Quicksand, sans-serif" font-size="46" font-weight="700" fill="#2E2A2A">BRAVO !</text>
-      <image href="p-${esc(p.id)}.png" x="${f.cx - iw / 2}" y="${f.cy - 78}" width="${iw}" height="${ih}"/>
-      ${noms.map((t, i) => `<text x="${f.cx + (niv >= 2 ? 14 : 0)}" y="${f.cy + ny + i * (fs + 4)}" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="${fs}" font-weight="700" fill="#2E2A2A">${esc(t)}</text>`).join('')}
+      <image href="p-${esc(p.id)}.png" x="${f.cx - m.iw / 2}" y="${m.y0}" width="${m.iw}" height="${m.ih}"/>
+      ${m.L.map((t, i) => `<text x="${f.cx}" y="${(m.base + (i + 1) * m.lh).toFixed(1)}" text-anchor="middle" font-family="Quicksand, sans-serif" font-size="${m.fs}" font-weight="700" fill="#2E2A2A">${esc(t)}</text>`).join('')}
     </svg>`;
   }
   function htmlCarte(p, pc) {                             // carte légère : le pétale à découper et à coller sur la fleur d'aventure
@@ -956,6 +982,7 @@
         <p class="duree">⏱ ${esc(d.duree)}</p>
         <p style="margin:0">${esc(d.consigne)}</p>
         ${d.plus ? `<p class="plus"><b>Pour aller plus loin :</b> ${esc(d.plus)}</p>` : ''}
+        ${faconsHtml(d.facons)}
         <label class="coche"><input type="checkbox" id="fait" data-cle="${esc(cleFait)}" ${fait ? 'checked' : ''}> Nous l'avons vécu en famille</label>
       </div>`;
     return `<section class="vue">
