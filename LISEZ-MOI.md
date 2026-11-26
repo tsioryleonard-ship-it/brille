@@ -286,3 +286,7 @@ Dans la barre du haut, « Étincelle » est maintenant centré, dans la police G
 - Le fond de l'écran « Mission » est toujours une couleur pleine : on ne voit plus la page à travers (texte illisible). Le même réglage s'applique à la grande fête de fin de mois.
 - La voix lit maintenant tout ce qui est écrit à l'écran : l'introduction (titre, semaine, « il n'y a ni note ni chrono »), la fin de mission et la fin de semaine. Le point « · » est lu comme une pause.
 - Fichiers à publier : `jeu.js`, `sw.js` (v97). Anciennes versions dans `_avant-lecture-fond`.
+
+## Version 98 : retour au dé 🎲
+
+- Le dé 🎲 remplace la pièce de puzzle sur « Lancer la mission », l'écran de départ de la mission et « Une autre question ». Fichiers à publier : `app.js`, `jeu.js`, `sw.js` (v98). Anciennes versions dans `_avant-retour-de`.

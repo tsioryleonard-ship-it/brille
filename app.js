@@ -610,7 +610,7 @@
         <summary><span class="pc-num">${fait ? '✓' : n}</span><span><b>Semaine ${n}</b> · ${esc(w.titre)}${n === cur && !fait ? ' <em>(cette semaine)</em>' : ''}${fait ? `<br><small class="pc-mot-sem">${esc(MOTS_SEMAINE[i] || '')}</small>` : ''}</span></summary>
         <p class="pc-mission">${esc(w.mission)}</p>
         ${faconsHtml(w.facons)}
-        ${fait ? '' : `<button type="button" class="btn plein pc-lancer" data-n="${n}"><svg class="ico-puzzle" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z" fill="#cbe1b6" stroke="#2E2A2A" stroke-width="1.2" stroke-linejoin="round"/></svg> Lancer la mission <small>(${w.etapes.length} étapes)</small></button><p class="jeu-aide">Ou lisez les étapes, vivez-les à votre rythme, puis cochez la case.</p>`}
+        ${fait ? '' : `<button type="button" class="btn plein pc-lancer" data-n="${n}">🎲 Lancer la mission <small>(${w.etapes.length} étapes)</small></button><p class="jeu-aide">Ou lisez les étapes, vivez-les à votre rythme, puis cochez la case.</p>`}
         <ol class="etapes">${w.etapes.map(x => `<li>${esc(x)}</li>`).join('')}</ol>
         <div class="parler"><b>Pour en parler ensuite</b><ul>${w.enParler.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
         <label class="coche"><input type="checkbox" class="pc-fait" data-n="${n}" ${fait ? 'checked' : ''} ${pc.sem[n + 1] ? 'disabled' : ''}> Nous l'avons vécue ensemble</label>
